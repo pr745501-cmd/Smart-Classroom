@@ -1,32 +1,26 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/authMiddleware");
+const User = require("../models/User");
 
-const auth = require("../middleware/authMiddleware");
-const role = require("../middleware/roleMiddleware");
+router.get("/profile", authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password");
 
-const Lecture = require("../models/Lecture");
-const Assignment = require("../models/Assignment");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-// ✅ View Lectures
-router.get(
-  "/lectures",
-  auth,
-  role(["student"]),
-  async (req, res) => {
-    const lectures = await Lecture.find();
-    res.json(lectures);
+    res.json({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      course: user.course || "Not Assigned",
+      profilePic: user.profilePic || ""
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
-);
-
-// ✅ View Assignments
-router.get(
-  "/assignments",
-  auth,
-  role(["student"]),
-  async (req, res) => {
-    const assignments = await Assignment.find();
-    res.json(assignments);
-  }
-);
+});
 
 module.exports = router;
