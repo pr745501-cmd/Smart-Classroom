@@ -1,14 +1,13 @@
-// models/Lecture.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const lectureSchema = new mongoose.Schema({
   title: String,
-  description: String,
-  videoUrl: String,
-  createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  }
-}, { timestamps: true });
+  subject: String,
+  faculty: String,
+  type: String, // video | pdf | ppt
+  url: String,
+  date: Date,
+  course: String
+});
 
-module.exports = mongoose.model("Lecture", lectureSchema);
+module.exports = mongoose.model('Lecture', lectureSchema);

@@ -7,7 +7,7 @@ const authRoutes = require("./routes/auth");
 const testRoutes = require("./routes/test");
 const announcementRoutes = require("./routes/announcementRoutes");
 const studentRoutes = require("./routes/studentRoutes");
-
+const lectureRoutes = require("./routes/lectureRoutes")
 const app = express();
 
 // middleware
@@ -30,6 +30,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/announcement", announcementRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/lecture",lectureRoutes);
 
 const PORT = 5000;
 app.listen(PORT, () => {
