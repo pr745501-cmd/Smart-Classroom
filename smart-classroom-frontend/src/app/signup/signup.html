@@ -1,0 +1,38 @@
+<h2>Signup</h2>
+
+<form (ngSubmit)="signup()">
+  <input
+    type="text"
+    placeholder="Name"
+    [(ngModel)]="name"
+    name="name"
+  />
+  <br /><br />
+
+  <input
+    type="email"
+    placeholder="Email"
+    [(ngModel)]="email"
+    name="email"
+  />
+  <br /><br />
+
+  <input
+    type="password"
+    placeholder="Password"
+    [(ngModel)]="password"
+    name="password"
+  />
+  <br /><br />
+
+  <select [(ngModel)]="role" name="role">
+    <option value="admin">Admin</option>
+    <option value="faculty">Faculty</option>
+    <option value="student">Student</option>
+  </select>
+  <br /><br />
+
+  <button type="submit">Signup</button>
+
+  <p style="color:red">{{ error }}</p>
+</form>

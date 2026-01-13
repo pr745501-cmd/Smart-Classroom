@@ -1,0 +1,49 @@
+<div class="lectures-container">
+
+  <h2>📚 Lectures</h2>
+
+  <!-- FILTER -->
+  <div class="filter">
+    <input
+      type="text"
+      placeholder="Enter subject (eg: Web)"
+      [(ngModel)]="subject"
+    />
+    <button (click)="filterBySubject()">Search</button>
+    <button class="reset" (click)="resetFilter()">Reset</button>
+  </div>
+
+  <!-- LOADING -->
+  <p *ngIf="loading" class="loading">Loading lectures...</p>
+
+  <!-- GRID -->
+  <div class="lecture-grid" *ngIf="!loading">
+
+    <div class="lecture-card" *ngFor="let lec of lectures">
+
+      <h3>{{ lec.title }}</h3>
+
+      <p><b>Subject:</b> {{ lec.subject }}</p>
+      <p><b>Faculty:</b> {{ lec.faculty }}</p>
+      <p><b>Date:</b> {{ lec.date | date }}</p>
+
+      <span class="badge">{{ lec.type | uppercase }}</span>
+
+      <!-- 🔴 IMPORTANT FIX -->
+      <a
+        class="open-btn"
+        [href]="lec.url"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Open {{ lec.type | uppercase }}
+      </a>
+
+    </div>
+  </div>
+
+  <p *ngIf="!loading && lectures.length === 0">
+    No lectures found
+  </p>
+
+</div>
