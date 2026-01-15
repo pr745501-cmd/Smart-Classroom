@@ -8,7 +8,8 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-signup',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './signup.html'
+  templateUrl: './signup.html',
+  styleUrls: ['./signup.css']
 })
 export class Signup {
 
@@ -20,20 +21,20 @@ export class Signup {
 
   constructor(private http: HttpClient, private router: Router) {}
 
-signup() {
-  this.http.post<any>('http://localhost:5000/api/auth/signup', {
-    name: this.name,
-    email: this.email,
-    password: this.password,
-    role: this.role
-  }).subscribe({
-    next: () => {
-      alert('Signup successful ✅');
-      this.router.navigate(['/login']);
-    },
-    error: (err) => {
-      this.error = err.error?.message || 'Signup failed';
-    }
-  });
-}
+  signup() {
+    this.http.post<any>('http://localhost:5000/api/auth/signup', {
+      name: this.name,
+      email: this.email,
+      password: this.password,
+      role: this.role
+    }).subscribe({
+      next: () => {
+        alert('Signup successful ✅');
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        this.error = err.error?.message || 'Signup failed';
+      }
+    });
+  }
 }

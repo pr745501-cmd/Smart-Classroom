@@ -1,0 +1,142 @@
+/* PAGE WRAPPER */
+.assignment-box {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 30px;
+  background: #f9fbff;
+  border-radius: 16px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* HEADINGS */
+.assignment-box h2 {
+  text-align: center;
+  margin-bottom: 25px;
+  color: #1f3c88;
+}
+
+.assignment-box h3 {
+  margin: 30px 0 15px;
+  color: #333;
+  border-left: 4px solid #4facfe;
+  padding-left: 10px;
+}
+
+/* INPUTS */
+.assignment-box input[type="text"],
+.assignment-box input[type="date"],
+.assignment-box textarea {
+  width: 100%;
+  padding: 12px 14px;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  border: 1px solid #d0d7e2;
+  font-size: 15px;
+  transition: 0.3s;
+}
+
+.assignment-box textarea {
+  resize: none;
+  min-height: 100px;
+}
+
+.assignment-box input:focus,
+.assignment-box textarea:focus {
+  outline: none;
+  border-color: #4facfe;
+  box-shadow: 0 0 0 3px rgba(79, 172, 254, 0.25);
+}
+
+/* FILE INPUT */
+.assignment-box input[type="file"] {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
+
+/* BUTTON */
+.assignment-box button {
+  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 100%;
+}
+
+.assignment-box button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 198, 255, 0.4);
+}
+
+/* DIVIDER */
+.assignment-box hr {
+  margin: 35px 0;
+  border: none;
+  border-top: 1px dashed #ccc;
+}
+
+/* ASSIGNMENT CARD */
+.card {
+  background: #ffffff;
+  padding: 18px 20px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+/* LEFT COLOR BAR */
+.card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 5px;
+  background: linear-gradient(#4facfe, #00c6ff);
+}
+
+/* CARD HOVER */
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.18);
+}
+
+/* CARD CONTENT */
+.card h4 {
+  margin-bottom: 6px;
+  color: #1f3c88;
+}
+
+.card p {
+  margin-bottom: 6px;
+  color: #555;
+  font-size: 14px;
+}
+
+/* DOWNLOAD LINK */
+.card a {
+  display: inline-block;
+  margin-top: 8px;
+  color: #4facfe;
+  font-weight: bold;
+  text-decoration: none;
+}
+
+.card a:hover {
+  text-decoration: underline;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .assignment-box {
+    margin: 20px;
+    padding: 20px;
+  }
+}

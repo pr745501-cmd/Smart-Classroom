@@ -1,1 +1,48 @@
-<p>faculty works!</p>
+<div class="faculty-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 class="logo">🎓 Faculty</h2>
+
+    <nav>
+      <a (click)="goTo('/faculty')">🏠 Dashboard</a>
+      <a (click)="goTo('/faculty/assignments')">📝 Assignments</a>
+      <a (click)="goTo('/faculty/announcements')">📢 Announcements</a>
+      <a (click)="goTo('/faculty/students')">👨‍🎓 Students</a>
+      <a (click)="goTo('/faculty/lectures')">📚 Upload Lectures</a>
+    </nav>
+
+    <button class="logout" (click)="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="content">
+    <header class="topbar">
+      <h2>Welcome, {{ faculty.name }}</h2>
+      <span>{{ faculty.email }}</span>
+    </header>
+
+    <section class="cards">
+      <div class="card" (click)="goTo('/faculty/assignments')">
+        <h3>📝 Assignments</h3>
+        <p>Create & check student submissions</p>
+      </div>
+
+      <div class="card" (click)="goTo('/faculty/announcements')">
+        <h3>📢 Announcements</h3>
+        <p>Post notices for students</p>
+      </div>
+
+      <div class="card" (click)="goTo('/faculty/lectures')">
+        <h3>📚 Lectures</h3>
+        <p>Upload PDFs / PPTs / Videos</p>
+      </div>
+
+      <div class="card" (click)="goTo('/faculty/students')">
+        <h3>👨‍🎓 Students</h3>
+        <p>View enrolled students</p>
+      </div>
+    </section>
+  </main>
+
+</div>

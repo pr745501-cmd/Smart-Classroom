@@ -1,11 +1,50 @@
-<h2>Login</h2>
+<div class="login-page">
+  <div class="login-card">
 
-<input type="email" [(ngModel)]="email" placeholder="Email" />
-<br><br>
+    <div class="login-header">
+      <div class="login-logo">SC</div>
+      <h2 class="login-title">Welcome Back</h2>
+      <p class="login-subtitle">Login to Smart Classroom</p>
+    </div>
 
-<input type="password" [(ngModel)]="password" placeholder="Password" />
-<br><br>
+    <form class="login-form" (ngSubmit)="login()">
 
-<button (click)="login()">Login</button>
+      <div class="login-input-group">
+        <input
+          type="email"
+          class="login-input"
+          placeholder="Email address"
+          [(ngModel)]="email"
+          name="email"
+          required
+        />
+      </div>
 
-<p style="color:red">{{ error }}</p>
+      <div class="login-input-group">
+        <input
+          type="password"
+          class="login-input"
+          placeholder="Password"
+          [(ngModel)]="password"
+          name="password"
+          required
+        />
+      </div>
+
+      <div *ngIf="error" class="login-error">
+        {{ error }}
+      </div>
+
+      <button class="login-button" type="submit">
+        Login
+      </button>
+
+    </form>
+
+    <div class="login-footer">
+      Don’t have an account?
+      <a routerLink="/signup">Signup</a>
+    </div>
+
+  </div>
+</div>

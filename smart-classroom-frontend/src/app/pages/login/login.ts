@@ -8,7 +8,8 @@ import { Router } from '@angular/router';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './login.html'
+  templateUrl: './login.html',
+   styleUrls: ['./login.css'] 
 })
 export class Login {
   email = '';
@@ -16,22 +17,27 @@ export class Login {
   error = '';
 
   constructor(private http: HttpClient, private router: Router) {}
+login() {
+  this.http.post<any>('http://localhost:5000/api/auth/login', {
+    email: this.email,
+    password: this.password
+  }).subscribe({
+    next: (res) => {
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user', JSON.stringify(res.user));
 
-  login() {
-    this.http.post<any>('http://localhost:5000/api/auth/login', {
-      email: this.email,
-      password: this.password
-    }).subscribe({
-      next: (res) => {
-        localStorage.setItem('token', res.token);
-        localStorage.setItem('user', JSON.stringify(res.user));
-
-        // ROLE BASED REDIRECT
-        if (res.user.role === 'student') this.router.navigate(['/dashboard']);
-        if (res.user.role === 'faculty') this.router.navigate(['/faculty']);
-        if (res.user.role === 'admin') this.router.navigate(['/admin']);
-      },
-      error: () => this.error = 'Invalid credentials'
-    });
-  }
+      // ✅ ROLE BASED REDIRECT (IMPORTANT)
+      if (res.user.role === 'student') {
+        this.router.navigate(['/dashboard']);
+      } 
+      else if (res.user.role === 'faculty') {
+        this.router.navigate(['/faculty']);
+      } 
+      else if (res.user.role === 'admin') {
+        this.router.navigate(['/admin']);
+      }
+    },
+    error: () => this.error = 'Invalid credentials'
+  });
+}
 }

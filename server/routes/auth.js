@@ -10,6 +10,10 @@ router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields required" });
+    }
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
@@ -21,18 +25,20 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "student"
+      role: role || "student"   // 👈 faculty bhi accept karega
     });
 
     await user.save();
 
     res.status(201).json({
+      success: true,
       message: "User registered successfully"
     });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ success: false, error: err.message });
   }
 });
+
 
 /* ================= LOGIN ================= */
 router.post("/login", async (req, res) => {

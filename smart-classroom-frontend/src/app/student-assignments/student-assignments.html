@@ -1,0 +1,11 @@
+<div class="assignments">
+  <h2>📚 Assignments</h2>
+
+  <div class="card" *ngFor="let a of assignments">
+    <h3>{{ a.title }}</h3>
+    <p>{{ a.description }}</p>
+    <p><b>Due:</b> {{ a.dueDate | date }}</p>
+
+    <button>Upload Submission</button>
+  </div>
+</div>

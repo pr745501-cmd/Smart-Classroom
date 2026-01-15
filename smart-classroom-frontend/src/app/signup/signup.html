@@ -1,38 +1,35 @@
-<h2>Signup</h2>
+<div class="signup-container">
+  <h2>Signup</h2>
 
-<form (ngSubmit)="signup()">
-  <input
-    type="text"
-    placeholder="Name"
-    [(ngModel)]="name"
-    name="name"
-  />
-  <br /><br />
+  <form (ngSubmit)="signup()">
 
-  <input
-    type="email"
-    placeholder="Email"
-    [(ngModel)]="email"
-    name="email"
-  />
-  <br /><br />
+    <div class="input-group">
+      <label>Name</label>
+      <input type="text" [(ngModel)]="name" name="name" required />
+    </div>
 
-  <input
-    type="password"
-    placeholder="Password"
-    [(ngModel)]="password"
-    name="password"
-  />
-  <br /><br />
+    <div class="input-group">
+      <label>Email</label>
+      <input type="email" [(ngModel)]="email" name="email" required />
+    </div>
 
-  <select [(ngModel)]="role" name="role">
-    <option value="admin">Admin</option>
-    <option value="faculty">Faculty</option>
-    <option value="student">Student</option>
-  </select>
-  <br /><br />
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" [(ngModel)]="password" name="password" required />
+    </div>
 
-  <button type="submit">Signup</button>
+    <div class="input-group">
+      <label>Role</label>
+      <select [(ngModel)]="role" name="role">
+        <option value="student">Student</option>
+        <option value="teacher">Teacher</option>
+        <option value="admin">Admin</option>
+      </select>
+    </div>
 
-  <p style="color:red">{{ error }}</p>
-</form>
+    <p class="error" *ngIf="error">{{ error }}</p>
+
+    <button type="submit" class="signup-btn">Signup</button>
+
+  </form>
+</div>

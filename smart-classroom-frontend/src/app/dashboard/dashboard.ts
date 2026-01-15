@@ -11,7 +11,13 @@ import { Router } from '@angular/router';
 })
 export class Dashboard implements OnInit {
 
-  user = {
+  user: {
+    name: string;
+    email: string;
+    role: string;
+    course: string;
+    profilePic?: string;   // ✅ ADD THIS
+  } = {
     name: '',
     email: '',
     role: '',
@@ -36,7 +42,7 @@ export class Dashboard implements OnInit {
     this.user.name = parsed.name;
     this.user.email = parsed.email || 'N/A';
     this.user.role = parsed.role;
-    this.user.course = parsed.course || 'Not Assigned';
+    this.user.course = parsed.course || 'BCA'; // default BCA
     this.user.profilePic = parsed.profilePic || '';
 
     this.loading = false;
@@ -47,7 +53,6 @@ export class Dashboard implements OnInit {
     this.router.navigate(['/login']);
   }
 
-  // 👉 LECTURES PAGE NAVIGATION
   goToLectures() {
     this.router.navigate(['/lectures']);
   }
