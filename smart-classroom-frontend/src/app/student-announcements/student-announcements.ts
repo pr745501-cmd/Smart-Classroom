@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-student-assignments',
+  selector: 'app-student-announcements',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './student-assignments.html',
-  styleUrls: ['./student-assignments.css']
+  templateUrl: './student-announcements.html',
+  styleUrls: ['./student-announcements.css']
 })
-export class StudentAssignments implements OnInit {
+export class StudentAnnouncements implements OnInit {
 
-  assignments: any[] = [];
+  announcements: any[] = [];
 
   constructor(
     private http: HttpClient,
@@ -19,15 +19,15 @@ export class StudentAssignments implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:5000/api/assignment')
+    this.http.get<any>('http://localhost:5000/api/announcement')
       .subscribe({
         next: (res) => {
-          console.log('DIRECT API RESPONSE:', res);
-          this.assignments = res.assignments || [];
+          console.log('ANNOUNCEMENT API RESPONSE:', res);
+          this.announcements = res.announcements || [];
           this.cd.detectChanges();   // 🔥 FORCE UI UPDATE
         },
         error: (err) => {
-          console.error('API ERROR:', err);
+          console.error('Announcement API Error:', err);
         }
       });
   }

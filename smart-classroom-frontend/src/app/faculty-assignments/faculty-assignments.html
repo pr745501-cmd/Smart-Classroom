@@ -2,13 +2,31 @@
 
   <h2>📘 Create Assignment</h2>
 
-  <input type="text" placeholder="Title" [(ngModel)]="title">
-  <textarea placeholder="Description" [(ngModel)]="description"></textarea>
-  <input type="date" [(ngModel)]="dueDate">
+  <input
+    type="text"
+    placeholder="Title"
+    [(ngModel)]="title"
+  >
 
-  <input type="file" (change)="onFileChange($event)">
+  <textarea
+    placeholder="Description"
+    [(ngModel)]="description">
+  </textarea>
 
-  <button (click)="addAssignment()">➕ Add Assignment</button>
+  <input
+    type="date"
+    [(ngModel)]="dueDate"
+  >
+
+  <input
+    type="text"
+    placeholder="File URL (optional)"
+    [(ngModel)]="fileUrl"
+  >
+
+  <button (click)="addAssignment()">
+    ➕ Add Assignment
+  </button>
 
   <hr>
 
@@ -18,8 +36,10 @@
     <h4>{{ a.title }}</h4>
     <p>{{ a.description }}</p>
     <p><b>Due:</b> {{ a.dueDate | date }}</p>
-    <a *ngIf="a.fileUrl" [href]="'http://localhost:5000' + a.fileUrl" target="_blank">
-      📥 Download File
+
+    <a *ngIf="a.fileUrl" [href]="a.fileUrl" target="_blank">
+      📥 Download
     </a>
   </div>
+
 </div>

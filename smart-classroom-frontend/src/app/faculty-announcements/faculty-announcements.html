@@ -1,0 +1,18 @@
+<div class="box">
+  <h2>📢 Create Announcement</h2>
+
+  <input
+    type="text"
+    placeholder="Title"
+    [(ngModel)]="title"
+  >
+
+  <textarea
+    placeholder="Message"
+    [(ngModel)]="message">
+  </textarea>
+
+  <button (click)="addAnnouncement()">
+    📤 Post Announcement
+  </button>
+</div>

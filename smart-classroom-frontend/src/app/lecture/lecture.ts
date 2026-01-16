@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LectureService } from '../services/lecture.service';
 
@@ -7,24 +7,28 @@ import { LectureService } from '../services/lecture.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './lecture.html',
-  styleUrl:'./lecture.css',
+  styleUrls: ['./lecture.css']
 })
 export class Lectures implements OnInit {
-
   lectures: any[] = [];
-  loading = true;
+  error = '';
+constructor(
+  private lectureService: LectureService,
+  private cd: ChangeDetectorRef   // 🔥
+) {}
 
-  constructor(private lectureService: LectureService) {}
-
-  ngOnInit(): void {
-
-    // 🔥 API HIT (IMPORTANT)
-    this.lectureService.fetchLectures();
-
-    // 🔥 SUBSCRIBE TO STATE
-    this.lectureService.lectures$.subscribe(data => {
+ngOnInit() {
+  this.lectureService.getLectures().subscribe({
+    next: (data) => {
+      console.log("LECTURES:", data);
       this.lectures = data;
-      this.loading = false;
-    });
-  }
+      this.cd.detectChanges();   // 🔥 force UI update
+    },
+    error: (err) => {
+      console.error(err);
+      this.error = "Failed to load lectures";
+    }
+  });
+}
+
 }

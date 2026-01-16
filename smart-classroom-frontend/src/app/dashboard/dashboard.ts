@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -16,7 +16,7 @@ export class Dashboard implements OnInit {
     email: string;
     role: string;
     course: string;
-    profilePic?: string;   // ✅ ADD THIS
+    profilePic?: string;
   } = {
     name: '',
     email: '',
@@ -27,7 +27,10 @@ export class Dashboard implements OnInit {
 
   loading = true;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private cd: ChangeDetectorRef   // ✅ CHANGE DETECTOR
+  ) {}
 
   ngOnInit() {
     const storedUser = localStorage.getItem('user');
@@ -42,10 +45,13 @@ export class Dashboard implements OnInit {
     this.user.name = parsed.name;
     this.user.email = parsed.email || 'N/A';
     this.user.role = parsed.role;
-    this.user.course = parsed.course || 'BCA'; // default BCA
+    this.user.course = parsed.course || 'BCA';
     this.user.profilePic = parsed.profilePic || '';
 
     this.loading = false;
+
+    // 🔥 FORCE UI REFRESH
+    this.cd.detectChanges();
   }
 
   logout() {
@@ -55,5 +61,13 @@ export class Dashboard implements OnInit {
 
   goToLectures() {
     this.router.navigate(['/lectures']);
+  }
+
+  goToAssignments() {
+    this.router.navigate(['/student/assignments']);
+  }
+
+  goToAnnouncements() {
+    this.router.navigate(['/student/announcements']);
   }
 }

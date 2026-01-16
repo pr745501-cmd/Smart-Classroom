@@ -1,0 +1,17 @@
+<div class="announcements">
+
+  <h2>📢 Announcements</h2>
+
+  <p *ngIf="announcements.length === 0">
+    No announcements available
+  </p>
+
+  <div *ngFor="let a of announcements" class="card">
+    <h4>{{ a.title }}</h4>
+    <p>{{ a.message }}</p>
+    <small>
+      👨‍🏫 {{ a.faculty }} · {{ a.createdAt | date:'short' }}
+    </small>
+  </div>
+
+</div>

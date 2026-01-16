@@ -1,11 +1,33 @@
-<div class="assignments">
-  <h2>📚 Assignments</h2>
+<div class="student-assignments">
 
-  <div class="card" *ngFor="let a of assignments">
-    <h3>{{ a.title }}</h3>
-    <p>{{ a.description }}</p>
-    <p><b>Due:</b> {{ a.dueDate | date }}</p>
+  <h2>📄 Assignments</h2>
 
-    <button>Upload Submission</button>
+  <p *ngIf="assignments.length === 0" class="empty">
+    No assignments available
+  </p>
+
+  <div class="assignment-grid" *ngIf="assignments.length > 0">
+    <div class="assignment-card" *ngFor="let a of assignments">
+
+      <h3>{{ a.title }}</h3>
+      <p class="desc">{{ a.description }}</p>
+
+      <p class="meta">
+        📅 Due: {{ a.dueDate | date }}
+      </p>
+
+      <p class="meta">
+        👨‍🏫 {{ a.faculty }}
+      </p>
+
+      <a *ngIf="a.fileUrl"
+         [href]="a.fileUrl"
+         target="_blank"
+         class="btn">
+        📥 View Assignment
+      </a>
+
+    </div>
   </div>
+
 </div>

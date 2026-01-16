@@ -10,8 +10,13 @@ router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ message: "All fields required" });
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields including role are required" });
+    }
+
+    // ✅ STRICT ROLE CHECK
+    if (!["student", "faculty", "admin"].includes(role)) {
+      return res.status(400).json({ message: "Invalid role" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -25,17 +30,17 @@ router.post("/signup", async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: role || "student"   // 👈 faculty bhi accept karega
+      role // 👈 EXACT role save hogi
     });
 
     await user.save();
 
     res.status(201).json({
       success: true,
-      message: "User registered successfully"
+      message: `${role} registered successfully`
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 

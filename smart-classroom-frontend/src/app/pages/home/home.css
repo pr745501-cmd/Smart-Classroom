@@ -1,0 +1,185 @@
+/* =====================================================
+   🌙 SMART CLASSROOM – PROFESSIONAL DARK THEME (FULL)
+   ===================================================== */
+
+.dark,
+[data-theme="dark"] {
+  /* 🎨 Core Colors */
+  --sc-primary: 217 92% 66%;
+  --sc-primary-dark: 217 92% 56%;
+  --sc-secondary: 280 70% 65%;
+  --sc-accent: 160 85% 48%;
+
+  --sc-background: 222 28% 8%;
+  --sc-surface: 222 28% 12%;
+  --sc-surface-elevated: 222 28% 16%;
+
+  --sc-text: 220 25% 96%;
+  --sc-text-muted: 220 15% 68%;
+
+  --sc-border: 222 20% 22%;
+
+  --sc-success: 142 72% 50%;
+  --sc-warning: 38 92% 55%;
+  --sc-error: 0 85% 65%;
+
+  /* 🌈 Gradients */
+  --sc-gradient: linear-gradient(
+    135deg,
+    hsl(217 92% 60%) 0%,
+    hsl(280 70% 60%) 100%
+  );
+
+  --sc-gradient-soft: linear-gradient(
+    135deg,
+    hsla(217, 92%, 60%, 0.15),
+    hsla(280, 70%, 60%, 0.15)
+  );
+
+  /* 🌑 Shadows */
+  --sc-shadow: 0 6px 24px -6px hsla(0, 0%, 0%, 0.55);
+  --sc-shadow-lg: 0 20px 45px -10px hsla(0, 0%, 0%, 0.65);
+  --sc-shadow-glow: 0 0 45px -8px hsla(217, 92%, 60%, 0.35);
+
+  --sc-overlay: hsla(0, 0%, 0%, 0.7);
+  color-scheme: dark;
+}
+
+/* ================= NAVBAR ================= */
+.dark .navbar,
+[data-theme="dark"] .navbar {
+  background: hsla(222, 28%, 12%, 0.92);
+  border-bottom: 1px solid hsl(var(--sc-border));
+  box-shadow: var(--sc-shadow);
+}
+
+/* ================= BUTTONS ================= */
+.dark .btn,
+[data-theme="dark"] .btn {
+  background: var(--sc-gradient);
+  box-shadow: var(--sc-shadow-glow);
+}
+
+.dark .btn.outline,
+[data-theme="dark"] .btn.outline {
+  background: transparent;
+  border: 2px solid hsl(var(--sc-primary));
+  color: hsl(var(--sc-primary));
+}
+
+.dark .btn.outline:hover {
+  background: hsl(var(--sc-primary));
+  color: #fff;
+}
+
+/* ================= HERO ================= */
+.dark .hero,
+[data-theme="dark"] .hero {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--sc-surface)) 0%,
+    hsl(var(--sc-background)) 100%
+  );
+}
+
+/* ================= CARDS ================= */
+.dark .card,
+.dark .module-card,
+.dark .stats-card,
+[data-theme="dark"] .card,
+[data-theme="dark"] .module-card,
+[data-theme="dark"] .stats-card {
+  background: hsl(var(--sc-surface));
+  border: 1px solid hsl(var(--sc-border));
+  box-shadow: var(--sc-shadow);
+}
+
+/* ================= FEATURES ================= */
+.dark .feature-grid .card::before {
+  opacity: 1;
+}
+
+/* ================= INPUTS ================= */
+.dark .input-field,
+[data-theme="dark"] .input-field {
+  background: hsl(var(--sc-surface-elevated));
+  border-color: hsl(var(--sc-border));
+  color: hsl(var(--sc-text));
+}
+
+.dark .input-field:focus {
+  border-color: hsl(var(--sc-primary));
+  box-shadow: 0 0 0 4px hsla(217, 92%, 60%, 0.25);
+}
+
+/* ================= BADGES ================= */
+.dark .badge-primary {
+  background: var(--sc-gradient-soft);
+  color: hsl(var(--sc-primary));
+}
+
+.dark .badge-success {
+  background: hsla(142, 72%, 50%, 0.15);
+  color: hsl(var(--sc-success));
+}
+
+.dark .badge-warning {
+  background: hsla(38, 92%, 55%, 0.15);
+  color: hsl(var(--sc-warning));
+}
+
+.dark .badge-error {
+  background: hsla(0, 85%, 65%, 0.15);
+  color: hsl(var(--sc-error));
+}
+
+/* ================= CTA ================= */
+.dark .cta,
+[data-theme="dark"] .cta {
+  background: var(--sc-gradient);
+}
+
+.dark .cta .btn {
+  background: #fff;
+  color: hsl(var(--sc-primary));
+}
+
+/* ================= FOOTER ================= */
+.dark footer,
+[data-theme="dark"] footer {
+  background: hsl(222, 28%, 6%);
+  color: hsla(0, 0%, 100%, 0.7);
+}
+
+/* ================= SCROLLBAR ================= */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(var(--sc-background));
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: var(--sc-gradient);
+}
+
+/* ================= TOOLTIP ================= */
+.dark .tooltip::after {
+  background: hsl(var(--sc-text));
+  color: hsl(var(--sc-background));
+}
+
+/* ================= GLASS ================= */
+.dark .glass {
+  background: hsla(222, 28%, 14%, 0.75);
+  backdrop-filter: blur(14px);
+  border: 1px solid hsla(222, 20%, 28%, 0.5);
+}
+
+/* ================= FAB ================= */
+.dark .fab {
+  box-shadow: var(--sc-shadow-glow);
+}
+
+/* ================= SELECTION ================= */
+.dark ::selection {
+  background: hsla(217, 92%, 60%, 0.35);
+  color: #fff;
+}

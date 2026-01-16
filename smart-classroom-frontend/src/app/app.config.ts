@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideHttpClient() // 👈 NO INTERCEPTOR
+    provideHttpClient(),     // 🔥 THIS WAS MISSING
+    provideRouter(routes)
   ]
 };

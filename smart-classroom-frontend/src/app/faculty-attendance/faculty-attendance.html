@@ -1,0 +1,21 @@
+<h2>📝 Mark Attendance</h2>
+
+<input placeholder="Student ID" [(ngModel)]="studentId">
+<br><br>
+
+<input placeholder="Student Name" [(ngModel)]="studentName">
+<br><br>
+
+<input placeholder="Subject" [(ngModel)]="subject">
+<br><br>
+
+<input type="date" [(ngModel)]="date">
+<br><br>
+
+<select [(ngModel)]="status">
+  <option>Present</option>
+  <option>Absent</option>
+</select>
+<br><br>
+
+<button (click)="saveAttendance()">Save Attendance</button>

@@ -1,20 +1,20 @@
 <div class="lectures-page">
-  <h1 class="page-title">
-    📚 BCA Lectures
-  </h1>
+  <h1 class="page-title">📚 BCA Lectures</h1>
 
   <div class="lecture-grid" *ngIf="lectures.length > 0">
     <div class="lecture-card" *ngFor="let lec of lectures">
+      
       <div class="lecture-header">
         <h2>{{ lec.title }}</h2>
         <span class="badge">{{ lec.type | uppercase }}</span>
       </div>
 
-      <p class="subject">{{ lec.subject }}</p>
+      <p class="subject">📘 {{ lec.subject }}</p>
       <p class="faculty">👨‍🏫 {{ lec.faculty }}</p>
 
-      <a class="open-btn" [href]="lec.url" target="_blank">
-        Open Lecture →
+      <!-- ✅ FIXED HERE -->
+      <a class="open-btn" [href]="lec.fileUrl" target="_blank">
+        📄 Open Lecture
       </a>
     </div>
   </div>

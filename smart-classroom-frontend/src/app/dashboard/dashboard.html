@@ -23,10 +23,10 @@
   <!-- MAIN GRID -->
   <section class="grid">
 
-    <!-- 🔥 CLICKABLE LECTURES CARD -->
+    <!-- 📚 LECTURES -->
     <div class="card clickable" (click)="goToLectures()">
       <h4>📚 Lectures</h4>
-      <p>View subject‑wise lectures</p>
+      <p>View subject-wise lectures</p>
       <ul>
         <li>✔ Video / PDF / PPT</li>
         <li>✔ Faculty name</li>
@@ -35,7 +35,8 @@
       <small class="hint">Click to open</small>
     </div>
 
-    <div class="card">
+    <!-- 📝 ASSIGNMENTS -->
+    <div class="card clickable" (click)="goToAssignments()">
       <h4>📝 Assignments</h4>
       <p>Track & submit assignments</p>
       <ul>
@@ -46,17 +47,19 @@
       <small class="hint">Click to open</small>
     </div>
 
-    <div class="card">
+    <!-- 📢 ANNOUNCEMENTS (NEW) -->
+    <div class="card clickable" (click)="goToAnnouncements()">
       <h4>📢 Announcements</h4>
       <p>Important updates</p>
       <ul>
         <li>✔ Exam notices</li>
         <li>✔ Faculty messages</li>
         <li>✔ Admin alerts</li>
-        <small class="hint">Click to open</small>
       </ul>
+      <small class="hint">Click to open</small>
     </div>
 
+    <!-- 📊 ATTENDANCE -->
     <div class="card">
       <h4>📊 Attendance</h4>
       <p>Attendance overview</p>
@@ -64,8 +67,8 @@
         <li>✔ Subject wise %</li>
         <li>✔ Monthly chart</li>
         <li>✔ Shortage alerts</li>
-        <small class="hint">Click to open</small>
       </ul>
+      <small class="hint">Click to open</small>
     </div>
 
   </section>
