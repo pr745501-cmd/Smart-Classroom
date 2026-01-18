@@ -2,11 +2,12 @@ const mongoose = require("mongoose");
 
 const assignmentSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
-    dueDate: Date,
-    fileUrl: String,
-    faculty: String
+    title: { type: String, required: true },
+    description: { type: String },
+    dueDate: { type: Date, required: true },
+    fileUrl: { type: String },
+    faculty: { type: String, required: true },
+    course: { type: String, default: "BCA" }
   },
   { timestamps: true }
 );

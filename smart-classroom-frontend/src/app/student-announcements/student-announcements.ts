@@ -1,34 +1,40 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AnnouncementService } from '../services/announcement.service';
 
 @Component({
   selector: 'app-student-announcements',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './student-announcements.html',
-  styleUrls: ['./student-announcements.css']
+  templateUrl: './student-announcements.html'
 })
 export class StudentAnnouncements implements OnInit {
 
   announcements: any[] = [];
+  loading = true;
 
   constructor(
-    private http: HttpClient,
-    private cd: ChangeDetectorRef   // 🔥 IMPORTANT
+    private announcementService: AnnouncementService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:5000/api/announcement')
-      .subscribe({
-        next: (res) => {
-          console.log('ANNOUNCEMENT API RESPONSE:', res);
-          this.announcements = res.announcements || [];
-          this.cd.detectChanges();   // 🔥 FORCE UI UPDATE
-        },
-        error: (err) => {
-          console.error('Announcement API Error:', err);
-        }
-      });
+    this.loadAnnouncements();
+  }
+
+  loadAnnouncements() {
+    this.loading = true;
+
+    this.announcementService.getAnnouncements().subscribe({
+      next: (res) => {
+        this.announcements = res.announcements || [];
+        this.loading = false;
+        this.cdr.detectChanges(); // 🔥 REQUIRED
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

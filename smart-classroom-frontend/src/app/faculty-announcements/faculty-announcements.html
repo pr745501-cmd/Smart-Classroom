@@ -15,4 +15,17 @@
   <button (click)="addAnnouncement()">
     📤 Post Announcement
   </button>
+
+  <hr>
+
+  <h3>📄 Your Announcements</h3>
+
+  <div *ngFor="let a of announcements" class="announcement-card">
+    <h4>{{ a.title }}</h4>
+    <p>{{ a.message }}</p>
+
+    <small>
+      {{ a.createdAt | date:'medium' }}
+    </small>
+  </div>
 </div>

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AnnouncementService } from '../services/announcement.service';
@@ -10,18 +10,29 @@ import { AnnouncementService } from '../services/announcement.service';
   templateUrl: './faculty-announcements.html',
   styleUrls: ['./faculty-announcements.css']
 })
-export class FacultyAnnouncements {
+export class FacultyAnnouncements implements OnInit {
 
   title = '';
   message = '';
 
+  announcements: any[] = [];
   facultyName = '';
+  course = 'BCA';
 
-  constructor(private announcementService: AnnouncementService) {
+  constructor(
+    private announcementService: AnnouncementService,
+    private cdr: ChangeDetectorRef
+  ) {
     const user = localStorage.getItem('user');
     if (user) {
-      this.facultyName = JSON.parse(user).name; // ✅ LOGGED-IN FACULTY
+      const parsed = JSON.parse(user);
+      this.facultyName = parsed.name;
+      this.course = parsed.course || 'BCA';
     }
+  }
+
+  ngOnInit(): void {
+    this.loadAnnouncements();
   }
 
   addAnnouncement() {
@@ -33,13 +44,26 @@ export class FacultyAnnouncements {
     const data = {
       title: this.title,
       message: this.message,
-      faculty: this.facultyName   // ✅ DYNAMIC
+      faculty: this.facultyName,
+      course: this.course
     };
 
     this.announcementService.createAnnouncement(data).subscribe(() => {
-      alert('Announcement Posted');
+      alert('Announcement Posted ✅');
+
       this.title = '';
       this.message = '';
+
+      this.loadAnnouncements();
     });
+  }
+
+  loadAnnouncements() {
+    this.announcementService
+      .getFacultyAnnouncements(this.facultyName)
+      .subscribe(res => {
+        this.announcements = res.announcements || [];
+        this.cdr.detectChanges(); // 🔥 DO NOT REMOVE
+      });
   }
 }

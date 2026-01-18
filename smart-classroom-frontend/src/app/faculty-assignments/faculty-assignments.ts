@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AssignmentService } from '../services/assignment.service';
@@ -19,16 +19,20 @@ export class FacultyAssignments implements OnInit {
 
   assignments: any[] = [];
   facultyName = '';
+  course = 'BCA';
 
-  constructor(private assignmentService: AssignmentService) {
-    // ✅ get logged-in faculty name
+  constructor(
+    private assignmentService: AssignmentService,
+    private cdr: ChangeDetectorRef
+  ) {
     const user = localStorage.getItem('user');
     if (user) {
-      this.facultyName = JSON.parse(user).name;
+      const parsed = JSON.parse(user);
+      this.facultyName = parsed.name;
+      this.course = parsed.course || 'BCA';
     }
   }
 
-  // ✅ REQUIRED because we implemented OnInit
   ngOnInit(): void {
     this.loadAssignments();
   }
@@ -44,13 +48,13 @@ export class FacultyAssignments implements OnInit {
       description: this.description,
       dueDate: this.dueDate,
       fileUrl: this.fileUrl,
-      faculty: this.facultyName   // ✅ dynamic faculty
+      faculty: this.facultyName,
+      course: this.course
     };
 
     this.assignmentService.createAssignment(data).subscribe(() => {
-      alert('Assignment Added Successfully');
+      alert('Assignment Added Successfully ✅');
 
-      // reset form
       this.title = '';
       this.description = '';
       this.dueDate = '';
@@ -61,8 +65,11 @@ export class FacultyAssignments implements OnInit {
   }
 
   loadAssignments() {
-    this.assignmentService.getAssignments().subscribe(data => {
-      this.assignments = data;
-    });
+    this.assignmentService
+      .getFacultyAssignments(this.facultyName)
+      .subscribe(res => {
+        this.assignments = res.assignments || [];
+        this.cdr.detectChanges(); // 🔥 DO NOT REMOVE
+      });
   }
 }

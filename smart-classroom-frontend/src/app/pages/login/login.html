@@ -1,13 +1,15 @@
 <div class="login-page">
   <div class="login-card">
 
+    <!-- HEADER -->
     <div class="login-header">
       <div class="login-logo">SC</div>
       <h2 class="login-title">Welcome Back</h2>
       <p class="login-subtitle">Login to Smart Classroom</p>
     </div>
 
-    <form class="login-form" (ngSubmit)="login()">
+    <!-- FORM -->
+    <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
 
       <div class="login-input-group">
         <input
@@ -17,6 +19,7 @@
           [(ngModel)]="email"
           name="email"
           required
+          autocomplete="email"
         />
       </div>
 
@@ -28,19 +31,27 @@
           [(ngModel)]="password"
           name="password"
           required
+          autocomplete="current-password"
         />
       </div>
 
+      <!-- ERROR -->
       <div *ngIf="error" class="login-error">
         {{ error }}
       </div>
 
-      <button class="login-button" type="submit">
-        Login
+      <!-- BUTTON -->
+      <button
+        class="login-button"
+        type="submit"
+        [disabled]="loading || !loginForm.valid"
+      >
+        {{ loading ? 'Logging in...' : 'Login' }}
       </button>
 
     </form>
 
+    <!-- FOOTER -->
     <div class="login-footer">
       Don’t have an account?
       <a routerLink="/signup">Signup</a>

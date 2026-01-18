@@ -18,7 +18,7 @@ const app = express();
 
 /* ================= MIDDLEWARE ================= */
 app.use(cors());
-app.use(express.json());
+app.use(express.json());                 // ✅ REQUIRED
 app.use(express.urlencoded({ extended: true }));
 
 /* ================= NO CACHE ================= */
@@ -50,11 +50,11 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
-app.use("/api/announcement", announcementRoutes);
+app.use("/api/announcements", announcementRoutes);
 app.use("/api/student", studentRoutes);
-app.use("/api/lecture", lectureRoutes);
-app.use("/api/assignment", assignmentRoutes);
-app.use("/api/submission", submissionRoutes);
+app.use("/api/lectures", lectureRoutes);   // ✅ FIXED
+app.use("/api/assignments", assignmentRoutes);
+app.use("/api/submissions", submissionRoutes);
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 5000;

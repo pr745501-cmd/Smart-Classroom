@@ -1,34 +1,34 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { AssignmentService } from '../services/assignment.service';
 
 @Component({
   selector: 'app-student-assignments',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './student-assignments.html',
-  styleUrls: ['./student-assignments.css']
+  templateUrl: './student-assignments.html'
 })
 export class StudentAssignments implements OnInit {
 
   assignments: any[] = [];
+  loading = true;
 
   constructor(
-    private http: HttpClient,
-    private cd: ChangeDetectorRef   // 🔥 IMPORTANT
+    private assignmentService: AssignmentService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
-    this.http.get<any>('http://localhost:5000/api/assignment')
-      .subscribe({
-        next: (res) => {
-          console.log('DIRECT API RESPONSE:', res);
-          this.assignments = res.assignments || [];
-          this.cd.detectChanges();   // 🔥 FORCE UI UPDATE
-        },
-        error: (err) => {
-          console.error('API ERROR:', err);
-        }
-      });
+    this.assignmentService.getAssignments().subscribe({
+      next: (res) => {
+        this.assignments = res.assignments || [];
+        this.loading = false;
+        this.cdr.detectChanges(); // 🔥 REQUIRED
+      },
+      error: () => {
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

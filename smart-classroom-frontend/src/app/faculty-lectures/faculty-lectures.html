@@ -1,1 +1,40 @@
-<p>faculty-lectures works!</p>
+<div class="page">
+
+  <h2>📚 Faculty Lectures</h2>
+
+  <div class="card">
+    <h3>Upload Lecture</h3>
+
+    <input type="text" placeholder="Lecture Title" [(ngModel)]="title" />
+    <input type="text" placeholder="Subject" [(ngModel)]="subject" />
+
+    <select [(ngModel)]="type">
+      <option>PDF</option>
+      <option>PPT</option>
+      <option>Video</option>
+    </select>
+
+    <input type="text" placeholder="File URL (optional)" [(ngModel)]="fileUrl" />
+
+    <button (click)="uploadLecture()">Upload Lecture</button>
+  </div>
+
+  <h3>Your Lectures</h3>
+
+  <p *ngIf="loading">Loading...</p>
+  <p *ngIf="!loading && lectures.length === 0">No lectures uploaded yet</p>
+
+  <div *ngFor="let lecture of lectures" class="lecture-card">
+    <h4>{{ lecture.title }}</h4>
+    <p>📘 {{ lecture.subject }}</p>
+    <p>👨‍🏫 {{ lecture.faculty }}</p>
+    <p>📄 {{ lecture.type.toUpperCase() }}</p>
+
+    <a *ngIf="lecture.fileUrl" [href]="lecture.fileUrl" target="_blank">
+      Open File
+    </a>
+
+    <p *ngIf="!lecture.fileUrl">No file attached</p>
+  </div>
+
+</div>

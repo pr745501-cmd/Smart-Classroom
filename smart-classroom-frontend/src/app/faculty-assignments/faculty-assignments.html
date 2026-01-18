@@ -2,35 +2,16 @@
 
   <h2>📘 Create Assignment</h2>
 
-  <input
-    type="text"
-    placeholder="Title"
-    [(ngModel)]="title"
-  >
+  <input type="text" placeholder="Title" [(ngModel)]="title">
+  <textarea placeholder="Description" [(ngModel)]="description"></textarea>
+  <input type="date" [(ngModel)]="dueDate">
+  <input type="text" placeholder="File URL (optional)" [(ngModel)]="fileUrl">
 
-  <textarea
-    placeholder="Description"
-    [(ngModel)]="description">
-  </textarea>
-
-  <input
-    type="date"
-    [(ngModel)]="dueDate"
-  >
-
-  <input
-    type="text"
-    placeholder="File URL (optional)"
-    [(ngModel)]="fileUrl"
-  >
-
-  <button (click)="addAssignment()">
-    ➕ Add Assignment
-  </button>
+  <button (click)="addAssignment()">➕ Add Assignment</button>
 
   <hr>
 
-  <h3>📄 Existing Assignments</h3>
+  <h3>📄 Your Assignments</h3>
 
   <div *ngFor="let a of assignments" class="card">
     <h4>{{ a.title }}</h4>

@@ -1,25 +1,28 @@
-<div class="lectures-page">
-  <h1 class="page-title">📚 BCA Lectures</h1>
+<h2>📚 BCA Lectures</h2>
 
-  <div class="lecture-grid" *ngIf="lectures.length > 0">
-    <div class="lecture-card" *ngFor="let lec of lectures">
-      
-      <div class="lecture-header">
-        <h2>{{ lec.title }}</h2>
-        <span class="badge">{{ lec.type | uppercase }}</span>
-      </div>
+<!-- LOADING -->
+<p *ngIf="loading">Loading lectures...</p>
 
-      <p class="subject">📘 {{ lec.subject }}</p>
-      <p class="faculty">👨‍🏫 {{ lec.faculty }}</p>
+<!-- EMPTY -->
+<p *ngIf="!loading && lectures.length === 0">
+  No lectures available
+</p>
 
-      <!-- ✅ FIXED HERE -->
-      <a class="open-btn" [href]="lec.fileUrl" target="_blank">
-        📄 Open Lecture
-      </a>
-    </div>
+<!-- LIST -->
+<div *ngIf="!loading && lectures.length > 0">
+  <div *ngFor="let lec of lectures" style="border:1px solid #ddd; padding:12px; margin-bottom:10px; border-radius:8px;">
+    <h3>{{ lec.title }}</h3>
+
+    <p>📘 Subject: {{ lec.subject }}</p>
+    <p>👩‍🏫 Faculty: {{ lec.faculty }}</p>
+    <p>📄 Type: {{ lec.type | uppercase }}</p>
+
+    <a *ngIf="lec.fileUrl"
+       [href]="lec.fileUrl"
+       target="_blank">
+       Open Lecture
+    </a>
+
+    <p *ngIf="!lec.fileUrl">No file attached</p>
   </div>
-
-  <p class="empty" *ngIf="lectures.length === 0">
-    No lectures available
-  </p>
 </div>

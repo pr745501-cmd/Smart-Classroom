@@ -1,33 +1,40 @@
 import { Routes } from '@angular/router';
 
+/* PUBLIC */
+import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { Signup } from './signup/signup';
-import { Home } from './pages/home/home';
 
+/* STUDENT */
 import { Dashboard } from './dashboard/dashboard';
 import { Lectures } from './lecture/lecture';
-
-import { Faculty } from './faculty/faculty';
-import { FacultyAssignments } from './faculty-assignments/faculty-assignments';
-import { FacultyStudents } from './faculty-students/faculty-students';
-import { FacultyLectures } from './faculty-lectures/faculty-lectures';
-import { FacultyAnnouncements } from './faculty-announcements/faculty-announcements';
-import { FacultyAttendance } from './faculty-attendance/faculty-attendance';
-
 import { StudentAssignments } from './student-assignments/student-assignments';
 import { StudentAnnouncements } from './student-announcements/student-announcements';
 //import { StudentAttendance } from './student-attendance/student-attendance';
 
+/* FACULTY */
+import { Faculty } from './faculty/faculty';
+import { FacultyAssignments } from './faculty-assignments/faculty-assignments';
+import { FacultyLectures } from './faculty-lectures/faculty-lectures';
+import { FacultyStudents } from './faculty-students/faculty-students';
+import { FacultyAnnouncements } from './faculty-announcements/faculty-announcements';
+import { FacultyAttendance } from './faculty-attendance/faculty-attendance';
+
+/* ADMIN */
+import { Admin } from './admin/admin';
+import { AdminUsers } from './admin-users/admin-users';
+
+/* GUARD */
 import { roleGuard } from './guards/guards';
 
 export const routes: Routes = [
 
-  // 🏠 PUBLIC
+  /* 🌐 PUBLIC ROUTES */
   { path: '', component: Home },
   { path: 'login', component: Login },
   { path: 'signup', component: Signup },
 
-  // 🎓 STUDENT ROUTES
+  /* 🎓 STUDENT ROUTES */
   {
     path: 'dashboard',
     component: Dashboard,
@@ -48,13 +55,13 @@ export const routes: Routes = [
     component: StudentAnnouncements,
     canActivate: [roleGuard(['student'])]
   },
-  /*{
+ /* {
     path: 'student/attendance',
     component: StudentAttendance,
     canActivate: [roleGuard(['student'])]
   },*/
 
-  // 👨‍🏫 FACULTY ROUTES
+  /* 👨‍🏫 FACULTY ROUTES */
   {
     path: 'faculty',
     component: Faculty,
@@ -86,6 +93,18 @@ export const routes: Routes = [
     canActivate: [roleGuard(['faculty'])]
   },
 
-  // ❌ FALLBACK
+  /* 👨‍💼 ADMIN ROUTES */
+  {
+    path: 'admin',
+    component: Admin,
+    canActivate: [roleGuard(['admin'])]
+  },
+  {
+    path: 'admin/users',
+    component: AdminUsers,
+    canActivate: [roleGuard(['admin'])]
+  },
+
+  /* ❌ FALLBACK */
   { path: '**', redirectTo: '' }
 ];

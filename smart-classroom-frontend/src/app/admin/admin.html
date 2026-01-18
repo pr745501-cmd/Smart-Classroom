@@ -1,1 +1,44 @@
-<p>admin works!</p>
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <h2 class="logo">👨‍💼 Admin</h2>
+
+    <nav>
+      <a class="active" (click)="goTo('/admin')">🏠 Dashboard</a>
+      <a (click)="goTo('/admin/users')">👥 Users</a>
+      <a class="disabled">📊 Stats</a>
+    </nav>
+
+    <button class="logout" (click)="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div>
+        <h2>Admin Dashboard</h2>
+        <p>Welcome, {{ admin.name }}</p>
+      </div>
+      <span class="email">{{ admin.email }}</span>
+    </header>
+
+    <!-- CARDS -->
+    <section class="cards">
+
+      <div class="card clickable" (click)="goTo('/admin/users')">
+        <h3>👥 Manage Users</h3>
+        <p>View students & faculty</p>
+      </div>
+
+      <div class="card disabled">
+        <h3>📊 System Stats</h3>
+        <p>Coming soon</p>
+      </div>
+
+    </section>
+
+  </main>
+</div>

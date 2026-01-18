@@ -2,28 +2,63 @@ const express = require("express");
 const router = express.Router();
 const Assignment = require("../models/Assignment");
 
-/* FACULTY: CREATE ASSIGNMENT */
+/* ===============================
+   CREATE ASSIGNMENT (FACULTY)
+================================ */
 router.post("/", async (req, res) => {
   try {
-    const assignment = new Assignment(req.body);
-    await assignment.save();
+    const assignment = await Assignment.create(req.body);
 
     res.status(201).json({
       success: true,
       assignment
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    res.status(400).json({
+      success: false,
+      message: err.message
+    });
   }
 });
 
-/* STUDENT: GET ALL ASSIGNMENTS */
+/* ===============================
+   GET ALL ASSIGNMENTS (STUDENT)
+================================ */
 router.get("/", async (req, res) => {
   try {
-    const assignments = await Assignment.find().sort({ createdAt: -1 });
-    res.json({ success: true, assignments });
-  } catch (err) {
-    res.status(500).json({ success: false });
+    const assignments = await Assignment.find()
+      .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      assignments
+    });
+  } catch {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch assignments"
+    });
+  }
+});
+
+/* ===============================
+   GET FACULTY ASSIGNMENTS
+================================ */
+router.get("/faculty/:name", async (req, res) => {
+  try {
+    const assignments = await Assignment.find({
+      faculty: req.params.name
+    }).sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      assignments
+    });
+  } catch {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch faculty assignments"
+    });
   }
 });
 
