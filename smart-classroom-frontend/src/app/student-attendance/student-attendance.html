@@ -1,0 +1,34 @@
+<h2>📊 My Attendance</h2>
+
+<p *ngIf="loading">Loading attendance...</p>
+
+<p *ngIf="!loading && attendance.length === 0">
+  No attendance records found
+</p>
+
+<div *ngIf="attendance.length > 0">
+  <div
+    *ngFor="let a of attendance"
+    style="border:1px solid #ddd; padding:12px; margin-bottom:10px; border-radius:8px;"
+  >
+    <p><b>Date:</b> {{ a.date | date }}</p>
+    <p><b>Faculty:</b> {{ a.faculty }}</p>
+    <p><b>Course:</b> {{ a.course }}</p>
+    <p>
+      <b>Status:</b>
+      <span [style.color]="a.status === 'present' ? 'green' : 'red'">
+        {{ a.status | uppercase }}
+      </span>
+    </p>
+  </div>
+</div>
+
+<hr>
+<h2>📊 Monthly Attendance</h2>
+
+<div style="height: 300px; max-width: 900px;">
+  <canvas id="attendanceChart"></canvas>
+</div>
+
+
+<canvas id="attendanceChart"></canvas>

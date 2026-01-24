@@ -1,1 +1,13 @@
-<p>faculty-students works!</p>
+<h2>🎓 Enrolled Students</h2>
+
+<p *ngIf="loading">Loading students...</p>
+
+<p *ngIf="!loading && students.length === 0">
+  No students enrolled yet
+</p>
+
+<div *ngFor="let s of students" class="student-card">
+  <h3>{{ s.name }}</h3>
+  <p>📧 {{ s.email }}</p>
+  <p>🎓 Course: {{ s.course || 'Not assigned' }}</p>
+</div>

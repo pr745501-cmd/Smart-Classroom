@@ -1,21 +1,27 @@
-<h2>📝 Mark Attendance</h2>
+<h2>📊 Mark Attendance</h2>
 
-<input placeholder="Student ID" [(ngModel)]="studentId">
-<br><br>
+<label>
+  Date:
+  <input type="date" [(ngModel)]="date">
+</label>
 
-<input placeholder="Student Name" [(ngModel)]="studentName">
-<br><br>
+<p *ngIf="loading">Loading students...</p>
 
-<input placeholder="Subject" [(ngModel)]="subject">
-<br><br>
+<p *ngIf="!loading && students.length === 0">
+  No enrolled students
+</p>
 
-<input type="date" [(ngModel)]="date">
-<br><br>
+<div *ngFor="let s of students">
+  <label>
+    <input type="checkbox" [(ngModel)]="s.present">
+    {{ s.name }}
+  </label>
+</div>
 
-<select [(ngModel)]="status">
-  <option>Present</option>
-  <option>Absent</option>
-</select>
-<br><br>
+<br>
 
-<button (click)="saveAttendance()">Save Attendance</button>
+<button
+  (click)="submitAttendance()"
+  [disabled]="students.length === 0 || submitting">
+  {{ submitting ? 'Submitting...' : 'Submit Attendance' }}
+</button>

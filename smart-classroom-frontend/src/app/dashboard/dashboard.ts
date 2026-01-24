@@ -70,4 +70,7 @@ export class Dashboard implements OnInit {
   goToAnnouncements() {
     this.router.navigate(['/student/announcements']);
   }
+  goToAttendance() {
+    this.router.navigate(['/student/attendance']);
+  }
 }

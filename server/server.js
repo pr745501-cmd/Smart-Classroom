@@ -13,6 +13,7 @@ const studentRoutes = require("./routes/studentRoutes");
 const lectureRoutes = require("./routes/lectureRoutes");
 const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
+const attendanceRoutes = require("./routes/attendanceRoutes");
 
 const app = express();
 
@@ -51,10 +52,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/announcements", announcementRoutes);
-app.use("/api/student", studentRoutes);
+app.use("/api/students", studentRoutes); // ✅ MUST BE PLURAL
 app.use("/api/lectures", lectureRoutes);   // ✅ FIXED
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
+app.use("/api/attendance", attendanceRoutes); // ✅ REQUIRED
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 5000;

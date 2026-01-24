@@ -10,7 +10,7 @@ import { Dashboard } from './dashboard/dashboard';
 import { Lectures } from './lecture/lecture';
 import { StudentAssignments } from './student-assignments/student-assignments';
 import { StudentAnnouncements } from './student-announcements/student-announcements';
-//import { StudentAttendance } from './student-attendance/student-attendance';
+import { StudentAttendance } from './student-attendance/student-attendance';
 
 /* FACULTY */
 import { Faculty } from './faculty/faculty';
@@ -29,12 +29,11 @@ import { roleGuard } from './guards/guards';
 
 export const routes: Routes = [
 
-  /* 🌐 PUBLIC ROUTES */
   { path: '', component: Home },
   { path: 'login', component: Login },
   { path: 'signup', component: Signup },
 
-  /* 🎓 STUDENT ROUTES */
+  /* 🎓 STUDENT */
   {
     path: 'dashboard',
     component: Dashboard,
@@ -55,13 +54,13 @@ export const routes: Routes = [
     component: StudentAnnouncements,
     canActivate: [roleGuard(['student'])]
   },
- /* {
+  {
     path: 'student/attendance',
     component: StudentAttendance,
     canActivate: [roleGuard(['student'])]
-  },*/
+  },
 
-  /* 👨‍🏫 FACULTY ROUTES */
+  /* 👨‍🏫 FACULTY */
   {
     path: 'faculty',
     component: Faculty,
@@ -93,7 +92,7 @@ export const routes: Routes = [
     canActivate: [roleGuard(['faculty'])]
   },
 
-  /* 👨‍💼 ADMIN ROUTES */
+  /* 👨‍💼 ADMIN */
   {
     path: 'admin',
     component: Admin,
@@ -105,6 +104,5 @@ export const routes: Routes = [
     canActivate: [roleGuard(['admin'])]
   },
 
-  /* ❌ FALLBACK */
   { path: '**', redirectTo: '' }
 ];
