@@ -1,31 +1,69 @@
-<div class="box">
-  <h2>📢 Create Announcement</h2>
+<div class="page">
 
-  <input
-    type="text"
-    placeholder="Title"
-    [(ngModel)]="title"
-  >
+<h2>📢 Faculty Announcements</h2>
+<p class="subtitle">Create and manage announcements</p>
 
-  <textarea
-    placeholder="Message"
-    [(ngModel)]="message">
-  </textarea>
+<div class="form-card">
 
-  <button (click)="addAnnouncement()">
-    📤 Post Announcement
-  </button>
+<h3>{{ editingId ? 'Update Announcement' : 'Create Announcement' }}</h3>
 
-  <hr>
+<input
+  class="input"
+  placeholder="Title"
+  [(ngModel)]="title"
+/>
 
-  <h3>📄 Your Announcements</h3>
+<textarea
+  class="input"
+  placeholder="Message"
+  [(ngModel)]="message">
+</textarea>
 
-  <div *ngFor="let a of announcements" class="announcement-card">
-    <h4>{{ a.title }}</h4>
-    <p>{{ a.message }}</p>
+<div class="actions">
 
-    <small>
-      {{ a.createdAt | date:'medium' }}
-    </small>
-  </div>
+<button
+  *ngIf="!editingId"
+  (click)="addAnnouncement()"
+  class="btn primary">
+Post
+</button>
+
+<button
+  *ngIf="editingId"
+  (click)="updateAnnouncement()"
+  class="btn success">
+Update
+</button>
+
+<button
+  *ngIf="editingId"
+  (click)="resetForm()"
+  class="btn gray">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+<h3 class="mt">Your Announcements</h3>
+
+<div class="grid">
+
+<div class="card" *ngFor="let a of announcements">
+
+<h4>{{ a.title }}</h4>
+<p>{{ a.message }}</p>
+
+<small>{{ a.createdAt | date:'medium' }}</small>
+
+<div class="card-actions">
+<button (click)="editAnnouncement(a)" class="edit">Edit</button>
+<button (click)="deleteAnnouncement(a._id)" class="delete">Delete</button>
+</div>
+
+</div>
+
+</div>
+
 </div>

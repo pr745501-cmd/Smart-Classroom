@@ -1,26 +1,111 @@
-<div class="assignment-box">
+<div class="page">
 
-  <h2>📘 Create Assignment</h2>
+  <!-- HEADER -->
+  <div class="header">
+    <h2>📘 Faculty Assignments</h2>
+    <p>Create and manage student assignments</p>
+  </div>
 
-  <input type="text" placeholder="Title" [(ngModel)]="title">
-  <textarea placeholder="Description" [(ngModel)]="description"></textarea>
-  <input type="date" [(ngModel)]="dueDate">
-  <input type="text" placeholder="File URL (optional)" [(ngModel)]="fileUrl">
+  <!-- FORM CARD -->
+  <div class="card">
 
-  <button (click)="addAssignment()">➕ Add Assignment</button>
+    <h3>
+      {{ editingAssignmentId ? 'Update Assignment' : 'Create Assignment' }}
+    </h3>
 
-  <hr>
+    <div class="form-grid">
 
-  <h3>📄 Your Assignments</h3>
+      <input
+        type="text"
+        placeholder="Assignment Title"
+        [(ngModel)]="title">
 
-  <div *ngFor="let a of assignments" class="card">
-    <h4>{{ a.title }}</h4>
-    <p>{{ a.description }}</p>
-    <p><b>Due:</b> {{ a.dueDate | date }}</p>
+      <input
+        type="date"
+        [(ngModel)]="dueDate">
 
-    <a *ngIf="a.fileUrl" [href]="a.fileUrl" target="_blank">
-      📥 Download
-    </a>
+      <input
+        type="text"
+        placeholder="File URL (optional)"
+        [(ngModel)]="fileUrl">
+
+      <textarea
+        placeholder="Description"
+        [(ngModel)]="description">
+      </textarea>
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        *ngIf="!editingAssignmentId"
+        (click)="addAssignment()"
+        class="btn primary">
+        ➕ Add Assignment
+      </button>
+
+      <button
+        *ngIf="editingAssignmentId"
+        (click)="updateAssignment()"
+        class="btn success">
+        💾 Update Assignment
+      </button>
+
+      <button
+        *ngIf="editingAssignmentId"
+        (click)="resetForm()"
+        class="btn gray">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- LIST -->
+  <h3 class="section-title">Your Assignments</h3>
+
+  <div class="grid">
+
+    <div
+      *ngFor="let a of assignments"
+      class="assignment-card">
+
+      <h4>{{ a.title }}</h4>
+
+      <p class="desc">{{ a.description }}</p>
+
+      <p class="due">
+        ⏰ Due: {{ a.dueDate | date }}
+      </p>
+
+      <a
+        *ngIf="a.fileUrl"
+        [href]="a.fileUrl"
+        target="_blank"
+        class="link">
+        📥 Download File
+      </a>
+
+      <div class="card-actions">
+
+        <button
+          (click)="editAssignment(a)"
+          class="btn outline">
+          ✏ Edit
+        </button>
+
+        <button
+          (click)="deleteAssignment(a._id)"
+          class="btn danger">
+          🗑 Delete
+        </button>
+
+      </div>
+
+    </div>
+
   </div>
 
 </div>

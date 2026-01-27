@@ -16,6 +16,8 @@ export class FacultyAnnouncements implements OnInit {
   message = '';
 
   announcements: any[] = [];
+  editingId: string | null = null;
+
   facultyName = '';
   course = 'BCA';
 
@@ -31,13 +33,24 @@ export class FacultyAnnouncements implements OnInit {
     }
   }
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadAnnouncements();
   }
 
+  /* LOAD */
+  loadAnnouncements() {
+    this.announcementService
+      .getFacultyAnnouncements(this.facultyName)
+      .subscribe(res => {
+        this.announcements = res.announcements || [];
+        this.cdr.detectChanges();
+      });
+  }
+
+  /* CREATE */
   addAnnouncement() {
     if (!this.title || !this.message) {
-      alert('All fields required');
+      alert("All fields required");
       return;
     }
 
@@ -48,22 +61,49 @@ export class FacultyAnnouncements implements OnInit {
       course: this.course
     };
 
-    this.announcementService.createAnnouncement(data).subscribe(() => {
-      alert('Announcement Posted ✅');
-
-      this.title = '';
-      this.message = '';
-
-      this.loadAnnouncements();
-    });
+    this.announcementService.createAnnouncement(data)
+      .subscribe(() => {
+        alert("Announcement Posted");
+        this.resetForm();
+        this.loadAnnouncements();
+      });
   }
 
-  loadAnnouncements() {
+  /* EDIT */
+  editAnnouncement(a: any) {
+    this.editingId = a._id;
+    this.title = a.title;
+    this.message = a.message;
+  }
+
+  /* UPDATE */
+  updateAnnouncement() {
+    const data = {
+      title: this.title,
+      message: this.message
+    };
+
     this.announcementService
-      .getFacultyAnnouncements(this.facultyName)
-      .subscribe(res => {
-        this.announcements = res.announcements || [];
-        this.cdr.detectChanges(); // 🔥 DO NOT REMOVE
+      .updateAnnouncement(this.editingId!, data)
+      .subscribe(() => {
+        alert("Updated");
+        this.resetForm();
+        this.loadAnnouncements();
       });
+  }
+
+  /* DELETE */
+  deleteAnnouncement(id: string) {
+    if (!confirm("Delete announcement?")) return;
+
+    this.announcementService
+      .deleteAnnouncement(id)
+      .subscribe(() => this.loadAnnouncements());
+  }
+
+  resetForm() {
+    this.title = '';
+    this.message = '';
+    this.editingId = null;
   }
 }

@@ -3,8 +3,7 @@ const router = express.Router();
 const Announcement = require("../models/Announcement");
 
 /* ===============================
-   FACULTY: CREATE ANNOUNCEMENT
-   (VISIBLE TO ALL)
+   CREATE ANNOUNCEMENT
 ================================ */
 router.post("/", async (req, res) => {
   try {
@@ -23,7 +22,7 @@ router.post("/", async (req, res) => {
 });
 
 /* ===============================
-   STUDENT: GET ALL ANNOUNCEMENTS
+   GET ALL (STUDENT)
 ================================ */
 router.get("/", async (req, res) => {
   try {
@@ -43,7 +42,7 @@ router.get("/", async (req, res) => {
 });
 
 /* ===============================
-   FACULTY: GET OWN ANNOUNCEMENTS
+   GET FACULTY ANNOUNCEMENTS
 ================================ */
 router.get("/faculty/:name", async (req, res) => {
   try {
@@ -61,20 +60,30 @@ router.get("/faculty/:name", async (req, res) => {
       message: "Failed to fetch faculty announcements"
     });
   }
-  router.delete("/:id", auth, role(["faculty"]), async (req,res)=>{
-  await Announcement.findByIdAndDelete(req.params.id);
-  res.json({success:true});
 });
 
-router.put("/:id", auth, role(["faculty"]), async (req,res)=>{
+/* ===============================
+   UPDATE
+================================ */
+router.put("/:id", async (req, res) => {
   const updated = await Announcement.findByIdAndUpdate(
     req.params.id,
     req.body,
-    {new:true}
+    { new: true }
   );
-  res.json(updated);
+
+  res.json({
+    success: true,
+    announcement: updated
+  });
 });
 
+/* ===============================
+   DELETE
+================================ */
+router.delete("/:id", async (req, res) => {
+  await Announcement.findByIdAndDelete(req.params.id);
+  res.json({ success: true });
 });
 
 module.exports = router;

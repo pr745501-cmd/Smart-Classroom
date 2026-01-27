@@ -6,22 +6,33 @@ import { HttpClient } from '@angular/common/http';
 })
 export class AssignmentService {
 
-  private API = 'http://localhost:5000/api/assignments';
+  api = "http://localhost:5000/api/assignments";
 
   constructor(private http: HttpClient) {}
 
-  // CREATE
+  /* CREATE */
   createAssignment(data: any) {
-    return this.http.post<any>(this.API, data);
+    return this.http.post(this.api, data);
   }
 
-  // GET ALL (STUDENT)
-  getAssignments() {
-    return this.http.get<any>(this.API);
-  }
-
-  // GET FACULTY
+  /* FACULTY */
   getFacultyAssignments(name: string) {
-    return this.http.get<any>(`${this.API}/faculty/${name}`);
+    return this.http.get<any>(`${this.api}/faculty/${name}`);
   }
+
+  /* STUDENT */
+  getAssignments() {
+    return this.http.get<any>(this.api);
+  }
+
+  /* UPDATE */
+  updateAssignment(id: string, data: any) {
+    return this.http.put(`${this.api}/${id}`, data);
+  }
+
+  /* DELETE */
+  deleteAssignment(id: string) {
+    return this.http.delete(`${this.api}/${id}`);
+  }
+
 }
