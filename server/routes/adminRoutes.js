@@ -3,10 +3,39 @@ const router = express.Router();
 
 const auth = require("../middleware/authMiddleware");
 const role = require("../middleware/roleMiddleware");
-
 const User = require("../models/User");
 
-// ✅ Create User
+/* =====================================
+   GET ALL USERS (ADMIN)
+   GET /api/admin/users
+===================================== */
+router.get(
+  "/users",
+  auth,
+  role(["admin"]),
+  async (req, res) => {
+    try {
+      const users = await User.find()
+        .select("name email role")
+        .sort({ createdAt: -1 });
+
+      res.json({
+        success: true,
+        users
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to fetch users"
+      });
+    }
+  }
+);
+
+/* =====================================
+   CREATE USER
+   POST /api/admin/create-user
+===================================== */
 router.post(
   "/create-user",
   auth,
@@ -18,7 +47,10 @@ router.post(
   }
 );
 
-// ✅ Update Role
+/* =====================================
+   UPDATE ROLE
+   PUT /api/admin/update-role/:id
+===================================== */
 router.put(
   "/update-role/:id",
   auth,
@@ -28,6 +60,16 @@ router.put(
       role: req.body.role
     });
     res.json({ message: "Role updated" });
+  }
+);
+// ✅ Delete User
+router.delete(
+  "/users/:id",
+  auth,
+  role(["admin"]),
+  async (req, res) => {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: "User deleted" });
   }
 );
 

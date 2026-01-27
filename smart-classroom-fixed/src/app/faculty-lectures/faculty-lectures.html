@@ -1,0 +1,132 @@
+<div class="page">
+
+  <!-- Header -->
+  <div class="header">
+    <div>
+      <h2>📚 Faculty Lectures</h2>
+      <p>Upload and manage your lecture materials</p>
+    </div>
+  </div>
+
+  <!-- Upload Card -->
+  <div class="card">
+
+    <h3>
+      {{ editingLectureId ? 'Update Lecture' : 'Upload Lecture' }}
+    </h3>
+
+    <div class="form-grid">
+
+      <input
+        type="text"
+        placeholder="Lecture Title"
+        [(ngModel)]="title"
+      />
+
+      <input
+        type="text"
+        placeholder="Subject"
+        [(ngModel)]="subject"
+      />
+
+      <select [(ngModel)]="type">
+        <option>PDF</option>
+        <option>PPT</option>
+        <option>VIDEO</option>
+      </select>
+
+      <input
+        type="text"
+        placeholder="File URL"
+        [(ngModel)]="fileUrl"
+      />
+
+    </div>
+
+    <div class="actions">
+
+      <button
+        *ngIf="!editingLectureId"
+        (click)="uploadLecture()"
+        class="btn primary">
+        ⬆ Upload Lecture
+      </button>
+
+      <button
+        *ngIf="editingLectureId"
+        (click)="updateLecture()"
+        class="btn success">
+        💾 Update Lecture
+      </button>
+
+      <button
+        *ngIf="editingLectureId"
+        (click)="resetForm()"
+        class="btn gray">
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- List -->
+  <h3 class="section-title">Your Lectures</h3>
+
+  <div class="lecture-grid">
+
+    <div
+      *ngFor="let l of lectures"
+      class="lecture-card">
+
+      <div class="top-row">
+
+        <div>
+          <h4>{{ l.title }}</h4>
+          <p>📘 {{ l.subject }}</p>
+          <p>👨‍🏫 {{ l.faculty }}</p>
+        </div>
+
+        <span
+          class="badge"
+          [ngClass]="{
+            'pdf': l.type === 'pdf',
+            'ppt': l.type === 'ppt',
+            'video': l.type === 'video'
+          }">
+
+          {{ l.type | uppercase }}
+
+        </span>
+
+      </div>
+
+      <a
+        *ngIf="l.fileUrl"
+        [href]="l.fileUrl"
+        target="_blank"
+        class="open-link">
+        🔗 Open File
+      </a>
+
+      <div class="card-actions">
+
+        <button
+          (click)="editLecture(l)"
+          class="btn outline">
+          ✏ Edit
+        </button>
+
+        <button
+          (click)="deleteLecture(l._id)"
+          class="btn danger">
+          🗑 Delete
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

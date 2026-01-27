@@ -60,6 +60,20 @@ router.get("/faculty/:name", async (req, res) => {
       message: "Failed to fetch faculty assignments"
     });
   }
+  router.delete("/:id", auth, role(["faculty"]), async (req,res)=>{
+  await Assignment.findByIdAndDelete(req.params.id);
+  res.json({success:true});
+});
+
+router.put("/:id", auth, role(["faculty"]), async (req,res)=>{
+  const updated = await Assignment.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {new:true}
+  );
+  res.json(updated);
+});
+
 });
 
 module.exports = router;

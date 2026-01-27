@@ -1,0 +1,31 @@
+.card{
+  background:#ffffff;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:0 4px 10px rgba(0,0,0,0.08);
+  transition:0.3s;
+}
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:0 8px 18px rgba(0,0,0,0.15);
+}
+.name{
+  font-weight:600;
+  font-size:18px;
+}
+.email{
+  font-size:14px;
+  color:#555;
+}
+.delete-btn{
+  margin-top:10px;
+  background:#ef4444;
+  color:white;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+}
+.delete-btn:hover{
+  background:#dc2626;
+}

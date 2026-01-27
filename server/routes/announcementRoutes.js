@@ -61,6 +61,20 @@ router.get("/faculty/:name", async (req, res) => {
       message: "Failed to fetch faculty announcements"
     });
   }
+  router.delete("/:id", auth, role(["faculty"]), async (req,res)=>{
+  await Announcement.findByIdAndDelete(req.params.id);
+  res.json({success:true});
+});
+
+router.put("/:id", auth, role(["faculty"]), async (req,res)=>{
+  const updated = await Announcement.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    {new:true}
+  );
+  res.json(updated);
+});
+
 });
 
 module.exports = router;

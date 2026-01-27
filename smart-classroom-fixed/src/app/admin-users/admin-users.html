@@ -1,0 +1,56 @@
+<div class="p-6 max-w-6xl mx-auto">
+
+  <!-- HEADER -->
+  <h2 class="text-3xl font-bold mb-6 flex items-center gap-2">
+    👥 Manage Users
+  </h2>
+
+  <!-- SEARCH -->
+  <input
+    type="text"
+    placeholder="Search by name, email or role..."
+    [(ngModel)]="search"
+    (input)="filterUsers()"
+    class="w-full mb-6 p-3 rounded-lg border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
+
+  <!-- LOADING -->
+  <p *ngIf="loading" class="text-gray-500">Loading users...</p>
+
+  <!-- FACULTY -->
+  <h3 class="text-xl font-semibold mt-6 mb-3">👨‍🏫 Faculty</h3>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div *ngFor="let u of getByRole('faculty')" class="card">
+      <p class="name">{{u.name}}</p>
+      <p class="email">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)" class="delete-btn">
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- STUDENTS -->
+  <h3 class="text-xl font-semibold mt-10 mb-3">🎓 Students</h3>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div *ngFor="let u of getByRole('student')" class="card">
+      <p class="name">{{u.name}}</p>
+      <p class="email">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)" class="delete-btn">
+        Delete
+      </button>
+    </div>
+  </div>
+
+  <!-- ADMINS -->
+  <h3 class="text-xl font-semibold mt-10 mb-3">🛡 Admins</h3>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div *ngFor="let u of getByRole('admin')" class="card">
+      <p class="name">{{u.name}}</p>
+      <p class="email">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)" class="delete-btn">
+        Delete
+      </button>
+    </div>
+  </div>
+
+</div>

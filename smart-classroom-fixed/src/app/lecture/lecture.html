@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-slate-100 p-8">
+
+  <!-- HEADER -->
+  <div class="flex justify-between items-center mb-6">
+
+    <h1 class="text-3xl font-bold">
+      📚 Lectures
+    </h1>
+
+    <div class="flex gap-3">
+
+      <input
+        type="text"
+        placeholder="Search lecture..."
+        [(ngModel)]="searchText"
+        (input)="applyFilter()"
+        class="px-4 py-2 border rounded-lg w-64"
+      >
+
+      <select
+        [(ngModel)]="selectedSubject"
+        (change)="applyFilter()"
+        class="px-4 py-2 border rounded-lg"
+      >
+        <option value="">All Subjects</option>
+        <option *ngFor="let s of subjects">
+          {{ s }}
+        </option>
+      </select>
+
+    </div>
+
+  </div>
+
+  <!-- LOADING TEXT -->
+  <p *ngIf="loading" class="text-gray-500">
+    Loading lectures...
+  </p>
+
+  <!-- NO DATA -->
+  <p *ngIf="!loading && filteredLectures.length === 0" class="text-gray-500">
+    No lectures found
+  </p>
+
+  <!-- GRID -->
+  <div
+    *ngIf="!loading && filteredLectures.length > 0"
+    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+  >
+
+    <div
+      *ngFor="let lec of filteredLectures"
+      class="bg-white p-5 rounded-xl shadow"
+    >
+
+      <span
+        class="text-xs px-2 py-1 rounded-full"
+        [ngClass]="{
+          'bg-red-200 text-red-700': lec.type === 'video',
+          'bg-green-200 text-green-700': lec.type === 'pdf',
+          'bg-yellow-200 text-yellow-700': lec.type === 'ppt'
+        }"
+      >
+        {{ lec.type }}
+      </span>
+
+      <h3 class="mt-2 font-semibold text-lg">
+        {{ lec.title }}
+      </h3>
+
+      <p class="text-sm">📘 {{ lec.subject }}</p>
+      <p class="text-sm mb-3">👨‍🏫 {{ lec.faculty }}</p>
+
+      <a
+        [href]="lec.fileUrl"
+        target="_blank"
+        class="block bg-blue-600 text-white text-center py-2 rounded-lg"
+      >
+        Open Lecture
+      </a>
+
+    </div>
+
+  </div>
+
+</div>
