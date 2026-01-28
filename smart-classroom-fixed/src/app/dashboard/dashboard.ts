@@ -1,6 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { LiveClassService } from '../services/live-class.service';   // ✅ ADD
 
 @Component({
   selector: 'app-dashboard',
@@ -27,12 +28,17 @@ export class Dashboard implements OnInit {
 
   loading = true;
 
+  private liveTimer: any;
+  private alreadyNotified = false;
+
   constructor(
     private router: Router,
-    private cd: ChangeDetectorRef   // ✅ CHANGE DETECTOR
+    private cd: ChangeDetectorRef,
+    private live: LiveClassService      // ✅ ADD
   ) {}
 
   ngOnInit() {
+
     const storedUser = localStorage.getItem('user');
 
     if (!storedUser) {
@@ -49,16 +55,56 @@ export class Dashboard implements OnInit {
     this.user.profilePic = parsed.profilePic || '';
 
     this.loading = false;
-
-    // 🔥 FORCE UI REFRESH
     this.cd.detectChanges();
+
+    // 🔁 CHECK LIVE CLASS EVERY 5 SECONDS
+    this.liveTimer = setInterval(() => {
+      this.checkLiveClass();
+    }, 5000);
   }
 
+  // ==========================
+  // 🔔 LIVE CLASS NOTIFICATION
+  // ==========================
+  checkLiveClass() {
+   this.live.getLiveClass().subscribe((res: any) => {
+
+
+      if (res && !this.alreadyNotified) {
+
+        this.alreadyNotified = true;
+
+        // 🔊 PLAY SOUND
+        const audio = new Audio('assets/notify.mp3');
+        audio.play().catch(()=>{});
+
+        // 📢 SHOW POPUP
+        alert(
+          `📢 A class has been started!\n\n` +
+          `Class: ${res.title}\n` +
+          `Faculty: ${res.facultyName}\n\n` +
+          `Join fast!`
+        );
+      }
+
+      if (!res) {
+        this.alreadyNotified = false;
+      }
+
+    });
+  }
+
+  // ==========================
+  // LOGOUT
+  // ==========================
   logout() {
     localStorage.clear();
     this.router.navigate(['/login']);
   }
 
+  // ==========================
+  // NAVIGATION
+  // ==========================
   goToLectures() {
     this.router.navigate(['/lectures']);
   }
@@ -70,7 +116,13 @@ export class Dashboard implements OnInit {
   goToAnnouncements() {
     this.router.navigate(['/student/announcements']);
   }
+
   goToAttendance() {
     this.router.navigate(['/student/attendance']);
   }
+
+  goToLive() {
+    this.router.navigate(['/student/live']);
+  }
+
 }

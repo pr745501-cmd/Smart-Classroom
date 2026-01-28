@@ -15,6 +15,7 @@ const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const liveClassRoutes = require("./routes/liveClassRoutes");
 
 const app = express();
 
@@ -59,6 +60,7 @@ app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
 app.use("/api/attendance", attendanceRoutes); // ✅ REQUIRED
 app.use("/api/admin", adminRoutes);
+app.use("/api/live-class", liveClassRoutes);
 
 /* ================= SERVER ================= */
 const PORT = process.env.PORT || 5000;

@@ -19,59 +19,71 @@
       <p><b>Course:</b> {{ user.course }}</p>
     </div>
   </section>
+<!-- MAIN GRID -->
+<section class="grid">
 
-  <!-- MAIN GRID -->
-  <section class="grid">
+  <!-- 📚 LECTURES -->
+  <div class="card clickable" (click)="goToLectures()">
+    <h4>📚 Lectures</h4>
+    <p>View subject-wise lectures</p>
+    <ul>
+      <li>✔ Video / PDF / PPT</li>
+      <li>✔ Faculty name</li>
+      <li>✔ Date wise</li>
+    </ul>
+    <small class="hint">Click to open</small>
+  </div>
 
-    <!-- 📚 LECTURES -->
-    <div class="card clickable" (click)="goToLectures()">
-      <h4>📚 Lectures</h4>
-      <p>View subject-wise lectures</p>
-      <ul>
-        <li>✔ Video / PDF / PPT</li>
-        <li>✔ Faculty name</li>
-        <li>✔ Date wise</li>
-      </ul>
-      <small class="hint">Click to open</small>
-    </div>
+  <!-- 📝 ASSIGNMENTS -->
+  <div class="card clickable" (click)="goToAssignments()">
+    <h4>📝 Assignments</h4>
+    <p>Track & submit assignments</p>
+    <ul>
+      <li>✔ Due date countdown</li>
+      <li>✔ Upload submission</li>
+      <li>✔ Status tracking</li>
+    </ul>
+    <small class="hint">Click to open</small>
+  </div>
 
-    <!-- 📝 ASSIGNMENTS -->
-    <div class="card clickable" (click)="goToAssignments()">
-      <h4>📝 Assignments</h4>
-      <p>Track & submit assignments</p>
-      <ul>
-        <li>✔ Due date countdown</li>
-        <li>✔ Upload submission</li>
-        <li>✔ Status tracking</li>
-      </ul>
-      <small class="hint">Click to open</small>
-    </div>
+  <!-- 📢 ANNOUNCEMENTS -->
+  <div class="card clickable" (click)="goToAnnouncements()">
+    <h4>📢 Announcements</h4>
+    <p>Important updates</p>
+    <ul>
+      <li>✔ Exam notices</li>
+      <li>✔ Faculty messages</li>
+      <li>✔ Admin alerts</li>
+    </ul>
+    <small class="hint">Click to open</small>
+  </div>
 
-    <!-- 📢 ANNOUNCEMENTS (NEW) -->
-    <div class="card clickable" (click)="goToAnnouncements()">
-      <h4>📢 Announcements</h4>
-      <p>Important updates</p>
-      <ul>
-        <li>✔ Exam notices</li>
-        <li>✔ Faculty messages</li>
-        <li>✔ Admin alerts</li>
-      </ul>
-      <small class="hint">Click to open</small>
-    </div>
+  <!-- 📊 ATTENDANCE -->
+  <div class="card clickable" (click)="goToAttendance()">
+    <h4>📊 Attendance</h4>
+    <p>Attendance overview</p>
+    <ul>
+      <li>✔ Subject wise %</li>
+      <li>✔ Monthly chart</li>
+      <li>✔ Shortage alerts</li>
+    </ul>
+    <small class="hint">Click to open</small>
+  </div>
 
-    <!-- 📊 ATTENDANCE -->
-    <div class="card clickable" (click)="goToAttendance()">
-      <h4>📊 Attendance</h4>
-      <p>Attendance overview</p>
-      <ul>
-        <li>✔ Subject wise %</li>
-        <li>✔ Monthly chart</li>
-        <li>✔ Shortage alerts</li>
-      </ul>
-      <small class="hint">Click to open</small>
-    </div>
+  <!-- 🔴 LIVE CLASS (NEW) -->
+  <div class="card clickable live" (click)="goToLive()">
+    <h4>🎥 Live Class</h4>
+    <p>Join ongoing live class</p>
+    <ul>
+      <li>✔ Instant join</li>
+      <li>✔ Faculty hosted</li>
+      <li>✔ One click access</li>
+    </ul>
+    <small class="hint">Click to open</small>
+  </div>
 
-  </section>
+</section>
+
 </div>
 
 <!-- LOADER -->

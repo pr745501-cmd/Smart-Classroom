@@ -1,0 +1,26 @@
+<div class="live-container">
+
+  <h2>🎥 Live Class</h2>
+
+  <!-- No Live -->
+  <div *ngIf="!liveClass" class="no-class">
+    ⏳ No Live Class Right Now
+  </div>
+
+  <!-- Live Running -->
+  <div *ngIf="liveClass" class="live-card">
+
+    <h3>{{ liveClass.title }}</h3>
+
+    <p>👨‍🏫 Faculty: {{ liveClass.facultyName }}</p>
+
+    <a
+      [href]="liveClass.meetingLink"
+      target="_blank"
+      class="join-btn">
+      🚀 Join Class
+    </a>
+
+  </div>
+
+</div>

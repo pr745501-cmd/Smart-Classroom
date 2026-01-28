@@ -1,0 +1,49 @@
+.live-container{
+  min-height: 80vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+.live-card{
+  width:380px;
+  background:white;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.1);
+  text-align:center;
+}
+
+.live-card h2{
+  margin-bottom:20px;
+}
+
+.live-card input{
+  width:100%;
+  padding:10px;
+  margin-bottom:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+}
+
+.start-btn{
+  width:100%;
+  padding:10px;
+  background:#2563eb;
+  color:white;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+}
+
+.end-btn{
+  width:100%;
+  padding:10px;
+  background:#ef4444;
+  color:white;
+  border:none;
+  border-radius:8px;
+  margin-top:10px;
+  cursor:pointer;
+}

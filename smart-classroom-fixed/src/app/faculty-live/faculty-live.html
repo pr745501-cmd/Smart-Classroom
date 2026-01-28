@@ -1,0 +1,29 @@
+<div class="live-container">
+
+  <div class="live-card">
+
+    <h2>🎥 Start Live Class</h2>
+
+    <input
+      type="text"
+      placeholder="Class Title"
+      [(ngModel)]="title"
+    >
+
+    <input
+      type="text"
+      placeholder="Meeting Link"
+      [(ngModel)]="link"
+    >
+
+    <button class="start-btn" (click)="start()">
+      {{ loading ? 'Starting...' : 'Start Class' }}
+    </button>
+
+    <button class="end-btn" (click)="end()">
+      End Class
+    </button>
+
+  </div>
+
+</div>

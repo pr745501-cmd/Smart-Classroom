@@ -1,0 +1,41 @@
+.live-container{
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:#f3f6fb;
+}
+
+.live-card{
+  background:#fff;
+  width:360px;
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,.08);
+  text-align:center;
+}
+
+.live-card h3{
+  margin-bottom:10px;
+}
+
+.join-btn{
+  display:block;
+  margin-top:20px;
+  background:#22c55e;
+  color:white;
+  padding:12px;
+  border-radius:8px;
+  text-decoration:none;
+  font-weight:600;
+}
+
+.join-btn:hover{
+  background:#16a34a;
+}
+
+.no-class{
+  font-size:20px;
+  color:#777;
+}

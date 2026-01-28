@@ -1,0 +1,52 @@
+[debug] [2026-01-27T18:16:21.059Z] ----------------------------------------------------------------------
+[debug] [2026-01-27T18:16:21.065Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\PankajKatal\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js init
+[debug] [2026-01-27T18:16:21.066Z] CLI Version:   15.4.0
+[debug] [2026-01-27T18:16:21.066Z] Platform:      win32
+[debug] [2026-01-27T18:16:21.066Z] Node Version:  v24.3.0
+[debug] [2026-01-27T18:16:21.066Z] Time:          Tue Jan 27 2026 23:46:21 GMT+0530 (India Standard Time)
+[debug] [2026-01-27T18:16:21.066Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-01-27T18:16:21.071Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  C:\Users\PankajKatal\OneDrive\Desktop\New folder\Smart Classroom\smart-classroom-fixed
+
+[debug] [2026-01-27T18:16:24.200Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-01-27T18:16:24.201Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-01-27T18:17:00.236Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-01-27T18:17:00.237Z] > authorizing via signed-in user (katalpankaj44@gmail.com)
+[debug] [2026-01-27T18:17:00.237Z] Checked if tokens are valid: false, expires at: 1757397347244
+[debug] [2026-01-27T18:17:00.238Z] Checked if tokens are valid: false, expires at: 1757397347244
+[debug] [2026-01-27T18:17:00.238Z] > refreshing access token with scopes: []
+[debug] [2026-01-27T18:17:00.239Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-01-27T18:17:00.239Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-27T18:17:01.056Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-01-27T18:17:01.056Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-01-27T18:17:01.070Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=100
+[debug] [2026-01-27T18:17:02.390Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-01-27T18:17:02.390Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] 
+=== Hosting Setup
+[debug] [2026-01-27T18:17:02.430Z] Checked if tokens are valid: true, expires at: 1769541420056
+[debug] [2026-01-27T18:17:02.430Z] Checked if tokens are valid: true, expires at: 1769541420056
+[debug] [2026-01-27T18:17:02.430Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/train-app-779a6 [none]
+[debug] [2026-01-27T18:17:02.838Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/train-app-779a6 200
+[debug] [2026-01-27T18:17:02.838Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/train-app-779a6 {"projectId":"train-app-779a6","projectNumber":"875554809352","displayName":"Train app","name":"projects/train-app-779a6","resources":{"hostingSite":"train-app-779a6"},"state":"ACTIVE","etag":"1_0593a2d3-68ff-4099-ab04-c0ce52be88eb"}
+[info] 
+[info] Your public directory is the folder (relative to your project directory) that
+[info] will contain Hosting assets to be uploaded with firebase deploy. If you
+[info] have a build process for your assets, use your build's output directory.
+[info] 

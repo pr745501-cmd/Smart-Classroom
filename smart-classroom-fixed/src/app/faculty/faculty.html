@@ -28,33 +28,39 @@
     <!-- DASHBOARD CARDS -->
     <section class="cards">
 
-      <div class="card clickable" (click)="goTo('/faculty/assignments')">
-        <h3>📝 Assignments</h3>
-        <p>Create & check student submissions</p>
-      </div>
+  <div class="card clickable" (click)="goTo('/faculty/assignments')">
+    <h3>📝 Assignments</h3>
+    <p>Create & check student submissions</p>
+  </div>
 
-      <div class="card clickable" (click)="goTo('/faculty/announcements')">
-        <h3>📢 Announcements</h3>
-        <p>Post notices for students</p>
-      </div>
+  <div class="card clickable" (click)="goTo('/faculty/announcements')">
+    <h3>📢 Announcements</h3>
+    <p>Post notices for students</p>
+  </div>
 
-      <div class="card clickable" (click)="goTo('/faculty/lectures')">
-        <h3>📚 Lectures</h3>
-        <p>Upload PDFs / PPTs / Videos</p>
-      </div>
+  <div class="card clickable" (click)="goTo('/faculty/lectures')">
+    <h3>📚 Lectures</h3>
+    <p>Upload PDFs / PPTs / Videos</p>
+  </div>
 
-      <div class="card clickable" (click)="goTo('/faculty/students')">
-        <h3>👨‍🎓 Students</h3>
-        <p>View enrolled students</p>
-      </div>
+  <div class="card clickable" (click)="goTo('/faculty/students')">
+    <h3>👨‍🎓 Students</h3>
+    <p>View enrolled students</p>
+  </div>
 
-      <!-- ✅ NEW ATTENDANCE CARD -->
-      <div class="card clickable" (click)="goTo('/faculty/attendance')">
-        <h3>📊 Attendance</h3>
-        <p>Mark & manage student attendance</p>
-      </div>
+  <div class="card clickable" (click)="goTo('/faculty/attendance')">
+    <h3>📊 Attendance</h3>
+    <p>Mark & manage attendance</p>
+  </div>
 
-    </section>
+  <!-- 🔴 LIVE CLASS -->
+  <div class="card clickable live" (click)="goTo('/faculty/live')">
+    <h3>🎥 Live Class</h3>
+    <p>Start & end live class</p>
+  </div>
+
+</section>
+
   </main>
 
 </div>

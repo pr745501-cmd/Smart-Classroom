@@ -11,6 +11,8 @@ import { Lectures } from './lecture/lecture';
 import { StudentAssignments } from './student-assignments/student-assignments';
 import { StudentAnnouncements } from './student-announcements/student-announcements';
 import { StudentAttendance } from './student-attendance/student-attendance';
+import { FacultyLive } from './faculty-live/faculty-live';
+import { StudentLive } from './student-live/student-live';
 
 /* FACULTY */
 import { Faculty } from './faculty/faculty';
@@ -103,6 +105,20 @@ export const routes: Routes = [
     component: AdminUsers,
     canActivate: [roleGuard(['admin'])]
   },
+  /* 🎓 STUDENT */
+{
+  path: 'student/live',
+  component: StudentLive,
+  canActivate: [roleGuard(['student'])]
+},
+
+/* 👨‍🏫 FACULTY */
+{
+  path: 'faculty/live',
+  component: FacultyLive,
+  canActivate: [roleGuard(['faculty'])]
+},
+
 
   { path: '**', redirectTo: '' }
 ];
