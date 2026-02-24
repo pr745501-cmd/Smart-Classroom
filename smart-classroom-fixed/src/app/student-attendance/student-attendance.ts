@@ -9,13 +9,12 @@ import Chart from 'chart.js/auto';
   imports: [CommonModule],
   templateUrl: './student-attendance.html',
   styleUrls: ['./student-attendance.css']
-
 })
 export class StudentAttendance implements OnInit {
 
   attendance: any[] = [];
   loading = true;
-  chart: any;
+  chart: Chart | null = null;
 
   constructor(
     private http: HttpClient,
@@ -68,44 +67,69 @@ export class StudentAttendance implements OnInit {
       }
     });
   }
+renderChart(data: any[]) {
 
-  renderChart(data: any[]) {
+  const labels = data.map(d =>
+    new Date(d.date).getDate().toString()
+  );
 
-    const labels = data.map(d =>
-      new Date(d.date).getDate().toString()
-    );
+  const presentData = data.map(d =>
+    d.status.toLowerCase() === 'present' ? 100 : 0
+  );
 
-    const presentData = data.map(d =>
-      d.status === 'present' ? 1 : 0
-    );
+  const absentData = data.map(d =>
+    d.status.toLowerCase() === 'absent' ? 100 : 0
+  );
 
-    if (this.chart) {
-      this.chart.destroy();
-    }
+  if (this.chart) {
+    this.chart.destroy();
+  }
 
-    this.chart = new Chart('attendanceChart', {
-      type: 'bar',
-      data: {
-        labels,
-        datasets: [
-          {
-            label: 'Present',
-            data: presentData
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        scales: {
-          y: {
-            beginAtZero: true,
-            ticks: {
-              stepSize: 1,
-              callback: v => v === 1 ? 'Present' : 'Absent'
-            }
+  this.chart = new Chart('attendanceChart', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Present',
+          data: presentData,
+          backgroundColor: '#4CAF50'
+        },
+        {
+          label: 'Absent',
+          data: absentData,
+          backgroundColor: '#F44336'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        tooltip: {
+          callbacks: {
+            label: ctx => ctx.raw === 100
+              ? ctx.dataset.label
+              : ''
           }
         }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          title: {
+            display: true,
+            text: 'Day of Month'
+          }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          max: 100
+        }
       }
-    });
-  }
+    }
+  });
+}
+
 }

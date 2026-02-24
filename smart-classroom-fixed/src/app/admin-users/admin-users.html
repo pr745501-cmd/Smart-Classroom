@@ -1,53 +1,160 @@
 <div class="p-6 max-w-6xl mx-auto">
 
   <!-- HEADER -->
-  <h2 class="text-3xl font-bold mb-6 flex items-center gap-2">
+  <h2 class="text-3xl font-bold mb-8 flex items-center gap-2">
     👥 Manage Users
   </h2>
 
+  <!-- ===================== -->
+  <!-- STATS CARDS -->
+  <!-- ===================== -->
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+
+    <div class="bg-white p-4 rounded-lg shadow text-center">
+      <h3 class="text-gray-500 text-sm">Total Users</h3>
+      <p class="text-2xl font-bold text-blue-600">
+        {{ totalUsers }}
+      </p>
+    </div>
+
+    <div class="bg-white p-4 rounded-lg shadow text-center">
+      <h3 class="text-gray-500 text-sm">Students</h3>
+      <p class="text-2xl font-bold text-green-600">
+        {{ totalStudents }}
+      </p>
+    </div>
+
+    <div class="bg-white p-4 rounded-lg shadow text-center">
+      <h3 class="text-gray-500 text-sm">Faculty</h3>
+      <p class="text-2xl font-bold text-purple-600">
+        {{ totalFaculty }}
+      </p>
+    </div>
+
+    <div class="bg-white p-4 rounded-lg shadow text-center">
+      <h3 class="text-gray-500 text-sm">Pending Students</h3>
+      <p class="text-2xl font-bold text-orange-500">
+        {{ pendingStudents }}
+      </p>
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
+  <!-- PIE CHART (FIXED SIZE) -->
+  <!-- ===================== -->
+  <div class="bg-white p-6 rounded-lg shadow mb-10 flex justify-center">
+
+    <div class="w-full md:w-1/2 h-80">
+      <canvas
+        baseChart
+        [data]="pieChartData"
+        [type]="pieChartType"
+        [options]="pieChartOptions">
+      </canvas>
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
   <!-- SEARCH -->
+  <!-- ===================== -->
   <input
     type="text"
     placeholder="Search by name, email or role..."
     [(ngModel)]="search"
     (input)="filterUsers()"
-    class="w-full mb-6 p-3 rounded-lg border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    class="w-full mb-8 p-3 rounded-lg border shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
   />
 
   <!-- LOADING -->
   <p *ngIf="loading" class="text-gray-500">Loading users...</p>
 
+  <!-- ===================== -->
+  <!-- PENDING STUDENTS -->
+  <!-- ===================== -->
+  <h3 class="text-xl font-semibold mb-4">
+    ⏳ Pending Students
+  </h3>
+
+  <div *ngIf="getPendingStudents().length === 0"
+       class="text-gray-500 mb-6">
+    No pending students
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+
+    <div *ngFor="let u of getPendingStudents()"
+         class="bg-yellow-50 p-4 rounded-lg shadow">
+
+      <p class="font-semibold text-lg">
+        {{ u.name }}
+      </p>
+
+      <p class="text-sm text-gray-600">
+        {{ u.email }}
+      </p>
+
+      <button
+        (click)="deleteUser(u._id)"
+        class="mt-3 bg-red-500 hover:bg-red-600
+               text-white px-3 py-1 rounded">
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
+  <!-- ===================== -->
   <!-- FACULTY -->
-  <h3 class="text-xl font-semibold mt-6 mb-3">👨‍🏫 Faculty</h3>
+  <!-- ===================== -->
+  <h3 class="text-xl font-semibold mb-4">
+    👨‍🏫 Faculty
+  </h3>
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div *ngFor="let u of getByRole('faculty')" class="card">
-      <p class="name">{{u.name}}</p>
-      <p class="email">{{u.email}}</p>
-      <button (click)="deleteUser(u._id)" class="delete-btn">
+    <div *ngFor="let u of getByRole('faculty')" class="bg-white p-4 rounded-lg shadow">
+      <p class="font-semibold text-lg">{{u.name}}</p>
+      <p class="text-sm text-gray-600">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)"
+              class="mt-3 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
         Delete
       </button>
     </div>
   </div>
 
+  <!-- ===================== -->
   <!-- STUDENTS -->
-  <h3 class="text-xl font-semibold mt-10 mb-3">🎓 Students</h3>
+  <!-- ===================== -->
+  <h3 class="text-xl font-semibold mt-10 mb-4">
+    🎓 Students
+  </h3>
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div *ngFor="let u of getByRole('student')" class="card">
-      <p class="name">{{u.name}}</p>
-      <p class="email">{{u.email}}</p>
-      <button (click)="deleteUser(u._id)" class="delete-btn">
+    <div *ngFor="let u of getByRole('student')" class="bg-white p-4 rounded-lg shadow">
+      <p class="font-semibold text-lg">{{u.name}}</p>
+      <p class="text-sm text-gray-600">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)"
+              class="mt-3 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
         Delete
       </button>
     </div>
   </div>
 
+  <!-- ===================== -->
   <!-- ADMINS -->
-  <h3 class="text-xl font-semibold mt-10 mb-3">🛡 Admins</h3>
+  <!-- ===================== -->
+  <h3 class="text-xl font-semibold mt-10 mb-4">
+    🛡 Admins
+  </h3>
+
   <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-    <div *ngFor="let u of getByRole('admin')" class="card">
-      <p class="name">{{u.name}}</p>
-      <p class="email">{{u.email}}</p>
-      <button (click)="deleteUser(u._id)" class="delete-btn">
+    <div *ngFor="let u of getByRole('admin')" class="bg-white p-4 rounded-lg shadow">
+      <p class="font-semibold text-lg">{{u.name}}</p>
+      <p class="text-sm text-gray-600">{{u.email}}</p>
+      <button (click)="deleteUser(u._id)"
+              class="mt-3 bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded">
         Delete
       </button>
     </div>

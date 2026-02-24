@@ -2,9 +2,21 @@ const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    name: { 
+      type: String, 
+      required: true 
+    },
+
+    email: { 
+      type: String, 
+      required: true, 
+      unique: true 
+    },
+
+    password: { 
+      type: String, 
+      required: true 
+    },
 
     role: {
       type: String,
@@ -12,10 +24,19 @@ const userSchema = new mongoose.Schema(
       default: "student"
     },
 
-    // ✅ ADD THIS
     course: {
       type: String,
       default: "BCA"
+    },
+
+    // ✅ Approval System
+    isApproved: {
+      type: Boolean,
+      default: function () {
+        // Student → false
+        // Faculty/Admin → true
+        return this.role === "student" ? false : true;
+      }
     }
   },
   { timestamps: true }

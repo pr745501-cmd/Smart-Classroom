@@ -1,25 +1,33 @@
 const express = require("express");
 const router = express.Router();
+
 const Assignment = require("../models/Assignment");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
 
 /* ===============================
    CREATE ASSIGNMENT (FACULTY)
 ================================ */
-router.post("/", async (req, res) => {
-  try {
-    const assignment = await Assignment.create(req.body);
+router.post(
+  "/",
+  authMiddleware,
+  roleMiddleware(["faculty"]),
+  async (req, res) => {
+    try {
+      const assignment = await Assignment.create(req.body);
 
-    res.status(201).json({
-      success: true,
-      assignment
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: err.message
-    });
+      res.status(201).json({
+        success: true,
+        assignment
+      });
+    } catch (err) {
+      res.status(400).json({
+        success: false,
+        message: err.message
+      });
+    }
   }
-});
+);
 
 /* ===============================
    GET ALL ASSIGNMENTS (STUDENT)
@@ -33,7 +41,7 @@ router.get("/", async (req, res) => {
       success: true,
       assignments
     });
-  } catch {
+  } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to fetch assignments"
@@ -54,26 +62,64 @@ router.get("/faculty/:name", async (req, res) => {
       success: true,
       assignments
     });
-  } catch {
+  } catch (err) {
     res.status(500).json({
       success: false,
       message: "Failed to fetch faculty assignments"
     });
   }
-  router.delete("/:id", auth, role(["faculty"]), async (req,res)=>{
-  await Assignment.findByIdAndDelete(req.params.id);
-  res.json({success:true});
 });
 
-router.put("/:id", auth, role(["faculty"]), async (req,res)=>{
-  const updated = await Assignment.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    {new:true}
-  );
-  res.json(updated);
-});
+/* ===============================
+   DELETE ASSIGNMENT (FACULTY)
+================================ */
+router.delete(
+  "/:id",
+  authMiddleware,
+  roleMiddleware(["faculty"]),
+  async (req, res) => {
+    try {
+      await Assignment.findByIdAndDelete(req.params.id);
 
-});
+      res.json({
+        success: true,
+        message: "Assignment deleted successfully"
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to delete assignment"
+      });
+    }
+  }
+);
+
+/* ===============================
+   UPDATE ASSIGNMENT (FACULTY)
+================================ */
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware(["faculty"]),
+  async (req, res) => {
+    try {
+      const updated = await Assignment.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        { new: true }
+      );
+
+      res.json({
+        success: true,
+        assignment: updated
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        message: "Failed to update assignment"
+      });
+    }
+  }
+);
 
 module.exports = router;

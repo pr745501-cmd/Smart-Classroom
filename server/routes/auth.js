@@ -32,17 +32,23 @@ router.post("/signup", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // 🔥 APPROVAL SYSTEM LOGIC
     const user = await User.create({
       name,
       email: email.toLowerCase(),
       password: hashedPassword,
-      role: finalRole
+      role: finalRole,
+      isApproved: finalRole === "student" ? false : true   // ✅ IMPORTANT
     });
 
     res.status(201).json({
       success: true,
-      message: `${finalRole} registered successfully`
+      message:
+        finalRole === "student"
+          ? "Signup successful. Awaiting faculty approval."
+          : `${finalRole} registered successfully`
     });
+
   } catch (err) {
     res.status(500).json({
       success: false,
@@ -50,6 +56,7 @@ router.post("/signup", async (req, res) => {
     });
   }
 });
+
 
 /* ===================== LOGIN ===================== */
 router.post("/login", async (req, res) => {
@@ -79,6 +86,16 @@ router.post("/login", async (req, res) => {
       });
     }
 
+ 
+    
+    if (user.role === "student" && !user.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: "Your account is pending faculty approval."
+      });
+    }
+  
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -93,9 +110,39 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        isApproved: user.isApproved
       }
     });
+
+  } catch (err) {
+    res.status(500).json({
+      success: false,
+      message: err.message
+    });
+  }
+});/* ===============================
+   CHECK APPROVAL STATUS
+   GET /api/auth/check-status/:email
+================================ */
+router.get("/check-status/:email", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      email: req.params.email.toLowerCase()
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      approved: user.isApproved
+    });
+
   } catch (err) {
     res.status(500).json({
       success: false,

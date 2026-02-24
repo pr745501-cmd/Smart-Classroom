@@ -1,3 +1,7 @@
+// 🔥 FORCE GOOGLE DNS (Fix SRV ECONNREFUSED)
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+
 require("dotenv").config();
 
 const express = require("express");
@@ -21,7 +25,7 @@ const app = express();
 
 /* ================= MIDDLEWARE ================= */
 app.use(cors());
-app.use(express.json());                 // ✅ REQUIRED
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ================= NO CACHE ================= */
@@ -38,13 +42,13 @@ if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 app.use("/uploads", express.static(uploadsDir));
 
 /* ================= MONGODB ================= */
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("✅ MongoDB Atlas Connected"))
-  .catch((err) => {
-    console.error("❌ MongoDB Error:", err.message);
-    process.exit(1);
-  });
+mongoose.connect(process.env.MONGO_URI, {
+  serverSelectionTimeoutMS: 30000
+})
+.then(() => console.log("✅ MongoDB Atlas Connected"))
+.catch((err) => {
+  console.error("❌ MongoDB Error:", err);
+});
 
 /* ================= ROUTES ================= */
 app.get("/", (req, res) => {
@@ -54,11 +58,11 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
 app.use("/api/announcements", announcementRoutes);
-app.use("/api/students", studentRoutes); // ✅ MUST BE PLURAL
-app.use("/api/lectures", lectureRoutes);   // ✅ FIXED
+app.use("/api/students", studentRoutes);
+app.use("/api/lectures", lectureRoutes);
 app.use("/api/assignments", assignmentRoutes);
 app.use("/api/submissions", submissionRoutes);
-app.use("/api/attendance", attendanceRoutes); // ✅ REQUIRED
+app.use("/api/attendance", attendanceRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/live-class", liveClassRoutes);
 

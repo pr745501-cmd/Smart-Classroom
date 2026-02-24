@@ -11,6 +11,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class FacultyStudents implements OnInit {
 
   students: any[] = [];
+  pendingStudents: any[] = [];
   loading = true;
 
   constructor(
@@ -20,29 +21,55 @@ export class FacultyStudents implements OnInit {
 
   ngOnInit(): void {
     this.loadStudents();
+    this.loadPendingStudents();
+  }
+
+  getHeaders() {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`
+    });
   }
 
   loadStudents() {
-    const token = localStorage.getItem('token');
-
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
-
     this.http
-      .get<any>('http://localhost:5000/api/students/enrolled', { headers })
+      .get<any>('http://localhost:5000/api/students/enrolled', {
+        headers: this.getHeaders()
+      })
       .subscribe({
         next: (res) => {
-          console.log('STUDENTS 👉', res);
           this.students = res.students || [];
           this.loading = false;
-          this.cdr.detectChanges(); // 🔥 force UI
+          this.cdr.detectChanges();
         },
-        error: (err) => {
-          console.error(err);
+        error: () => {
           this.loading = false;
           this.cdr.detectChanges();
         }
+      });
+  }
+
+  loadPendingStudents() {
+    this.http
+      .get<any>('http://localhost:5000/api/students/pending', {
+        headers: this.getHeaders()
+      })
+      .subscribe({
+        next: (res) => {
+          this.pendingStudents = res.students || [];
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  approveStudent(id: string) {
+    this.http
+      .put(`http://localhost:5000/api/students/approve/${id}`, {}, {
+        headers: this.getHeaders()
+      })
+      .subscribe(() => {
+        this.loadStudents();
+        this.loadPendingStudents();
       });
   }
 }
