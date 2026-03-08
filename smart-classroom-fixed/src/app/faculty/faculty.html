@@ -10,7 +10,11 @@
       <a (click)="goTo('/faculty/announcements')">📢 Announcements</a>
       <a (click)="goTo('/faculty/students')">👨‍🎓 Students</a>
       <a (click)="goTo('/faculty/lectures')">📚 Upload Lectures</a>
-      <a (click)="goTo('/faculty/attendance')">📊 Attendance</a> <!-- ✅ ADDED -->
+      <a (click)="goTo('/faculty/attendance')">📊 Attendance</a>
+
+      <!-- 💬 CLASS CHAT -->
+      <a (click)="goTo('/chat')">💬 Class Chat</a>
+
     </nav>
 
     <button class="logout" (click)="logout()">Logout</button>
@@ -28,38 +32,44 @@
     <!-- DASHBOARD CARDS -->
     <section class="cards">
 
-  <div class="card clickable" (click)="goTo('/faculty/assignments')">
-    <h3>📝 Assignments</h3>
-    <p>Create & check student submissions</p>
-  </div>
+      <div class="card clickable" (click)="goTo('/faculty/assignments')">
+        <h3>📝 Assignments</h3>
+        <p>Create & check student submissions</p>
+      </div>
 
-  <div class="card clickable" (click)="goTo('/faculty/announcements')">
-    <h3>📢 Announcements</h3>
-    <p>Post notices for students</p>
-  </div>
+      <div class="card clickable" (click)="goTo('/faculty/announcements')">
+        <h3>📢 Announcements</h3>
+        <p>Post notices for students</p>
+      </div>
 
-  <div class="card clickable" (click)="goTo('/faculty/lectures')">
-    <h3>📚 Lectures</h3>
-    <p>Upload PDFs / PPTs / Videos</p>
-  </div>
+      <div class="card clickable" (click)="goTo('/faculty/lectures')">
+        <h3>📚 Lectures</h3>
+        <p>Upload PDFs / PPTs / Videos</p>
+      </div>
 
-  <div class="card clickable" (click)="goTo('/faculty/students')">
-    <h3>👨‍🎓 Students</h3>
-    <p>View enrolled students</p>
-  </div>
+      <div class="card clickable" (click)="goTo('/faculty/students')">
+        <h3>👨‍🎓 Students</h3>
+        <p>View enrolled students</p>
+      </div>
 
-  <div class="card clickable" (click)="goTo('/faculty/attendance')">
-    <h3>📊 Attendance</h3>
-    <p>Mark & manage attendance</p>
-  </div>
+      <div class="card clickable" (click)="goTo('/faculty/attendance')">
+        <h3>📊 Attendance</h3>
+        <p>Mark & manage attendance</p>
+      </div>
 
-  <!-- 🔴 LIVE CLASS -->
-  <div class="card clickable live" (click)="goTo('/faculty/live')">
-    <h3>🎥 Live Class</h3>
-    <p>Start & end live class</p>
-  </div>
+      <!-- 🔴 LIVE CLASS -->
+      <div class="card clickable live" (click)="goTo('/faculty/live')">
+        <h3>🎥 Live Class</h3>
+        <p>Start & end live class</p>
+      </div>
 
-</section>
+      <!-- 💬 CLASS CHAT -->
+      <div class="card clickable chat" (click)="goTo('/chat')">
+        <h3>💬 Class Chat</h3>
+        <p>Discuss with students in real time</p>
+      </div>
+
+    </section>
 
   </main>
 

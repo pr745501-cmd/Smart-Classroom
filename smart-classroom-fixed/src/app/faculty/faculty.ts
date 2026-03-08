@@ -30,7 +30,14 @@ export class Faculty {
   goTo(path: string) {
     this.router.navigate([path]);
   }
+
   goToAttendance() {
-    this.router.navigate(['/faculty/attendance']); // ✅ THIS WAS MISSING
+    this.router.navigate(['/faculty/attendance']);
   }
+
+  // 💬 NEW CHAT FUNCTION
+  goToChat() {
+    this.router.navigate(['/chat']);
+  }
+
 }

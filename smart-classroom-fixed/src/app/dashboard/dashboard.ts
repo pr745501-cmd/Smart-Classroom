@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { LiveClassService } from '../services/live-class.service';   // ✅ ADD
+import { LiveClassService } from '../services/live-class.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -34,7 +34,7 @@ export class Dashboard implements OnInit {
   constructor(
     private router: Router,
     private cd: ChangeDetectorRef,
-    private live: LiveClassService      // ✅ ADD
+    private live: LiveClassService
   ) {}
 
   ngOnInit() {
@@ -57,7 +57,6 @@ export class Dashboard implements OnInit {
     this.loading = false;
     this.cd.detectChanges();
 
-    // 🔁 CHECK LIVE CLASS EVERY 5 SECONDS
     this.liveTimer = setInterval(() => {
       this.checkLiveClass();
     }, 5000);
@@ -67,18 +66,16 @@ export class Dashboard implements OnInit {
   // 🔔 LIVE CLASS NOTIFICATION
   // ==========================
   checkLiveClass() {
-   this.live.getLiveClass().subscribe((res: any) => {
 
+    this.live.getLiveClass().subscribe((res: any) => {
 
       if (res && !this.alreadyNotified) {
 
         this.alreadyNotified = true;
 
-        // 🔊 PLAY SOUND
         const audio = new Audio('assets/notify.mp3');
         audio.play().catch(()=>{});
 
-        // 📢 SHOW POPUP
         alert(
           `📢 A class has been started!\n\n` +
           `Class: ${res.title}\n` +
@@ -123,6 +120,11 @@ export class Dashboard implements OnInit {
 
   goToLive() {
     this.router.navigate(['/student/live']);
+  }
+
+  // 💬 NEW CHAT NAVIGATION
+  goToChat() {
+    this.router.navigate(['/chat']);
   }
 
 }

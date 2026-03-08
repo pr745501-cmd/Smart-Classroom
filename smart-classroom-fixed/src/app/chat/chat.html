@@ -1,0 +1,48 @@
+<div class="chat-wrapper">
+
+  <div class="chat-header">
+    💬 Classroom Chat
+  </div>
+
+  <div class="chat-messages" #scrollContainer>
+
+    <div
+      *ngFor="let m of messages; trackBy:trackMsg"
+      class="chat-bubble"
+      [class.self]="m.senderName === user.name">
+
+      <div class="sender">
+
+        {{m.senderName}}
+
+      </div>
+
+      <div class="message-text">
+
+        {{m.message}}
+
+      </div>
+
+      <div class="time">
+
+        {{m.createdAt | date:'shortTime'}}
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="chat-input">
+
+    <input
+      [(ngModel)]="message"
+      placeholder="Type message..."
+      (keyup.enter)="sendMessage()"
+    />
+
+    <button (click)="sendMessage()">➤</button>
+
+  </div>
+
+</div>

@@ -1,0 +1,178 @@
+.chat-wrapper{
+
+width:420px;
+height:600px;
+margin:auto;
+
+display:flex;
+flex-direction:column;
+
+border-radius:12px;
+
+overflow:hidden;
+
+box-shadow:0 5px 20px rgba(0,0,0,0.15);
+
+font-family:Segoe UI;
+
+background:white;
+
+}
+
+/* HEADER */
+
+.chat-header{
+
+background:#075E54;
+
+color:white;
+
+padding:15px;
+
+font-size:18px;
+
+font-weight:600;
+
+}
+
+/* MESSAGE AREA */
+
+.chat-messages{
+
+flex:1;
+
+overflow-y:auto;
+
+padding:15px;
+
+background:#e5ddd5;
+
+display:flex;
+
+flex-direction:column;
+
+}
+
+/* MESSAGE BUBBLE */
+
+.chat-bubble{
+
+background:white;
+
+padding:10px 14px;
+
+margin-bottom:10px;
+
+border-radius:10px;
+
+max-width:70%;
+
+transform:translateZ(0);
+
+will-change:transform;
+
+}
+
+/* CURRENT USER MESSAGE */
+
+.chat-bubble.self{
+
+background:#dcf8c6;
+
+margin-left:auto;
+
+text-align:right;
+
+}
+
+/* SENDER */
+
+.sender{
+
+font-size:12px;
+
+font-weight:600;
+
+margin-bottom:3px;
+
+color:#555;
+
+}
+
+/* MESSAGE TEXT */
+
+.message-text{
+
+font-size:14px;
+
+}
+
+/* TIME */
+
+.time{
+
+font-size:10px;
+
+text-align:right;
+
+margin-top:4px;
+
+color:#777;
+
+}
+
+/* INPUT AREA */
+
+.chat-input{
+
+display:flex;
+
+padding:10px;
+
+background:#f0f0f0;
+
+border-top:1px solid #ddd;
+
+}
+
+.chat-input input{
+
+flex:1;
+
+padding:10px;
+
+border-radius:20px;
+
+border:1px solid #ccc;
+
+outline:none;
+
+font-size:14px;
+
+}
+
+.chat-input button{
+
+margin-left:8px;
+
+background:#128C7E;
+
+border:none;
+
+color:white;
+
+padding:10px 16px;
+
+border-radius:50%;
+
+cursor:pointer;
+
+font-size:16px;
+
+}
+
+.chat-input button:hover{
+
+background:#0f7a6d;
+
+}

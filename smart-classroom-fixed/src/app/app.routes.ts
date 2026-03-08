@@ -5,7 +5,7 @@ import { Home } from './pages/home/home';
 import { Login } from './pages/login/login';
 import { Signup } from './signup/signup';
 import { PendingApproval } from './pending-approval/pending-approval';
-
+import { Chat } from './chat/chat';
 /* STUDENT */
 import { Dashboard } from './dashboard/dashboard';
 import { Lectures } from './lecture/lecture';
@@ -120,6 +120,11 @@ export const routes: Routes = [
     component: AdminUsers,
     canActivate: [roleGuard(['admin'])]
   },
+{
+  path: 'chat',
+  component: Chat,
+  canActivate: [roleGuard(['student','faculty'])]
+},
 
   /* 🔁 FALLBACK */
   { path: '**', redirectTo: '' }
