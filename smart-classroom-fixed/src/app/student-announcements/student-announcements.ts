@@ -7,7 +7,8 @@ import { AnnouncementService } from '../services/announcement.service';
   selector: 'app-student-announcements',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './student-announcements.html'
+  templateUrl: './student-announcements.html',
+  styleUrls: ['./student-announcements.css']
 })
 export class StudentAnnouncements implements OnInit {
 

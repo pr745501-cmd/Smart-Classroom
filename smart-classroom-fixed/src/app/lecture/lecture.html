@@ -1,86 +1,76 @@
-<div class="min-h-screen bg-slate-100 p-8">
+<div class="lecture-viewport">
+  
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
 
-  <!-- HEADER -->
-  <div class="flex justify-between items-center mb-6">
+  <div class="interface-wrapper">
+    <header class="glass-header">
+      <div class="title-area">
+        <h1>Academic <span>Lectures</span></h1>
+        <p>Session 2026 • {{ filteredLectures.length }} Resources Available</p>
+      </div>
 
-    <h1 class="text-3xl font-bold">
-      📚 Lectures
-    </h1>
+      <div class="filter-controls">
+        <div class="search-pill">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Search lectures..."
+            [(ngModel)]="searchText"
+            (input)="applyFilter()"
+          >
+        </div>
 
-    <div class="flex gap-3">
+        <div class="select-pill">
+          <select [(ngModel)]="selectedSubject" (change)="applyFilter()">
+            <option value="">All Subjects</option>
+            <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+    </header>
 
-      <input
-        type="text"
-        placeholder="Search lecture..."
-        [(ngModel)]="searchText"
-        (input)="applyFilter()"
-        class="px-4 py-2 border rounded-lg w-64"
-      >
-
-      <select
-        [(ngModel)]="selectedSubject"
-        (change)="applyFilter()"
-        class="px-4 py-2 border rounded-lg"
-      >
-        <option value="">All Subjects</option>
-        <option *ngFor="let s of subjects">
-          {{ s }}
-        </option>
-      </select>
-
+    <div class="status-box" *ngIf="loading">
+      <div class="pulse-loader"></div>
+      <p>Syncing curriculum...</p>
     </div>
 
-  </div>
-
-  <!-- LOADING TEXT -->
-  <p *ngIf="loading" class="text-gray-500">
-    Loading lectures...
-  </p>
-
-  <!-- NO DATA -->
-  <p *ngIf="!loading && filteredLectures.length === 0" class="text-gray-500">
-    No lectures found
-  </p>
-
-  <!-- GRID -->
-  <div
-    *ngIf="!loading && filteredLectures.length > 0"
-    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
-  >
-
-    <div
-      *ngFor="let lec of filteredLectures"
-      class="bg-white p-5 rounded-xl shadow"
-    >
-
-      <span
-        class="text-xs px-2 py-1 rounded-full"
-        [ngClass]="{
-          'bg-red-200 text-red-700': lec.type === 'video',
-          'bg-green-200 text-green-700': lec.type === 'pdf',
-          'bg-yellow-200 text-yellow-700': lec.type === 'ppt'
-        }"
-      >
-        {{ lec.type }}
-      </span>
-
-      <h3 class="mt-2 font-semibold text-lg">
-        {{ lec.title }}
-      </h3>
-
-      <p class="text-sm">📘 {{ lec.subject }}</p>
-      <p class="text-sm mb-3">👨‍🏫 {{ lec.faculty }}</p>
-
-      <a
-        [href]="lec.fileUrl"
-        target="_blank"
-        class="block bg-blue-600 text-white text-center py-2 rounded-lg"
-      >
-        Open Lecture
-      </a>
-
+    <div class="status-box" *ngIf="!loading && filteredLectures.length === 0">
+      <span class="empty-icon">📂</span>
+      <p>No matches found for your search.</p>
     </div>
 
-  </div>
+    <main class="lecture-grid" *ngIf="!loading && filteredLectures.length > 0">
+      <div class="lecture-card" *ngFor="let lec of filteredLectures">
+        
+        <div class="card-top">
+          <span class="type-tag" [attr.data-type]="lec.type">
+            {{ lec.type }}
+          </span>
+          <span class="subject-tag">{{ lec.subject }}</span>
+        </div>
 
+        <div class="card-body">
+          <div class="icon-sphere">
+            <span *ngIf="lec.type === 'video'">🎥</span>
+            <span *ngIf="lec.type === 'pdf'">📄</span>
+            <span *ngIf="lec.type === 'ppt'">📊</span>
+          </div>
+          <h3>{{ lec.title }}</h3>
+          <div class="faculty-info">
+            <div class="avatar-mini"></div>
+            <p>Prof. {{ lec.faculty }}</p>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <a [href]="lec.fileUrl" target="_blank" class="btn-open">
+            Open Resource
+            <span class="arrow">→</span>
+          </a>
+        </div>
+
+      </div>
+    </main>
+  </div>
 </div>

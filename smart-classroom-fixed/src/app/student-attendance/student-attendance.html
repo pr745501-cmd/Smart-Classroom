@@ -1,39 +1,87 @@
-<h2>📋 My Attendance</h2>
+<div class="attendance-viewport">
+  <div class="bg-blur-element"></div>
 
-<p *ngIf="loading">Loading attendance...</p>
+  <div class="content-container">
+    <section class="overview-grid">
+      <div class="metric-card glass-morph">
+        <div class="metric-info">
+          <span class="label">Total Attendance</span>
+          <h2 class="value">88.5%</h2>
+          <span class="trend up">↑ 2.4% from last month</span>
+        </div>
+        <div class="progress-ring-v2">
+           <div class="ring-dot"></div>
+        </div>
+      </div>
 
-<p *ngIf="!loading && attendance.length === 0">
-  No attendance records found
-</p>
+      <div class="quick-stats-glass">
+        <div class="mini-stat">
+          <span class="icon-bg present">✔</span>
+          <div>
+            <span class="stat-label">Present</span>
+            <span class="stat-count">42 Days</span>
+          </div>
+        </div>
+        <div class="mini-stat">
+          <span class="icon-bg absent">✘</span>
+          <div>
+            <span class="stat-label">Absent</span>
+            <span class="stat-count">04 Days</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-<div *ngIf="attendance.length > 0">
-  <div
-    *ngFor="let a of attendance"
-    style="
-      border: 1px solid #ddd;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-    "
-  >
-    <p><b>Date:</b> {{ a.date | date }}</p>
-    <p><b>Faculty:</b> {{ a.faculty }}</p>
-    <p><b>Course:</b> {{ a.course }}</p>
-    <p>
-      <b>Status:</b>
-      <span
-        [style.color]="a.status === 'present' ? 'green' : 'red'"
-      >
-        {{ a.status | uppercase }}
-      </span>
-    </p>
+    <div class="bento-layout">
+      <div class="chart-block glass-morph">
+        <div class="block-header">
+          <h3>📊 Engagement Curve</h3>
+          <select class="minimal-select">
+            <option>Last 6 Months</option>
+          </select>
+        </div>
+        <div class="chart-wrapper">
+          <canvas id="attendanceChart"></canvas>
+        </div>
+      </div>
+
+      <div class="table-block glass-morph">
+        <div class="block-header">
+          <h3>📋 Detailed Logs</h3>
+          <button class="export-btn">Export PDF</button>
+        </div>
+
+        <div class="scroll-area">
+          <table class="refined-table">
+            <thead>
+              <tr>
+                <th>Session Date</th>
+                <th>Instructor</th>
+                <th>Module</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of attendance" class="data-row">
+                <td class="date-col">
+                  <span class="day">{{ a.date | date:'dd' }}</span>
+                  <span class="month">{{ a.date | date:'MMM' }}</span>
+                </td>
+                <td class="instructor-col">
+                  <div class="avatar-circle">{{ a.faculty.charAt(0) }}</div>
+                  <span>{{ a.faculty }}</span>
+                </td>
+                <td><span class="module-pill">{{ a.course }}</span></td>
+                <td>
+                  <div class="status-chip" [attr.data-status]="a.status">
+                    {{ a.status | uppercase }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
-
-<hr />
-
-<h2>📊 Monthly Attendance Overview</h2>
-
-<div style="height: 350px; max-width: 900px;">
-  <canvas id="attendanceChart"></canvas>
 </div>

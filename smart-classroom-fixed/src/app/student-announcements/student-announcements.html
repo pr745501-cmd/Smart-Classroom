@@ -1,73 +1,36 @@
-<div class="min-h-screen bg-slate-100 p-8">
+<div class="viewport-bg">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+</div>
 
-  <!-- HEADER -->
-  <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
-
-    <h1 class="text-3xl font-bold text-slate-800">
-      📢 Announcements
-    </h1>
-
-    <!-- SEARCH -->
-    <input
-      type="text"
-      placeholder="Search announcement..."
-      [(ngModel)]="searchText"
-      class="px-4 py-2 rounded-lg border
-             focus:outline-none focus:ring-2
-             focus:ring-blue-400 w-full md:w-64"
-    />
-
-  </div>
-
-  <!-- SKELETON -->
-  <div
-    *ngIf="loading"
-    class="space-y-4"
-  >
-    <div
-      *ngFor="let i of [1,2,3,4]"
-      class="animate-pulse bg-white rounded-xl p-5 shadow"
-    >
-      <div class="h-5 bg-gray-200 rounded w-1/2 mb-3"></div>
-      <div class="h-4 bg-gray-200 rounded mb-2"></div>
-      <div class="h-4 bg-gray-200 rounded w-3/4"></div>
-    </div>
-  </div>
-
-  <!-- EMPTY -->
-  <p *ngIf="!loading && filteredAnnouncements.length === 0"
-     class="text-gray-500">
-     No announcements found
-  </p>
-
-  <!-- LIST -->
-  <div *ngIf="!loading" class="space-y-4">
-
-    <div
-      *ngFor="let a of filteredAnnouncements"
-      class="bg-white rounded-xl p-5 shadow
-             hover:shadow-xl hover:-translate-y-1
-             transition-all duration-300"
-    >
-
-      <!-- TITLE -->
-      <h3 class="font-semibold text-lg text-slate-800">
-        {{ a.title }}
-      </h3>
-
-      <!-- MESSAGE -->
-      <p class="text-gray-600 mt-2 mb-3">
-        {{ a.message }}
-      </p>
-
-      <!-- META -->
-      <p class="text-sm text-gray-500">
-        👨‍🏫 {{ a.faculty }} ·
-        {{ a.createdAt | date:'medium' }}
-      </p>
-
+<div class="announcement-viewport">
+  <header class="header-section">
+    <div class="title-group">
+      <h1>Announcements</h1>
+      <p>Academic Year 2026 • Updates & Alerts</p>
     </div>
 
-  </div>
+    <div class="search-container">
+      <span>🔍</span>
+      <input type="text" placeholder="Search updates..." [(ngModel)]="searchText" class="search-input">
+    </div>
+  </header>
 
+  <div class="announcement-list">
+    <div *ngFor="let a of filteredAnnouncements" class="card">
+      <h3 class="card-title">{{ a.title }}</h3>
+      <p class="card-body">{{ a.message }}</p>
+      
+      <div class="card-footer">
+        <div class="faculty-pill">
+          <div class="avatar-mini">{{ a.faculty.charAt(0) }}</div>
+          <span>{{ a.faculty }}</span>
+        </div>
+        <span class="timestamp">
+          📅 {{ a.createdAt | date:'mediumDate' }} • {{ a.createdAt | date:'shortTime' }}
+        </span>
+      </div>
+    </div>
+  </div>
 </div>

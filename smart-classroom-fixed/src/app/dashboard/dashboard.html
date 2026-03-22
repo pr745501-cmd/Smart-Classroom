@@ -1,104 +1,139 @@
-<div class="dashboard" *ngIf="!loading; else loader">
+<div class="app-container" *ngIf="!loading; else loader">
+  
+  <div class="bg-orb orb-primary"></div>
+  <div class="bg-orb orb-secondary"></div>
 
-  <!-- TOP BAR -->
-  <header class="topbar">
-    <h2>🎓 Student Dashboard</h2>
-    <button (click)="logout()">Logout</button>
-  </header>
+  <div class="glass-viewport">
+    <header class="navbar">
+      <div class="nav-brand">
+        <span class="emoji-icon">🎓</span>
+        <div class="brand-info">
+          <h2>Student Dashboard</h2>
+          <p>NexusEdu • Systems Nominal</p>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()">Logout</button>
+    </header>
 
-  <!-- PROFILE CARD -->
-  <section class="profile-card">
-    <img
-      [src]="user.profilePic || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'"
-      alt="Profile"
-    />
-    <div class="info">
-      <h3>{{ user.name }}</h3>
-      <p><b>Email:</b> {{ user.email }}</p>
-      <p><b>Role:</b> {{ user.role }}</p>
-      <p><b>Course:</b> {{ user.course }}</p>
-    </div>
-  </section>
-<!-- MAIN GRID -->
-<section class="grid">
+    <section class="profile-section">
+      <div class="profile-card-modern">
+        <div class="avatar-container">
+          <img [src]="user.profilePic || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png'" alt="Avatar">
+          <span class="status-online">Online</span>
+        </div>
+        <div class="user-meta">
+          <small class="id-tag">Digital Profile ID: #{{user.name.length}}82</small>
+          <h1>{{ user.name }}</h1>
+          <div class="meta-grid">
+            <span><b>Role:</b> {{ user.role }}</span>
+            <span><b>Course:</b> {{ user.course }}</span>
+            <span><b>Email:</b> {{ user.email }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <!-- 📚 LECTURES -->
-  <div class="card clickable" (click)="goToLectures()">
-    <h4>📚 Lectures</h4>
-    <p>View subject-wise lectures</p>
-    <ul>
-      <li>✔ Video / PDF / PPT</li>
-      <li>✔ Faculty name</li>
-      <li>✔ Date wise</li>
-    </ul>
-    <small class="hint">Click to open</small>
+    <main class="bento-grid">
+      
+      <div class="bento-item clickable" (click)="goToLectures()">
+        <div class="item-header">
+          <span class="item-icon">📚</span>
+          <div class="item-title">
+            <h3>Lectures</h3>
+            <p>View subject-wise lectures</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Video / PDF / PPT</li>
+          <li>Faculty name</li>
+          <li>Date wise</li>
+        </ul>
+        <div class="item-action">Explore Resources →</div>
+      </div>
+
+      <div class="bento-item clickable" (click)="goToAssignments()">
+        <div class="item-header">
+          <span class="item-icon">📝</span>
+          <div class="item-title">
+            <h3>Assignments</h3>
+            <p>Track & submit tasks</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Due date countdown</li>
+          <li>Status tracking</li>
+        </ul>
+        <div class="item-action">Open Portal →</div>
+      </div>
+
+      <div class="bento-item clickable live-highlight" (click)="goToLive()">
+        <div class="live-tag" *ngIf="$any(this).alreadyNotified">LIVE</div>
+        <div class="item-header">
+          <span class="item-icon">🎥</span>
+          <div class="item-title">
+            <h3>Live Class</h3>
+            <p>Join ongoing sessions</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Instant join</li>
+          <li>Faculty hosted</li>
+        </ul>
+        <div class="item-action">Enter Room →</div>
+      </div>
+
+      <div class="bento-item clickable" (click)="goToAttendance()">
+        <div class="item-header">
+          <span class="item-icon">📊</span>
+          <div class="item-title">
+            <h3>Attendance</h3>
+            <p>Overview & alerts</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Subject wise %</li>
+          <li>Monthly chart</li>
+        </ul>
+        <div class="item-action">View Data →</div>
+      </div>
+
+      <div class="bento-item clickable" (click)="goToAnnouncements()">
+        <div class="item-header">
+          <span class="item-icon">📢</span>
+          <div class="item-title">
+            <h3>Notices</h3>
+            <p>Important updates</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Exam notices</li>
+          <li>Admin alerts</li>
+        </ul>
+        <div class="item-action">Read All →</div>
+      </div>
+
+      <div class="bento-item clickable chat-style" (click)="goToChat()">
+        <div class="item-header">
+          <span class="item-icon">💬</span>
+          <div class="item-title">
+            <h3>Class Chat</h3>
+            <p>Discuss with peers</p>
+          </div>
+        </div>
+        <ul class="feature-checklist">
+          <li>Ask questions</li>
+          <li>Real-time help</li>
+        </ul>
+        <div class="item-action">Start Chat →</div>
+      </div>
+
+    </main>
   </div>
-
-  <!-- 📝 ASSIGNMENTS -->
-  <div class="card clickable" (click)="goToAssignments()">
-    <h4>📝 Assignments</h4>
-    <p>Track & submit assignments</p>
-    <ul>
-      <li>✔ Due date countdown</li>
-      <li>✔ Upload submission</li>
-      <li>✔ Status tracking</li>
-    </ul>
-    <small class="hint">Click to open</small>
-  </div>
-
-  <!-- 📢 ANNOUNCEMENTS -->
-  <div class="card clickable" (click)="goToAnnouncements()">
-    <h4>📢 Announcements</h4>
-    <p>Important updates</p>
-    <ul>
-      <li>✔ Exam notices</li>
-      <li>✔ Faculty messages</li>
-      <li>✔ Admin alerts</li>
-    </ul>
-    <small class="hint">Click to open</small>
-  </div>
-
-  <!-- 📊 ATTENDANCE -->
-  <div class="card clickable" (click)="goToAttendance()">
-    <h4>📊 Attendance</h4>
-    <p>Attendance overview</p>
-    <ul>
-      <li>✔ Subject wise %</li>
-      <li>✔ Monthly chart</li>
-      <li>✔ Shortage alerts</li>
-    </ul>
-    <small class="hint">Click to open</small>
-  </div>
-
-  <!-- 🔴 LIVE CLASS (NEW) -->
-  <div class="card clickable live" (click)="goToLive()">
-    <h4>🎥 Live Class</h4>
-    <p>Join ongoing live class</p>
-    <ul>
-      <li>✔ Instant join</li>
-      <li>✔ Faculty hosted</li>
-      <li>✔ One click access</li>
-    </ul>
-    <small class="hint">Click to open</small>
-  </div>
-
-  <!-- 💬 CLASS CHAT -->
-<div class="card clickable chat" (click)="goToChat()">
-  <h4>💬 Class Chat</h4>
-  <p>Discuss with faculty & classmates</p>
-  <ul>
-    <li>✔ Ask questions</li>
-    <li>✔ Real-time discussion</li>
-    <li>✔ Lecture help</li>
-  </ul>
-  <small class="hint">Click to open</small>
 </div>
 
-</section>
-
-</div>
-
-<!-- LOADER -->
 <ng-template #loader>
-  <div class="loader">Loading Student Dashboard...</div>
+  <div class="modern-loader">
+    <div class="spin-ring"></div>
+    <p>Loading Workspace...</p>
+  </div>
 </ng-template>

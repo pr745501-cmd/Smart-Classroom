@@ -7,7 +7,8 @@ import { AssignmentService } from '../services/assignment.service';
   selector: 'app-student-assignments',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './student-assignments.html'
+  templateUrl: './student-assignments.html',
+  styleUrls: ['./student-assignments.css'] // 👈 ADD THIS LINE EXACTLY
 })
 export class StudentAssignments implements OnInit {
 

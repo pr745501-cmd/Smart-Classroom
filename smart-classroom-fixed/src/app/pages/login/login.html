@@ -1,61 +1,51 @@
-<div class="login-page">
-  <div class="login-card">
-
-    <!-- HEADER -->
-    <div class="login-header">
-      <div class="login-logo">SC</div>
-      <h2 class="login-title">Welcome Back</h2>
-      <p class="login-subtitle">Login to Smart Classroom</p>
+<div class="split-viewport">
+  <div class="brand-side">
+    <div class="mesh-gradient"></div>
+    <div class="brand-content">
+      <div class="logo-badge">SC</div>
+      <h1 class="hero-text">Smart <br><span>Classroom</span></h1>
+      <p class="hero-sub">The next generation of academic management and digital collaboration.</p>
+      
+      <div class="feature-tag">
+        <span class="pulse-dot"></span>
+        Now with AI-Powered Insights
+      </div>
     </div>
+  </div>
 
-    <!-- FORM -->
-    <form class="login-form" (ngSubmit)="login()" #loginForm="ngForm">
-
-      <div class="login-input-group">
-        <input
-          type="email"
-          class="login-input"
-          placeholder="Email address"
-          [(ngModel)]="email"
-          name="email"
-          required
-          autocomplete="email"
-        />
+  <div class="form-side">
+    <div class="login-card glass-panel">
+      <div class="form-header">
+        <h2>Welcome Back</h2>
+        <p>Enter your credentials to continue</p>
       </div>
 
-      <div class="login-input-group">
-        <input
-          type="password"
-          class="login-input"
-          placeholder="Password"
-          [(ngModel)]="password"
-          name="password"
-          required
-          autocomplete="current-password"
-        />
-      </div>
+      <form (ngSubmit)="login()" #loginForm="ngForm">
+        <div class="input-group">
+          <label>Email Address</label>
+          <input type="email" [(ngModel)]="email" name="email" placeholder="name@university.edu" required>
+        </div>
 
-      <!-- ERROR -->
-      <div *ngIf="error" class="login-error">
-        {{ error }}
-      </div>
+        <div class="input-group">
+          <label>Password</label>
+          <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required>
+        </div>
 
-      <!-- BUTTON -->
-      <button
-        class="login-button"
-        type="submit"
-        [disabled]="loading || !loginForm.valid"
-      >
-        {{ loading ? 'Logging in...' : 'Login' }}
-      </button>
+        <div class="form-options">
+          <label class="remember-me">
+            <input type="checkbox"> Remember me
+          </label>
+          <a href="#" class="forgot-link">Forgot password?</a>
+        </div>
 
-    </form>
+        <button type="submit" class="btn-primary" [disabled]="loading">
+          {{ loading ? 'Authenticating...' : 'Sign In' }}
+        </button>
+      </form>
 
-    <!-- FOOTER -->
-    <div class="login-footer">
-      Don’t have an account?
-      <a routerLink="/signup">Signup</a>
+      <p class="signup-prompt">
+        Don't have an account? <a routerLink="/signup">Join for free</a>
+      </p>
     </div>
-
   </div>
 </div>
