@@ -1,35 +1,94 @@
-<div class="signup-container">
-  <h2>Signup</h2>
+<div class="auth-wrapper">
+  <div class="auth-container">
+    
+    <div class="left-panel">
+      <div class="glow-orb"></div>
+      
+      <div class="brand-top">
+        <div class="logo-box">
+          <span class="icon-pulse">🎓</span>
+        </div>
+        <h1 class="brand-title">Smart<span>Classroom</span></h1>
+      </div>
 
-  <form (ngSubmit)="signup()">
+      <div class="brand-mid">
+        <h2 class="welcome-heading">Elevate Your Academic Intelligence</h2>
+        <p class="brand-description">
+          The next generation of classroom management. Seamlessly integrate 
+          real-time analytics with intuitive faculty tools to transform 
+          the educational landscape.
+        </p>
+        
+        <div class="feature-stack">
+          <div class="feature-item">
+            <span class="dot">✦</span>
+            <div class="item-text">
+              <strong>Real-time Analytics</strong>
+              <p>Monitor student progress and engagement instantly.</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="dot">✦</span>
+            <div class="item-text">
+              <strong>AI Integration</strong>
+              <p>Smart automation for grading and scheduling.</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-    <div class="input-group">
-      <label>Name</label>
-      <input type="text" [(ngModel)]="name" name="name" required />
+      <div class="panel-footer">
+        <p>© 2026 Smart Classroom Systems</p>
+        <div class="status-badge">
+          <span class="pulse-dot"></span> System Online
+        </div>
+      </div>
     </div>
 
-    <div class="input-group">
-      <label>Email</label>
-      <input type="email" [(ngModel)]="email" name="email" required />
+    <div class="right-panel">
+      <div class="form-box">
+        <div class="form-header">
+          <h2>Create Account</h2>
+          <p class="subtitle">Enter your details to get started</p>
+        </div>
+
+        <form (ngSubmit)="signup()">
+          <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" [(ngModel)]="name" name="name" placeholder="John Doe" required />
+          </div>
+
+          <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" [(ngModel)]="email" name="email" placeholder="name@university.com" required />
+          </div>
+
+          <div class="input-group">
+            <label>Password</label>
+            <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required />
+          </div>
+
+          <div class="input-group">
+            <label>Your Role</label>
+            <select [(ngModel)]="role" name="role">
+              <option value="student">Student</option>
+              <option value="faculty">Faculty</option>
+            </select>
+          </div>
+
+          <p class="error-msg" *ngIf="error">{{ error }}</p>
+
+          <button type="submit" class="signup-btn" [disabled]="loading">
+            <span *ngIf="!loading">Get Started →</span>
+            <span *ngIf="loading" class="loader"></span>
+          </button>
+          
+          <p class="login-link">
+            Already a member? <a routerLink="/login">Sign In</a>
+          </p>
+        </form>
+      </div>
     </div>
 
-    <div class="input-group">
-      <label>Password</label>
-      <input type="password" [(ngModel)]="password" name="password" required />
-    </div>
-
-    <div class="input-group">
-      <label>Role</label>
-      <select [(ngModel)]="role" name="role">
-        <option value="student">Student</option>
-        <option value="faculty">Faculty</option>
-       
-      </select>
-    </div>
-
-    <p class="error" *ngIf="error">{{ error }}</p>
-
-    <button type="submit" class="signup-btn">Signup</button>
-
-  </form>
+  </div>
 </div>

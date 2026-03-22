@@ -1,71 +1,221 @@
+/* --- 1. CORE LAYOUT --- */
 .faculty-layout {
   display: flex;
   height: 100vh;
-  background: #f5f7fb;
+  width: 100vw;
+  background-color: #f8fafc;
+  overflow: hidden; /* Prevents the whole page from bouncing */
+  font-family: 'Inter', system-ui, sans-serif;
 }
 
+/* --- 2. SIDEBAR STABILITY --- */
 .sidebar {
-  width: 240px;
-  background: #1e293b;
-  color: white;
-  padding: 20px;
+  width: 280px;
+  background: white;
+  border-right: 1px solid #e2e8f0;
   display: flex;
   flex-direction: column;
+  flex-shrink: 0; /* Prevents sidebar from squishing on small screens */
+  height: 100%;
 }
 
-.logo {
-  text-align: center;
-  margin-bottom: 30px;
+.sidebar-header {
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.sidebar nav a {
-  display: block;
-  padding: 12px;
-  margin-bottom: 8px;
-  cursor: pointer;
-  border-radius: 6px;
+.logo-icon { font-size: 1.5rem; }
+.logo-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #1e293b;
+  letter-spacing: -0.025em;
 }
 
-.sidebar nav a:hover {
-  background: #334155;
-}
-
-.logout {
-  margin-top: auto;
-  padding: 10px;
-  border: none;
-  background: #ef4444;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.content {
+.nav-container {
   flex: 1;
-  padding: 25px;
+  padding: 0 1rem;
+  overflow-y: auto; /* Allows only the menu to scroll if it's too long */
 }
 
-.topbar {
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.25rem;
+}
+
+.nav-link:hover { background: #f1f5f9; color: #1e293b; }
+.nav-link.active { background: #eef2ff; color: #4f46e5; }
+
+.nav-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 1.5rem 1rem;
+}
+
+.chat-link {
+  background: #1e293b;
+  color: white !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.logout-action {
+  margin: 1.5rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border: none;
+  border-radius: 0.75rem;
+  color: #94a3b8;
+  font-weight: 700;
   display: flex;
   justify-content: space-between;
-  margin-bottom: 25px;
-}
-
-.cards {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
   cursor: pointer;
-  transition: 0.3s;
+  transition: all 0.2s;
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+.logout-action:hover { background: #fee2e2; color: #ef4444; }
+
+/* --- 3. MAIN CONTENT & HEADER --- */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Critical for grid stability */
+  height: 100%;
 }
+
+.header-glass {
+  height: 100px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.header-left h1 { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin: 0; }
+.header-left p { font-size: 0.875rem; color: #64748b; margin: 0.25rem 0 0; }
+
+.profile-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 1.25rem 0.5rem 0.5rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.avatar-box {
+  width: 40px;
+  height: 40px;
+  background: #1e293b;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.p-name { display: block; font-size: 0.75rem; font-weight: 700; color: #1e293b; line-height: 1; }
+.p-email { font-size: 0.65rem; color: #94a3b8; }
+
+/* --- 4. THE GRID FIX --- */
+.grid-container {
+  flex: 1;
+  overflow-y: auto; /* This area scrolls independently */
+  padding: 3rem;
+  display: grid;
+  /* repeat(auto-fill) ensures cards wrap perfectly instead of overlapping */
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  align-content: start;
+}
+
+.app-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  padding: 2rem;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.app-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  border-color: #d1d5db;
+}
+
+.app-card-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.i-blue { background: #eff6ff; color: #2563eb; }
+.i-purple { background: #faf5ff; color: #9333ea; }
+.i-orange { background: #fff7ed; color: #ea580c; }
+.i-green { background: #ecfdf5; color: #059669; }
+.i-red { background: #fef2f2; color: #dc2626; }
+.i-indigo { background: #eef2ff; color: #4f46e5; }
+
+.app-card-content h3 { font-size: 1.25rem; font-weight: 800; color: #1e293b; margin: 0; }
+.app-card-content p { font-size: 0.875rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Live Status Specifics */
+.status-tag {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  letter-spacing: 0.05em;
+}
+
+.pulse-red {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Chat Highlight Stability */
+.chat-highlight {
+  background: #1e293b;
+  border: none;
+}
+.chat-highlight h3 { color: white; }
+.chat-highlight p { color: #94a3b8; }

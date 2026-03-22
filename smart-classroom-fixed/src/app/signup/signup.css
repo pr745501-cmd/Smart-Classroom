@@ -1,63 +1,339 @@
-.signup-container {
-  width: 380px;
-  margin: 80px auto;
-  padding: 30px;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: #0f172a; /* Deep Space Background */
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
 }
 
-.signup-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
+.auth-container {
+  display: flex;
+  width: 100%;
+  max-width: 1150px;
+  height: 750px;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3rem;
+  overflow: hidden;
+  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* --- LEFT PANEL: ADVANCED EFFECTS --- */
+.left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  padding: 5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+.glow-orb {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+  filter: blur(40px);
+  animation: float 6s infinite ease-in-out;
+}
+
+.brand-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: -0.05em;
+  margin: 1.5rem 0;
+}
+
+.brand-title span {
+  color: #10b981; /* Emerald Green Accent */
+}
+
+.icon-pulse {
+  font-size: 2.5rem;
+  display: inline-block;
+  animation: pulseIcon 2s infinite;
+}
+
+.feature-pills {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pill {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.5rem 1rem;
+  border-radius: 99px;
+  font-size: 0.8rem;
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- RIGHT PANEL: FORM --- */
+.right-panel {
+  flex: 1.2;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+}
+
+.form-box h2 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
 }
 
 .input-group {
-  margin-bottom: 15px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .input-group label {
-  display: block;
-  font-size: 14px;
-  margin-bottom: 5px;
-  color: #555;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.input-group input,
-.input-group select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
-  font-size: 14px;
+input, select {
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 2px solid #f1f5f9;
+  background: #f8fafc;
+  font-weight: 600;
+  transition: all 0.3s;
 }
 
-.input-group input:focus,
-.input-group select:focus {
-  outline: none;
-  border-color: #4facfe;
+input:focus {
+  border-color: #10b981;
+  background: white;
+  box-shadow: 0 10px 20px -5px rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
 }
 
 .signup-btn {
   width: 100%;
-  padding: 12px;
-  background: linear-gradient(135deg, #4facfe, #00c6ff);
+  padding: 1.25rem;
+  background: #0f172a;
+  color: white;
+  border-radius: 1.25rem;
+  font-weight: 800;
   border: none;
-  border-radius: 8px;
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
   cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 1rem;
+  box-shadow: 0 20px 30px -10px rgba(15, 23, 42, 0.3);
 }
 
 .signup-btn:hover {
-  opacity: 0.9;
+  background: #10b981;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 20px 30px -10px rgba(16, 185, 129, 0.4);
 }
 
-.error {
-  color: red;
-  font-size: 14px;
-  text-align: center;
-  margin-bottom: 10px;
+/* --- ANIMATIONS --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-20px, 20px); }
+}
+
+@keyframes pulseIcon {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+
+.loader {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s infinite linear;
+  display: inline-block;
+}@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+.auth-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100vw;
+  background: #0f172a;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow: hidden;
+}
+
+.auth-container {
+  display: flex;
+  width: 100%;
+  max-width: 1150px;
+  height: 780px;
+  background: white;
+  border-radius: 3rem;
+  overflow: hidden;
+  box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* --- LEFT PANEL --- */
+.left-panel {
+  flex: 1;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  padding: 4rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.glow-orb {
+  position: absolute;
+  top: -10%;
+  right: -10%;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
+  filter: blur(50px);
+  animation: float 8s infinite ease-in-out;
+}
+
+.brand-title {
+  font-size: 2.8rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  margin: 1rem 0;
+}
+
+.brand-title span { color: #10b981; }
+
+.welcome-heading {
+  font-size: 1.4rem;
+  color: #10b981;
+  margin-bottom: 0.8rem;
+}
+
+.brand-description {
+  color: #94a3b8;
+  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.feature-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.feature-item { display: flex; gap: 1rem; }
+.feature-item .dot { color: #10b981; font-weight: bold; }
+.feature-item strong { display: block; font-size: 1rem; }
+.feature-item p { font-size: 0.85rem; color: #64748b; margin: 0; }
+
+.status-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+  animation: pulseDot 2s infinite;
+}
+
+/* --- RIGHT PANEL --- */
+.right-panel {
+  flex: 1.2;
+  background: white;
+  padding: 4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-box { width: 100%; max-width: 400px; }
+
+.input-group { margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.input-group label { font-size: 0.7rem; font-weight: 800; color: #64748b; text-transform: uppercase; }
+
+input, select {
+  padding: 0.9rem 1.2rem;
+  border-radius: 1rem;
+  border: 2px solid #f1f5f9;
+  background: #f8fafc;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+input:focus {
+  border-color: #10b981;
+  background: white;
+  box-shadow: 0 10px 20px rgba(16, 185, 129, 0.1);
+  transform: translateY(-2px);
+  outline: none;
+}
+
+.signup-btn {
+  width: 100%;
+  padding: 1.1rem;
+  background: #0f172a;
+  color: white;
+  border-radius: 1.2rem;
+  font-weight: 800;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 1rem;
+}
+
+.signup-btn:hover {
+  background: #10b981;
+  transform: translateY(-3px);
+  box-shadow: 0 15px 25px rgba(16, 185, 129, 0.3);
+}
+
+.error-msg { color: #ef4444; font-size: 0.85rem; text-align: center; margin-top: 1rem; font-weight: 600; }
+
+.login-link { text-align: center; margin-top: 1.5rem; color: #64748b; font-size: 0.9rem; }
+.login-link a { color: #0f172a; font-weight: 800; text-decoration: none; cursor: pointer; }
+
+/* --- ANIMATIONS --- */
+@keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-30px, 30px); } }
+@keyframes pulseDot { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+@keyframes pulseIcon { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+.icon-pulse { display: inline-block; animation: pulseIcon 2s infinite; }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
