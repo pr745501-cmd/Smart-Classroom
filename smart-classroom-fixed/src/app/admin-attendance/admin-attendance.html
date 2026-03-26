@@ -1,0 +1,103 @@
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🎓 SmartClass</div>
+    <div class="sidebar-admin">
+      <div class="admin-avatar">{{ admin.name?.charAt(0) | uppercase }}</div>
+      <div>
+        <div class="admin-name">{{ admin.name }}</div>
+        <div class="admin-email">{{ admin.email }}</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a [class.active]="isActive('/admin')" (click)="goTo('/admin')">🏠 Dashboard</a>
+      <a [class.active]="isActive('/admin/users')" (click)="goTo('/admin/users')">👥 Users</a>
+      <a [class.active]="isActive('/admin/stats')" (click)="goTo('/admin/stats')">📊 Stats</a>
+      <a [class.active]="isActive('/admin/approvals')" (click)="goTo('/admin/approvals')">⏳ Pending Approvals</a>
+      <a [class.active]="isActive('/admin/announcements')" (click)="goTo('/admin/announcements')">📢 Announcements</a>
+      <a [class.active]="isActive('/admin/assignments')" (click)="goTo('/admin/assignments')">📝 Assignments</a>
+      <a [class.active]="isActive('/admin/attendance')" (click)="goTo('/admin/attendance')">✅ Attendance</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">✅ Attendance</h1>
+        <p class="page-subtitle">Monitor class attendance records</p>
+      </div>
+    </header>
+
+    <!-- SUMMARY CARDS -->
+    <div *ngIf="!loading && !error" class="summary-cards">
+      <div class="summary-card blue">
+        <div class="summary-value">{{ summary.totalSessions }}</div>
+        <div class="summary-label">Total Sessions</div>
+      </div>
+      <div class="summary-card green">
+        <div class="summary-value">{{ summary.overallPresentPct }}%</div>
+        <div class="summary-label">Overall Present %</div>
+      </div>
+      <div class="summary-card purple">
+        <div class="summary-value">{{ summary.uniqueStudentCount }}</div>
+        <div class="summary-label">Unique Students</div>
+      </div>
+    </div>
+
+    <!-- COURSE FILTER -->
+    <div *ngIf="!loading" class="filter-bar">
+      <select class="filter-select" [(ngModel)]="courseFilter" (change)="applyCourseFilter()">
+        <option *ngFor="let c of courses" [value]="c">{{ c }}</option>
+      </select>
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3]"></div>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="error && !loading" class="error-banner">⚠️ Failed to load attendance records. Please refresh.</div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && !error && filtered.length === 0" class="empty-state">
+      ✅ No attendance records found.
+    </div>
+
+    <!-- TABLE -->
+    <div *ngIf="!loading && !error && filtered.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Faculty</th>
+            <th>Course</th>
+            <th>Total</th>
+            <th>Present</th>
+            <th>Absent</th>
+            <th>Rate</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let session of filtered">
+            <ng-container *ngIf="computeSessionRow(session) as row">
+              <td>{{ session.date }}</td>
+              <td>{{ session.faculty }}</td>
+              <td>{{ session.course }}</td>
+              <td>{{ row.total }}</td>
+              <td class="present-cell">{{ row.present }}</td>
+              <td class="absent-cell">{{ row.absent }}</td>
+              <td>
+                <span class="rate-badge" [ngClass]="row.rate >= 75 ? 'rate-good' : row.rate >= 50 ? 'rate-mid' : 'rate-low'">
+                  {{ row.rate }}%
+                </span>
+              </td>
+            </ng-container>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>

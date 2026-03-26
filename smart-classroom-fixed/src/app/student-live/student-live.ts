@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { LiveClassService } from '../services/live-class.service';
 
 @Component({
@@ -7,45 +8,41 @@ import { LiveClassService } from '../services/live-class.service';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './student-live.html',
-  styleUrls:['./student-live.css']
+  styleUrls: ['./student-live.css']
 })
 export class StudentLive implements OnInit, OnDestroy {
 
   liveClass: any = null;
   timer: any;
 
-  private previousHadClass = false;   // ✅ track state
-  private audio = new Audio('assets/notify.mp3'); // ✅ sound
+  private previousHadClass = false;
+  private audio = new Audio('assets/notify.mp3');
 
   constructor(
     private live: LiveClassService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
-
     this.loadLiveClass();
-
-    // check every 3 seconds
     this.timer = setInterval(() => {
       this.loadLiveClass();
     }, 3000);
+  }
 
+  goBack() {
+    this.router.navigate(['/dashboard']);
   }
 
   loadLiveClass() {
     this.live.getLiveClass().subscribe(res => {
-
       const hasClassNow = !!res;
-
-      // 🔔 Play sound ONLY when class just started
       if (!this.previousHadClass && hasClassNow) {
-        this.audio.play().catch(()=>{});
+        this.audio.play().catch(() => {});
       }
-
       this.previousHadClass = hasClassNow;
       this.liveClass = res;
-
       this.cdr.detectChanges();
     });
   }
@@ -55,5 +52,4 @@ export class StudentLive implements OnInit, OnDestroy {
       clearInterval(this.timer);
     }
   }
-
 }

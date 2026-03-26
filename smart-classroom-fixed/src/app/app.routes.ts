@@ -26,6 +26,15 @@ import { FacultyLive } from './faculty-live/faculty-live';
 /* ADMIN */
 import { Admin } from './admin/admin';
 import { AdminUsers } from './admin-users/admin-users';
+import { AdminStatsComponent } from './admin-stats/admin-stats';
+import { AdminApprovalsComponent } from './admin-approvals/admin-approvals';
+import { AdminAnnouncementsComponent } from './admin-announcements/admin-announcements';
+import { AdminAssignmentsComponent } from './admin-assignments/admin-assignments';
+import { AdminAttendanceComponent } from './admin-attendance/admin-attendance';
+
+/* DM */
+import { DmContainerComponent } from './dm/dm-container/dm-container.component';
+import { DmChatComponent } from './dm/dm-chat/dm-chat.component';
 
 /* GUARD */
 import { roleGuard } from './guards/guards';
@@ -120,11 +129,46 @@ export const routes: Routes = [
     component: AdminUsers,
     canActivate: [roleGuard(['admin'])]
   },
+  {
+    path: 'admin/stats',
+    component: AdminStatsComponent,
+    canActivate: [roleGuard(['admin'])]
+  },
+  {
+    path: 'admin/approvals',
+    component: AdminApprovalsComponent,
+    canActivate: [roleGuard(['admin'])]
+  },
+  {
+    path: 'admin/announcements',
+    component: AdminAnnouncementsComponent,
+    canActivate: [roleGuard(['admin'])]
+  },
+  {
+    path: 'admin/assignments',
+    component: AdminAssignmentsComponent,
+    canActivate: [roleGuard(['admin'])]
+  },
+  {
+    path: 'admin/attendance',
+    component: AdminAttendanceComponent,
+    canActivate: [roleGuard(['admin'])]
+  },
 {
   path: 'chat',
   component: Chat,
   canActivate: [roleGuard(['student','faculty'])]
 },
+  {
+    path: 'dm',
+    component: DmContainerComponent,
+    canActivate: [roleGuard(['student', 'faculty'])]
+  },
+  {
+    path: 'dm/:contactId',
+    component: DmChatComponent,
+    canActivate: [roleGuard(['student', 'faculty'])]
+  },
 
   /* 🔁 FALLBACK */
   { path: '**', redirectTo: '' }

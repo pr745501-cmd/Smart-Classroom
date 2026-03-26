@@ -1,6 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
@@ -25,28 +26,30 @@ export class FacultyLectures implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cd: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
     const faculty = JSON.parse(localStorage.getItem('user') || '{}');
     this.facultyName = faculty.name;
     this.course = faculty.course || 'BCA';
-
     this.loadLectures();
   }
 
-  /* ================= LOAD ================= */
+  goBack(): void {
+    this.router.navigate(['/faculty']);
+  }
+
   loadLectures() {
     this.http
       .get<any>(`http://localhost:5000/api/lectures/faculty/${this.facultyName}`)
       .subscribe(res => {
-        this.lectures = res.lectures;
-        this.cd.detectChanges();
+        this.lectures = res.lectures || [];
+        this.cdr.detectChanges();
       });
   }
 
-  /* ================= CREATE ================= */
   uploadLecture() {
     const payload = {
       title: this.title,
@@ -56,33 +59,31 @@ export class FacultyLectures implements OnInit {
       faculty: this.facultyName,
       course: this.course
     };
-
     this.http.post('http://localhost:5000/api/lectures', payload)
       .subscribe(() => {
         alert("Lecture uploaded");
         this.resetForm();
         this.loadLectures();
+        this.cdr.detectChanges();
       });
   }
 
-  /* ================= EDIT ================= */
   editLecture(l: any) {
     this.editingLectureId = l._id;
     this.title = l.title;
     this.subject = l.subject;
-    this.type = l.type.toUpperCase();   // ✅
+    this.type = l.type.toUpperCase();
     this.fileUrl = l.fileUrl || '';
+    this.cdr.detectChanges();
   }
 
-  /* ================= UPDATE ================= */
   updateLecture() {
     const payload = {
       title: this.title,
       subject: this.subject,
-      type: this.type.toLowerCase(),   // ✅ VERY IMPORTANT
+      type: this.type.toLowerCase(),
       fileUrl: this.fileUrl
     };
-
     this.http.put(
       `http://localhost:5000/api/lectures/${this.editingLectureId}`,
       payload
@@ -90,23 +91,26 @@ export class FacultyLectures implements OnInit {
       alert("Lecture updated");
       this.resetForm();
       this.loadLectures();
+      this.cdr.detectChanges();
     });
   }
 
-  /* ================= DELETE ================= */
   deleteLecture(id: string) {
     if (!confirm("Delete this lecture?")) return;
-
     this.http.delete(`http://localhost:5000/api/lectures/${id}`)
-      .subscribe(() => this.loadLectures());
+      .subscribe(() => {
+        this.loadLectures();
+        this.cdr.detectChanges();
+      });
   }
 
-  /* ================= RESET ================= */
   resetForm() {
     this.title = '';
     this.subject = '';
     this.type = 'PDF';
     this.fileUrl = '';
     this.editingLectureId = null;
+    this.cdr.detectChanges();
   }
 }
+

@@ -1,25 +1,30 @@
-<div class="live-container">
+<div class="page-wrapper">
 
-  <h2>🎥 Live Class</h2>
+  <button class="back-btn" (click)="goBack()">← Dashboard</button>
 
-  <!-- No Live -->
-  <div *ngIf="!liveClass" class="no-class">
-    ⏳ No Live Class Right Now
-  </div>
+  <div class="center-area">
 
-  <!-- Live Running -->
-  <div *ngIf="liveClass" class="live-card">
+    <!-- NO LIVE CLASS -->
+    <div *ngIf="!liveClass" class="no-class-card">
+      <span class="pulse-icon">📡</span>
+      <h2>No Live Class Right Now</h2>
+      <p>We'll notify you when a class starts. Check back soon.</p>
+    </div>
 
-    <h3>{{ liveClass.title }}</h3>
+    <!-- LIVE CLASS ACTIVE -->
+    <div *ngIf="liveClass" class="live-class-card">
+      <div class="live-badge">
+        <span class="live-dot"></span>
+        LIVE
+      </div>
 
-    <p>👨‍🏫 Faculty: {{ liveClass.facultyName }}</p>
+      <h2>{{ liveClass.title }}</h2>
+      <p class="faculty-line">👨‍🏫 {{ liveClass.facultyName }}</p>
 
-    <a
-      [href]="liveClass.meetingLink"
-      target="_blank"
-      class="join-btn">
-      🚀 Join Class
-    </a>
+      <a [href]="liveClass.meetingLink" target="_blank" class="join-btn">
+        Join Class →
+      </a>
+    </div>
 
   </div>
 

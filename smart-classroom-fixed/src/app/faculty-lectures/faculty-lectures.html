@@ -1,90 +1,82 @@
-<div class="lectures-container">
-  <header class="page-header">
-    <div class="header-content">
-      <h1>📚 Course Lectures</h1>
-      <p>Manage materials for <strong>{{ course }}</strong></p>
+﻿<div class="page-wrapper">
+
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+    <h1 class="page-title">Lectures</h1>
+    <span class="count-badge">{{ lectures.length }}</span>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT: Form -->
+    <div class="form-card">
+      <h2 class="form-title">{{ editingLectureId ? '✏️ Update Lecture' : '📤 Upload Lecture' }}</h2>
+
+      <div class="field-group">
+        <label>Title</label>
+        <input type="text" [(ngModel)]="title" placeholder="e.g. Introduction to Angular">
+      </div>
+
+      <div class="field-group">
+        <label>Subject</label>
+        <input type="text" [(ngModel)]="subject" placeholder="e.g. Web Development">
+      </div>
+
+      <div class="field-group">
+        <label>Content Type</label>
+        <select [(ngModel)]="type">
+          <option value="PDF">📄 PDF Document</option>
+          <option value="VIDEO">🎥 Video Lesson</option>
+          <option value="PPT">📊 Presentation</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Resource Link (URL)</label>
+        <input type="text" [(ngModel)]="fileUrl" placeholder="https://drive.google.com/...">
+      </div>
+
+      <div class="form-actions">
+        <ng-container *ngIf="!editingLectureId">
+          <button class="btn-primary" (click)="uploadLecture()">Upload Resource</button>
+        </ng-container>
+        <ng-container *ngIf="editingLectureId">
+          <button class="btn-update" (click)="updateLecture()">💾 Save Changes</button>
+          <button class="btn-cancel" (click)="resetForm()">Cancel</button>
+        </ng-container>
+      </div>
     </div>
-  </header>
 
-  <div class="main-layout">
-    <aside class="upload-section">
-      <div class="glass-card form-card">
-        <h2 class="form-title">{{ editingLectureId ? 'Update' : 'Upload' }} Lecture</h2>
-        
-        <div class="input-group">
-          <label>Lecture Title</label>
-          <input type="text" [(ngModel)]="title" placeholder="e.g. Introduction to Angular">
-        </div>
-
-        <div class="input-group">
-          <label>Subject</label>
-          <input type="text" [(ngModel)]="subject" placeholder="e.g. Web Development">
-        </div>
-
-        <div class="row">
-          <div class="input-group flex-1">
-            <label>Content Type</label>
-            <select [(ngModel)]="type">
-              <option value="PDF">📄 PDF Document</option>
-              <option value="VIDEO">🎥 Video Lesson</option>
-              <option value="PPT">📊 Presentation</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="input-group">
-          <label>Resource Link (URL)</label>
-          <input type="text" [(ngModel)]="fileUrl" placeholder="https://drive.google.com/...">
-        </div>
-
-        <div class="form-actions">
-          <button *ngIf="!editingLectureId" class="btn-primary" (click)="uploadLecture()">
-            <span>Upload Resource</span>
-          </button>
-          
-          <div class="edit-buttons" *ngIf="editingLectureId">
-            <button class="btn-update" (click)="updateLecture()">Save Changes</button>
-            <button class="btn-cancel" (click)="resetForm()">Cancel</button>
-          </div>
-        </div>
-      </div>
-    </aside>
-
-    <section class="feed-section">
-      <div class="feed-header">
-        <h3>Recent Uploads ({{ lectures.length }})</h3>
+    <!-- RIGHT: Grid -->
+    <div>
+      <div class="grid-header">
+        <h3>Recent Uploads</h3>
       </div>
 
-      <div class="lecture-list" *ngIf="lectures.length > 0; else noData">
-        <div class="lecture-item card-entrance" *ngFor="let l of lectures">
-          <div class="item-icon" [ngClass]="l.type.toLowerCase()">
-            <span *ngIf="l.type.toLowerCase() === 'pdf'">📄</span>
-            <span *ngIf="l.type.toLowerCase() === 'video'">🎥</span>
-            <span *ngIf="l.type.toLowerCase() === 'ppt'">📊</span>
+      <div class="lecture-grid">
+        <div *ngFor="let l of lectures" class="lecture-card">
+          <div class="type-badge" [ngClass]="l.type.toLowerCase()">
+            <span *ngIf="l.type.toLowerCase() === 'pdf'">📄 PDF</span>
+            <span *ngIf="l.type.toLowerCase() === 'video'">🎥 Video</span>
+            <span *ngIf="l.type.toLowerCase() === 'ppt'">📊 PPT</span>
           </div>
-
-          <div class="item-details">
-            <h4>{{ l.title }}</h4>
-            <div class="meta-tags">
-              <span class="tag subject">{{ l.subject }}</span>
-              <span class="tag type">{{ l.type }}</span>
+          <div class="subject-tag">{{ l.subject }}</div>
+          <h4 class="lecture-title">{{ l.title }}</h4>
+          <div class="card-footer">
+            <a [href]="l.fileUrl" target="_blank" class="open-link">Open →</a>
+            <div class="card-actions">
+              <button class="btn-edit" (click)="editLecture(l)">✏️</button>
+              <button class="btn-delete" (click)="deleteLecture(l._id)">🗑️</button>
             </div>
           </div>
+        </div>
 
-          <div class="item-actions">
-            <a [href]="l.fileUrl" target="_blank" class="action-btn view" title="View File">👁️</a>
-            <button class="action-btn edit" (click)="editLecture(l)" title="Edit">✏️</button>
-            <button class="action-btn delete" (click)="deleteLecture(l._id)" title="Delete">🗑️</button>
-          </div>
+        <div *ngIf="lectures.length === 0" class="empty-state">
+          <div class="empty-icon">📂</div>
+          <p>No lectures yet. Upload your first resource!</p>
         </div>
       </div>
+    </div>
 
-      <ng-template #noData>
-        <div class="empty-state">
-          <div class="empty-icon">📂</div>
-          <p>No lectures found. Start by uploading your first resource!</p>
-        </div>
-      </ng-template>
-    </section>
   </div>
 </div>

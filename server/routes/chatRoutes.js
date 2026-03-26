@@ -1,6 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const ChatMessage = require("../models/ChatMessage");
+const authMiddleware = require("../middleware/authMiddleware");
+const roleMiddleware = require("../middleware/roleMiddleware");
+const chatController = require("../controllers/chatController");
+
+/* ================= DM ROUTES ================= */
+
+router.get("/faculty", authMiddleware, roleMiddleware(["student", "admin"]), chatController.getFacultyList);
+
+router.get("/contacts", authMiddleware, roleMiddleware(["faculty"]), chatController.getStudentContacts);
+
+router.get("/conversation/:contactId", authMiddleware, chatController.getConversation);
 
 /* ================= GET CHAT HISTORY ================= */
 

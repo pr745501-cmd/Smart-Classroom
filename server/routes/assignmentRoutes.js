@@ -54,8 +54,9 @@ router.get("/", async (req, res) => {
 ================================ */
 router.get("/faculty/:name", async (req, res) => {
   try {
+    // Case-insensitive match so "Usham" and "usham" both work
     const assignments = await Assignment.find({
-      faculty: req.params.name
+      faculty: { $regex: new RegExp(`^${req.params.name}$`, 'i') }
     }).sort({ createdAt: -1 });
 
     res.json({

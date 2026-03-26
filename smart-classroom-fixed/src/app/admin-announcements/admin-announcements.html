@@ -1,0 +1,75 @@
+<div class="admin-layout">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">🎓 SmartClass</div>
+    <div class="sidebar-admin">
+      <div class="admin-avatar">{{ admin.name?.charAt(0) | uppercase }}</div>
+      <div>
+        <div class="admin-name">{{ admin.name }}</div>
+        <div class="admin-email">{{ admin.email }}</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a [class.active]="isActive('/admin')" (click)="goTo('/admin')">🏠 Dashboard</a>
+      <a [class.active]="isActive('/admin/users')" (click)="goTo('/admin/users')">👥 Users</a>
+      <a [class.active]="isActive('/admin/stats')" (click)="goTo('/admin/stats')">📊 Stats</a>
+      <a [class.active]="isActive('/admin/approvals')" (click)="goTo('/admin/approvals')">⏳ Pending Approvals</a>
+      <a [class.active]="isActive('/admin/announcements')" (click)="goTo('/admin/announcements')">📢 Announcements</a>
+      <a [class.active]="isActive('/admin/assignments')" (click)="goTo('/admin/assignments')">📝 Assignments</a>
+      <a [class.active]="isActive('/admin/attendance')" (click)="goTo('/admin/attendance')">✅ Attendance</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">📢 Announcements <span class="count-badge">{{ filtered.length }}</span></h1>
+        <p class="page-subtitle">Moderate faculty announcements</p>
+      </div>
+    </header>
+
+    <!-- DELETE ERROR -->
+    <div *ngIf="deleteError" class="error-banner">⚠️ {{ deleteError }}</div>
+
+    <!-- FILTER -->
+    <div class="filter-bar">
+      <input
+        type="text"
+        class="filter-input"
+        placeholder="Filter by faculty name..."
+        [(ngModel)]="filterText"
+        (input)="applyFilter()"
+      />
+    </div>
+
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+
+    <!-- ERROR -->
+    <div *ngIf="error && !loading" class="error-banner">⚠️ Failed to load announcements. Please refresh.</div>
+
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && !error && filtered.length === 0" class="empty-state">
+      📢 No announcements found.
+    </div>
+
+    <!-- ANNOUNCEMENT GRID -->
+    <div *ngIf="!loading && !error" class="announcement-grid">
+      <div class="announcement-card" *ngFor="let item of filtered">
+        <div class="card-header">
+          <div class="card-title">{{ item.title }}</div>
+          <button class="btn-delete" (click)="deleteItem(item._id)">🗑️ Delete</button>
+        </div>
+        <p class="card-message">{{ item.message }}</p>
+        <div class="card-footer">
+          <span class="card-faculty">👤 {{ item.faculty || 'Unknown' }}</span>
+          <span class="card-date">{{ item.createdAt | date:'mediumDate' }}</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

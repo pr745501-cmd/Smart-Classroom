@@ -1,94 +1,129 @@
-<div class="auth-wrapper">
-  <div class="auth-container">
-    
-    <div class="left-panel">
-      <div class="glow-orb"></div>
-      
-      <div class="brand-top">
-        <div class="logo-box">
-          <span class="icon-pulse">🎓</span>
-        </div>
-        <h1 class="brand-title">Smart<span>Classroom</span></h1>
-      </div>
+<div class="auth-layout">
 
-      <div class="brand-mid">
-        <h2 class="welcome-heading">Elevate Your Academic Intelligence</h2>
-        <p class="brand-description">
-          The next generation of classroom management. Seamlessly integrate 
-          real-time analytics with intuitive faculty tools to transform 
-          the educational landscape.
-        </p>
-        
-        <div class="feature-stack">
-          <div class="feature-item">
-            <span class="dot">✦</span>
-            <div class="item-text">
-              <strong>Real-time Analytics</strong>
-              <p>Monitor student progress and engagement instantly.</p>
-            </div>
-          </div>
-          <div class="feature-item">
-            <span class="dot">✦</span>
-            <div class="item-text">
-              <strong>AI Integration</strong>
-              <p>Smart automation for grading and scheduling.</p>
-            </div>
+  <!-- LEFT: Brand Panel -->
+  <div class="brand-panel">
+    <div class="bp-orb bp-orb-1"></div>
+    <div class="bp-orb bp-orb-2"></div>
+    <div class="bp-grid"></div>
+
+    <div class="bp-content">
+      <div class="bp-logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <h1 class="bp-title">Smart<span>Classroom</span></h1>
+      <p class="bp-sub">Join thousands of students and faculty on the next-generation academic platform.</p>
+
+      <div class="bp-features">
+        <div class="bp-feat">
+          <div class="bp-feat-icon">🎓</div>
+          <div>
+            <strong>Student Dashboards</strong>
+            <p>Track lectures, assignments and attendance in real-time.</p>
           </div>
         </div>
+        <div class="bp-feat">
+          <div class="bp-feat-icon">👨‍🏫</div>
+          <div>
+            <strong>Faculty Tools</strong>
+            <p>Manage classes, grade assignments and monitor progress.</p>
+          </div>
+        </div>
+        <div class="bp-feat">
+          <div class="bp-feat-icon">📊</div>
+          <div>
+            <strong>Live Analytics</strong>
+            <p>Real-time insights and performance dashboards.</p>
+          </div>
+        </div>
+        <div class="bp-feat">
+          <div class="bp-feat-icon">🔒</div>
+          <div>
+            <strong>Secure &amp; Private</strong>
+            <p>JWT-based auth with role-based access control.</p>
+          </div>
+        </div>
       </div>
 
-      <div class="panel-footer">
-        <p>© 2026 Smart Classroom Systems</p>
-        <div class="status-badge">
-          <span class="pulse-dot"></span> System Online
-        </div>
+      <div class="bp-badge">
+        <span class="bp-dot"></span>
+        Free to join · No credit card required
       </div>
     </div>
+  </div>
 
-    <div class="right-panel">
-      <div class="form-box">
-        <div class="form-header">
-          <h2>Create Account</h2>
-          <p class="subtitle">Enter your details to get started</p>
+  <!-- RIGHT: Form Panel -->
+  <div class="form-panel">
+    <div class="form-card">
+      <div class="form-top">
+        <div class="form-logo-sm">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+            <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+          </svg>
         </div>
+        <span>SmartClassroom</span>
+      </div>
 
-        <form (ngSubmit)="signup()">
-          <div class="input-group">
-            <label>Full Name</label>
+      <h2>Create your account</h2>
+      <p class="form-sub">Fill in your details to get started for free</p>
+
+      <form (ngSubmit)="signup()" class="auth-form">
+        <div class="field-group">
+          <label>Full Name</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             <input type="text" [(ngModel)]="name" name="name" placeholder="John Doe" required />
           </div>
+        </div>
 
-          <div class="input-group">
-            <label>Email Address</label>
+        <div class="field-group">
+          <label>Email Address</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <input type="email" [(ngModel)]="email" name="email" placeholder="name@university.com" required />
           </div>
+        </div>
 
-          <div class="input-group">
-            <label>Password</label>
-            <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required />
+        <div class="field-group">
+          <label>Password</label>
+          <div class="input-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            <input [type]="showPass ? 'text' : 'password'" [(ngModel)]="password" name="password" placeholder="••••••••" required />
+            <button type="button" class="toggle-pass" (click)="showPass = !showPass">
+              <svg *ngIf="!showPass" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg *ngIf="showPass" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+            </button>
           </div>
+        </div>
 
-          <div class="input-group">
-            <label>Your Role</label>
+        <div class="field-group">
+          <label>Your Role</label>
+          <div class="input-wrap select-wrap">
+            <svg class="input-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <select [(ngModel)]="role" name="role">
-              <option value="student">Student</option>
-              <option value="faculty">Faculty</option>
+              <option value="student">🎓 Student</option>
+              <option value="faculty">👨‍🏫 Faculty</option>
             </select>
           </div>
+        </div>
 
-          <p class="error-msg" *ngIf="error">{{ error }}</p>
+        <p class="error-msg" *ngIf="error">{{ error }}</p>
 
-          <button type="submit" class="signup-btn" [disabled]="loading">
-            <span *ngIf="!loading">Get Started →</span>
-            <span *ngIf="loading" class="loader"></span>
-          </button>
-          
-          <p class="login-link">
-            Already a member? <a routerLink="/login">Sign In</a>
-          </p>
-        </form>
-      </div>
+        <button type="submit" class="submit-btn" [disabled]="loading">
+          <span *ngIf="!loading">Create Account →</span>
+          <span *ngIf="loading" class="spinner"></span>
+        </button>
+      </form>
+
+      <div class="divider"><span>or</span></div>
+
+      <p class="switch-link">
+        Already have an account? <a routerLink="/login">Sign in</a>
+      </p>
     </div>
-
   </div>
+
 </div>

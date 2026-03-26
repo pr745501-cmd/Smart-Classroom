@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
@@ -9,8 +9,19 @@ import { CommonModule } from '@angular/common';
   templateUrl: './home.html',
   styleUrls: ['./home.css']
 })
-export class Home {
-  constructor(private router: Router) {}
+export class Home implements OnInit, OnDestroy {
+  isScrolled = false;
+
+  constructor(private router: Router, private cdr: ChangeDetectorRef) {}
+
+  ngOnInit() {}
+  ngOnDestroy() {}
+
+  @HostListener('window:scroll')
+  onScroll() {
+    this.isScrolled = window.scrollY > 40;
+    this.cdr.detectChanges();
+  }
 
   goToSignup() {
     this.router.navigate(['/signup']);

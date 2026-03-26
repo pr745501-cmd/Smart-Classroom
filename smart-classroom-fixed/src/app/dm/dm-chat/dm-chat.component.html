@@ -1,0 +1,101 @@
+<div class="chat-container">
+  <!-- Reconnecting Banner -->
+  <div class="reconnecting-banner" *ngIf="isReconnecting">
+    Reconnecting…
+  </div>
+
+  <!-- Header -->
+  <div class="chat-header">
+    <button class="back-btn" (click)="goBack()">&#8592;</button>
+    <div class="header-avatar">
+      <span>{{ contactInitials }}</span>
+      <span class="status-dot" [class.online]="contactIsOnline"></span>
+    </div>
+    <div class="header-info">
+      <div class="header-name">{{ contactName }}</div>
+      <div class="header-status">
+        <span *ngIf="contactIsOnline" class="online-text">Online</span>
+        <span *ngIf="!contactIsOnline && formatLastSeen(contactLastSeen)" class="lastseen-text">{{ formatLastSeen(contactLastSeen) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="messages-area" #messagesContainer (scroll)="onScroll()">
+    <!-- Load Earlier -->
+    <div class="load-earlier" *ngIf="hasMoreMessages">
+      <button (click)="loadEarlierMessages()">Load earlier messages</button>
+    </div>
+
+    <ng-container *ngFor="let msg of messages; let i = index; trackBy: trackMessage">
+      <!-- Date Separator -->
+      <div class="date-separator" *ngIf="showDateSeparator(i)">
+        <span>{{ getDateLabel(msg.timestamp) }}</span>
+      </div>
+
+      <!-- Message Bubble -->
+      <div class="message-row" [class.sent]="msg.sender === currentUserId" [class.received]="msg.sender !== currentUserId">
+        <div class="bubble">
+          <span class="bubble-text">{{ msg.text }}</span>
+          <div class="bubble-meta">
+            <span class="bubble-time">{{ formatTime(msg.timestamp) }}</span>
+            <span class="read-receipt" *ngIf="msg.sender === currentUserId">
+              <span *ngIf="msg.readReceipt === 'sent'">✓</span>
+              <span *ngIf="msg.readReceipt === 'delivered'" class="double-tick">✓✓</span>
+              <span *ngIf="msg.readReceipt === 'read'" class="double-tick blue">✓✓</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Typing Indicator -->
+    <div class="typing-indicator" *ngIf="isTyping">
+      <div class="bubble received-bubble">
+        <span class="typing-dots">
+          <span></span><span></span><span></span>
+        </span>
+        <span class="typing-text">{{ typingName }} is typing…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-area">
+    <div class="emoji-wrapper">
+      <button class="emoji-btn" (click)="toggleEmojiPicker($event)" title="Emoji">😊</button>
+
+      <!-- Custom Emoji Picker -->
+      <div class="emoji-panel" *ngIf="showEmojiPicker" (click)="$event.stopPropagation()">
+        <!-- Category tabs -->
+        <div class="emoji-tabs">
+          <button *ngFor="let cat of emojiCategories; let i = index"
+                  class="emoji-tab"
+                  [class.active]="activeEmojiCategory === i"
+                  (click)="activeEmojiCategory = i"
+                  [title]="cat.label">
+            {{ cat.emojis[0] }}
+          </button>
+        </div>
+        <!-- Emoji grid -->
+        <div class="emoji-grid">
+          <button *ngFor="let e of emojiCategories[activeEmojiCategory].emojis"
+                  class="emoji-item"
+                  (click)="insertEmoji(e)">{{ e }}</button>
+        </div>
+      </div>
+    </div>
+    <textarea
+      #messageInput
+      class="message-input"
+      [(ngModel)]="messageText"
+      (keydown)="onKeyDown($event)"
+      (input)="onInputChange()"
+      placeholder="Type a message"
+      rows="1">
+    </textarea>
+    <button class="send-btn" (click)="sendMessage()" [disabled]="!messageText.trim()">
+      &#9658;
+    </button>
+  </div>
+</div>

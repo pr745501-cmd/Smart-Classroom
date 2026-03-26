@@ -1,0 +1,32 @@
+<div class="contacts-container">
+  <div class="contacts-header">
+    <h2>Messages</h2>
+  </div>
+  <div class="contacts-list">
+    <div *ngIf="contacts.length === 0" class="empty-state">
+      No faculty members available.
+    </div>
+    <div *ngFor="let contact of contacts; trackBy: trackContact"
+         class="contact-item"
+         (click)="openChat(contact._id)">
+      <div class="avatar">
+        <span class="initials">{{ getInitials(contact.name) }}</span>
+        <span class="status-dot" [class.online]="contact.isOnline"></span>
+      </div>
+      <div class="contact-info">
+        <div class="contact-top">
+          <span class="contact-name">{{ contact.name }}</span>
+          <span class="last-time" *ngIf="contact.lastMessage">{{ formatTime(contact.lastMessage.timestamp) }}</span>
+        </div>
+        <div class="contact-bottom">
+          <span class="last-message" *ngIf="contact.lastMessage">{{ contact.lastMessage.text }}</span>
+          <span class="presence" *ngIf="!contact.lastMessage && contact.isOnline">Online</span>
+          <span class="presence lastseen" *ngIf="!contact.lastMessage && !contact.isOnline && formatLastSeen(contact.lastSeen)">
+            {{ formatLastSeen(contact.lastSeen) }}
+          </span>
+          <span class="unread-badge" *ngIf="contact.unreadCount > 0">{{ contact.unreadCount }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

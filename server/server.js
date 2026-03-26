@@ -17,6 +17,9 @@ const { Server } = require("socket.io");
 
 /* 🔥 CHAT MODEL */
 const ChatMessage = require("./models/ChatMessage");
+const jwt = require("jsonwebtoken");
+const DirectMessage = require("./models/DirectMessage");
+const presenceService = require("./services/presenceService");
 
 /* ROUTES */
 const authRoutes = require("./routes/auth");
@@ -30,6 +33,7 @@ const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const liveClassRoutes = require("./routes/liveClassRoutes");
 const chatRoutes = require("./routes/chatRoutes");
+const dashboardStatsRoute = require("./routes/dashboardStatsRoute");
 
 const app = express();
 
@@ -94,8 +98,20 @@ app.use("/api/attendance", attendanceRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/live-class", liveClassRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/dashboard", dashboardStatsRoute);
 
 /* ================= SOCKET CHAT ================= */
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth?.token;
+  if (!token) return next(new Error("Authentication error"));
+  try {
+    socket.user = jwt.verify(token, process.env.JWT_SECRET);
+    next();
+  } catch {
+    next(new Error("Authentication error"));
+  }
+});
 
 io.on("connection", (socket) => {
 
@@ -156,7 +172,73 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
 
     console.log("❌ User disconnected:", socket.id);
+    if (socket.user) {
+      presenceService.userDisconnected(socket.user.id, socket.id, io);
+    }
 
+  });
+
+  // ===== PRESENCE =====
+  if (socket.user) {
+    presenceService.userConnected(socket.user.id, socket.id);
+    presenceService.userOnline(socket.user.id, io);
+  }
+
+  // ===== JOIN DM ROOM =====
+  socket.on("joinDM", ({ roomId }) => {
+    socket.join(roomId);
+  });
+
+  // ===== SEND DM =====
+  socket.on("sendDM", async ({ roomId, recipientId, text, senderId }) => {
+    if (!socket.user || socket.user.id !== senderId) {
+      socket.emit("error", { message: "Unauthorized sender" });
+      return;
+    }
+    try {
+      const msg = new DirectMessage({
+        sender: senderId,
+        recipient: recipientId,
+        text,
+        readStatus: false
+      });
+      await msg.save();
+      io.to(roomId).emit("receiveDM", msg);
+      // Check if recipient is in the room
+      const roomSockets = await io.in(roomId).fetchSockets();
+      const recipientInRoom = roomSockets.some(s => s.user && s.user.id === recipientId);
+      if (recipientInRoom) {
+        socket.emit("delivered", { msgId: msg._id });
+      }
+    } catch (err) {
+      console.error("sendDM error:", err);
+      socket.emit("error", { message: "Failed to send message" });
+    }
+  });
+
+  // ===== MARK READ =====
+  socket.on("markRead", async ({ roomId, contactId }) => {
+    if (!socket.user) return;
+    try {
+      await DirectMessage.updateMany(
+        { sender: contactId, recipient: socket.user.id, readStatus: false },
+        { readStatus: true }
+      );
+      io.to(roomId).emit("messagesRead", { contactId: socket.user.id });
+    } catch (err) {
+      console.error("markRead error:", err);
+    }
+  });
+
+  // ===== TYPING =====
+  socket.on("typing", ({ roomId }) => {
+    if (!socket.user) return;
+    socket.to(roomId).emit("typing", { userId: socket.user.id });
+  });
+
+  socket.on("stopTyping", ({ roomId }) => {
+    if (!socket.user) return;
+    socket.to(roomId).emit("stopTyping", { userId: socket.user.id });
   });
 
 }); // 🔴 IMPORTANT: connection block closed here

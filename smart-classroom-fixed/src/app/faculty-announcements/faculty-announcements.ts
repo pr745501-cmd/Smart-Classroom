@@ -1,6 +1,7 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AnnouncementService } from '../services/announcement.service';
 
 @Component({
@@ -23,7 +24,8 @@ export class FacultyAnnouncements implements OnInit {
 
   constructor(
     private announcementService: AnnouncementService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {
     const user = localStorage.getItem('user');
     if (user) {
@@ -37,7 +39,10 @@ export class FacultyAnnouncements implements OnInit {
     this.loadAnnouncements();
   }
 
-  /* LOAD */
+  goBack(): void {
+    this.router.navigate(['/faculty']);
+  }
+
   loadAnnouncements() {
     this.announcementService
       .getFacultyAnnouncements(this.facultyName)
@@ -47,63 +52,59 @@ export class FacultyAnnouncements implements OnInit {
       });
   }
 
-  /* CREATE */
   addAnnouncement() {
     if (!this.title || !this.message) {
       alert("All fields required");
       return;
     }
-
     const data = {
       title: this.title,
       message: this.message,
       faculty: this.facultyName,
       course: this.course
     };
-
     this.announcementService.createAnnouncement(data)
       .subscribe(() => {
         alert("Announcement Posted");
         this.resetForm();
         this.loadAnnouncements();
+        this.cdr.detectChanges();
       });
   }
 
-  /* EDIT */
   editAnnouncement(a: any) {
     this.editingId = a._id;
     this.title = a.title;
     this.message = a.message;
+    this.cdr.detectChanges();
   }
 
-  /* UPDATE */
   updateAnnouncement() {
-    const data = {
-      title: this.title,
-      message: this.message
-    };
-
+    const data = { title: this.title, message: this.message };
     this.announcementService
       .updateAnnouncement(this.editingId!, data)
       .subscribe(() => {
         alert("Updated");
         this.resetForm();
         this.loadAnnouncements();
+        this.cdr.detectChanges();
       });
   }
 
-  /* DELETE */
   deleteAnnouncement(id: string) {
     if (!confirm("Delete announcement?")) return;
-
     this.announcementService
       .deleteAnnouncement(id)
-      .subscribe(() => this.loadAnnouncements());
+      .subscribe(() => {
+        this.loadAnnouncements();
+        this.cdr.detectChanges();
+      });
   }
 
   resetForm() {
     this.title = '';
     this.message = '';
     this.editingId = null;
+    this.cdr.detectChanges();
   }
 }

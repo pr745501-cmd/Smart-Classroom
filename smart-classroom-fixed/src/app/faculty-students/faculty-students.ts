@@ -1,12 +1,14 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-faculty-students',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './faculty-students.html'
+  templateUrl: './faculty-students.html',
+  styleUrls: ['./faculty-students.css']
 })
 export class FacultyStudents implements OnInit {
 
@@ -16,7 +18,8 @@ export class FacultyStudents implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -24,18 +27,13 @@ export class FacultyStudents implements OnInit {
     this.loadPendingStudents();
   }
 
-  getHeaders() {
-    const token = localStorage.getItem('token');
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`
-    });
+  goBack(): void {
+    this.router.navigate(['/faculty']);
   }
 
   loadStudents() {
     this.http
-      .get<any>('http://localhost:5000/api/students/enrolled', {
-        headers: this.getHeaders()
-      })
+      .get<any>('http://localhost:5000/api/students/enrolled')
       .subscribe({
         next: (res) => {
           this.students = res.students || [];
@@ -51,9 +49,7 @@ export class FacultyStudents implements OnInit {
 
   loadPendingStudents() {
     this.http
-      .get<any>('http://localhost:5000/api/students/pending', {
-        headers: this.getHeaders()
-      })
+      .get<any>('http://localhost:5000/api/students/pending')
       .subscribe({
         next: (res) => {
           this.pendingStudents = res.students || [];
@@ -64,12 +60,11 @@ export class FacultyStudents implements OnInit {
 
   approveStudent(id: string) {
     this.http
-      .put(`http://localhost:5000/api/students/approve/${id}`, {}, {
-        headers: this.getHeaders()
-      })
+      .put(`http://localhost:5000/api/students/approve/${id}`, {})
       .subscribe(() => {
         this.loadStudents();
         this.loadPendingStudents();
+        this.cdr.detectChanges();
       });
   }
 }

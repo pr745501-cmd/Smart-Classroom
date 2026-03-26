@@ -1,87 +1,150 @@
-<div class="attendance-viewport">
-  <div class="bg-blur-element"></div>
+<div class="page-shell">
 
-  <div class="content-container">
-    <section class="overview-grid">
-      <div class="metric-card glass-morph">
-        <div class="metric-info">
-          <span class="label">Total Attendance</span>
-          <h2 class="value">88.5%</h2>
-          <span class="trend up">↑ 2.4% from last month</span>
-        </div>
-        <div class="progress-ring-v2">
-           <div class="ring-dot"></div>
-        </div>
+  <!-- SIDEBAR STRIP -->
+  <div class="side-accent"></div>
+
+  <div class="page-content">
+
+    <!-- HEADER -->
+    <div class="page-header">
+      <button class="back-btn" (click)="goBack()">
+        <span>←</span> Dashboard
+      </button>
+      <div class="header-info">
+        <h1>Attendance Overview</h1>
+        <p>Track your presence and performance across all sessions</p>
       </div>
+    </div>
 
-      <div class="quick-stats-glass">
-        <div class="mini-stat">
-          <span class="icon-bg present">✔</span>
-          <div>
-            <span class="stat-label">Present</span>
-            <span class="stat-count">42 Days</span>
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loader-box">
+      <div class="spin-ring"></div>
+      <p>Fetching your attendance records...</p>
+    </div>
+
+    <ng-container *ngIf="!loading">
+
+      <!-- STAT CARDS -->
+      <div class="stats-grid">
+
+        <div class="stat-card rate-card">
+          <div class="stat-icon">📊</div>
+          <div class="stat-info">
+            <span class="stat-label">Overall Rate</span>
+            <span class="stat-value" [class.warn]="attendancePct < 75">{{ attendancePct }}%</span>
+            <span class="stat-sub" [class.warn-text]="attendancePct < 75">
+              {{ attendancePct >= 75 ? 'Good standing' : 'Below minimum — attend more classes' }}
+            </span>
+          </div>
+          <div class="rate-ring">
+            <svg viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="32" fill="none" stroke="#e2e8f0" stroke-width="8"/>
+              <circle cx="40" cy="40" r="32" fill="none"
+                [attr.stroke]="attendancePct >= 75 ? '#10b981' : '#f59e0b'"
+                stroke-width="8"
+                stroke-linecap="round"
+                [attr.stroke-dasharray]="201"
+                [attr.stroke-dashoffset]="201 - (201 * attendancePct / 100)"
+                transform="rotate(-90 40 40)"/>
+            </svg>
+            <span class="ring-label">{{ attendancePct }}%</span>
           </div>
         </div>
-        <div class="mini-stat">
-          <span class="icon-bg absent">✘</span>
-          <div>
-            <span class="stat-label">Absent</span>
-            <span class="stat-count">04 Days</span>
+
+        <div class="stat-card present-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-info">
+            <span class="stat-label">Present Days</span>
+            <span class="stat-value present">{{ presentCount }}</span>
+            <span class="stat-sub">Sessions attended</span>
           </div>
         </div>
-      </div>
-    </section>
 
-    <div class="bento-layout">
-      <div class="chart-block glass-morph">
-        <div class="block-header">
-          <h3>📊 Engagement Curve</h3>
-          <select class="minimal-select">
-            <option>Last 6 Months</option>
+        <div class="stat-card absent-card">
+          <div class="stat-icon">❌</div>
+          <div class="stat-info">
+            <span class="stat-label">Absent Days</span>
+            <span class="stat-value absent">{{ absentCount }}</span>
+            <span class="stat-sub">Sessions missed</span>
+          </div>
+        </div>
+
+        <div class="stat-card total-card">
+          <div class="stat-icon">📅</div>
+          <div class="stat-info">
+            <span class="stat-label">Total Sessions</span>
+            <span class="stat-value total">{{ attendance.length }}</span>
+            <span class="stat-sub">Recorded sessions</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CHART SECTION -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <h3>Monthly Attendance</h3>
+            <p>Day-by-day breakdown for selected month</p>
+          </div>
+          <select class="month-select" (change)="onMonthChange($event)">
+            <option *ngFor="let m of months; let i = index" [value]="i + 1" [selected]="i + 1 === selectedMonth">
+              {{ m }}
+            </option>
           </select>
         </div>
-        <div class="chart-wrapper">
+        <div class="chart-body">
           <canvas id="attendanceChart"></canvas>
         </div>
       </div>
 
-      <div class="table-block glass-morph">
-        <div class="block-header">
-          <h3>📋 Detailed Logs</h3>
-          <button class="export-btn">Export PDF</button>
+      <!-- TABLE SECTION -->
+      <div class="table-card">
+        <div class="table-header">
+          <h3>Attendance Records</h3>
+          <span class="record-count">{{ attendance.length }} records</span>
         </div>
 
-        <div class="scroll-area">
-          <table class="refined-table">
+        <div *ngIf="attendance.length === 0" class="empty-state">
+          <span>📋</span>
+          <p>No attendance records found.</p>
+        </div>
+
+        <div class="table-scroll" *ngIf="attendance.length > 0">
+          <table>
             <thead>
               <tr>
-                <th>Session Date</th>
-                <th>Instructor</th>
-                <th>Module</th>
+                <th>Date</th>
+                <th>Faculty</th>
+                <th>Course</th>
                 <th>Status</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let a of attendance" class="data-row">
-                <td class="date-col">
-                  <span class="day">{{ a.date | date:'dd' }}</span>
-                  <span class="month">{{ a.date | date:'MMM' }}</span>
+              <tr *ngFor="let a of attendance">
+                <td class="date-cell">
+                  <span class="date-day">{{ a.date | date:'dd' }}</span>
+                  <span class="date-month">{{ a.date | date:'MMM yyyy' }}</span>
                 </td>
-                <td class="instructor-col">
-                  <div class="avatar-circle">{{ a.faculty.charAt(0) }}</div>
-                  <span>{{ a.faculty }}</span>
-                </td>
-                <td><span class="module-pill">{{ a.course }}</span></td>
                 <td>
-                  <div class="status-chip" [attr.data-status]="a.status">
-                    {{ a.status | uppercase }}
+                  <div class="faculty-cell">
+                    <div class="avatar">{{ a.faculty?.charAt(0)?.toUpperCase() }}</div>
+                    <span>{{ a.faculty }}</span>
                   </div>
+                </td>
+                <td><span class="course-tag">{{ a.course }}</span></td>
+                <td>
+                  <span class="status-chip" [ngClass]="a.status?.toLowerCase()">
+                    <span class="chip-dot"></span>
+                    {{ a.status | uppercase }}
+                  </span>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
       </div>
-    </div>
+
+    </ng-container>
   </div>
 </div>

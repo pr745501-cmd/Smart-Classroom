@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css']
 })
@@ -17,10 +18,12 @@ export class Login {
   password: string = '';
   error: string = '';
   loading = false;
+  showPass = false;
 
   constructor(
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   login() {
@@ -55,11 +58,13 @@ export class Login {
           }
 
           this.loading = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('LOGIN ERROR 👉', err);
           this.error = err.error?.message || 'Invalid credentials';
           this.loading = false;
+          this.cdr.detectChanges();
         }
       });
   }

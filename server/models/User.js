@@ -37,7 +37,11 @@ const userSchema = new mongoose.Schema(
         // Faculty/Admin → true
         return this.role === "student" ? false : true;
       }
-    }
+    },
+
+    // ✅ Presence fields
+    isOnline: { type: Boolean, default: false },
+    lastSeen: { type: Date, default: null }
   },
   { timestamps: true }
 );

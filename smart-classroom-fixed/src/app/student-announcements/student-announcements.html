@@ -1,36 +1,43 @@
-<div class="viewport-bg">
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-</div>
+<div class="page-wrapper">
 
-<div class="announcement-viewport">
-  <header class="header-section">
-    <div class="title-group">
-      <h1>Announcements</h1>
-      <p>Academic Year 2026 • Updates & Alerts</p>
+  <button class="back-btn" (click)="goBack()">← Dashboard</button>
+
+  <div class="page-header">
+    <div class="header-title">
+      <h1>Notices & Announcements</h1>
+      <p>{{ filteredAnnouncements.length }} update{{ filteredAnnouncements.length !== 1 ? 's' : '' }} available</p>
     </div>
-
-    <div class="search-container">
+    <div class="search-box">
       <span>🔍</span>
-      <input type="text" placeholder="Search updates..." [(ngModel)]="searchText" class="search-input">
+      <input type="text" placeholder="Search announcements..." [(ngModel)]="searchText" />
     </div>
-  </header>
+  </div>
 
-  <div class="announcement-list">
-    <div *ngFor="let a of filteredAnnouncements" class="card">
-      <h3 class="card-title">{{ a.title }}</h3>
-      <p class="card-body">{{ a.message }}</p>
-      
-      <div class="card-footer">
+  <!-- LOADING -->
+  <div *ngIf="loading" class="state-box">
+    <div class="spin-ring"></div>
+    <p>Loading announcements...</p>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && filteredAnnouncements.length === 0" class="state-box">
+    <span class="state-icon">📭</span>
+    <p>No announcements found.</p>
+  </div>
+
+  <!-- LIST -->
+  <div *ngIf="!loading" class="announcement-list">
+    <div *ngFor="let a of filteredAnnouncements" class="ann-card">
+      <h3 class="ann-title">{{ a.title }}</h3>
+      <p class="ann-body">{{ a.message }}</p>
+      <div class="ann-footer">
         <div class="faculty-pill">
-          <div class="avatar-mini">{{ a.faculty.charAt(0) }}</div>
+          <div class="avatar-mini">{{ a.faculty?.charAt(0) }}</div>
           <span>{{ a.faculty }}</span>
         </div>
-        <span class="timestamp">
-          📅 {{ a.createdAt | date:'mediumDate' }} • {{ a.createdAt | date:'shortTime' }}
-        </span>
+        <span class="timestamp">📅 {{ a.createdAt | date:'dd MMM yyyy' }} · {{ a.createdAt | date:'shortTime' }}</span>
       </div>
     </div>
   </div>
+
 </div>

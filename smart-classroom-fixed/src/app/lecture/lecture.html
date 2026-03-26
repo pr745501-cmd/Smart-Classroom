@@ -1,76 +1,69 @@
-<div class="lecture-viewport">
-  
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
+<div class="page-wrapper">
 
-  <div class="interface-wrapper">
-    <header class="glass-header">
-      <div class="title-area">
-        <h1>Academic <span>Lectures</span></h1>
-        <p>Session 2026 • {{ filteredLectures.length }} Resources Available</p>
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">← Dashboard</button>
+
+    <div class="header-row">
+      <div class="header-title">
+        <h1>Lectures</h1>
+        <p>{{ filteredLectures.length }} resource{{ filteredLectures.length !== 1 ? 's' : '' }} available</p>
       </div>
 
-      <div class="filter-controls">
-        <div class="search-pill">
-          <span class="search-icon">🔍</span>
+      <div class="header-controls">
+        <div class="search-box">
+          <span>🔍</span>
           <input
             type="text"
             placeholder="Search lectures..."
             [(ngModel)]="searchText"
             (input)="applyFilter()"
-          >
+          />
         </div>
 
-        <div class="select-pill">
-          <select [(ngModel)]="selectedSubject" (change)="applyFilter()">
-            <option value="">All Subjects</option>
-            <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
-          </select>
-        </div>
+        <select class="filter-select" [(ngModel)]="selectedSubject" (change)="applyFilter()">
+          <option value="">All Subjects</option>
+          <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+        </select>
       </div>
-    </header>
-
-    <div class="status-box" *ngIf="loading">
-      <div class="pulse-loader"></div>
-      <p>Syncing curriculum...</p>
     </div>
-
-    <div class="status-box" *ngIf="!loading && filteredLectures.length === 0">
-      <span class="empty-icon">📂</span>
-      <p>No matches found for your search.</p>
-    </div>
-
-    <main class="lecture-grid" *ngIf="!loading && filteredLectures.length > 0">
-      <div class="lecture-card" *ngFor="let lec of filteredLectures">
-        
-        <div class="card-top">
-          <span class="type-tag" [attr.data-type]="lec.type">
-            {{ lec.type }}
-          </span>
-          <span class="subject-tag">{{ lec.subject }}</span>
-        </div>
-
-        <div class="card-body">
-          <div class="icon-sphere">
-            <span *ngIf="lec.type === 'video'">🎥</span>
-            <span *ngIf="lec.type === 'pdf'">📄</span>
-            <span *ngIf="lec.type === 'ppt'">📊</span>
-          </div>
-          <h3>{{ lec.title }}</h3>
-          <div class="faculty-info">
-            <div class="avatar-mini"></div>
-            <p>Prof. {{ lec.faculty }}</p>
-          </div>
-        </div>
-
-        <div class="card-footer">
-          <a [href]="lec.fileUrl" target="_blank" class="btn-open">
-            Open Resource
-            <span class="arrow">→</span>
-          </a>
-        </div>
-
-      </div>
-    </main>
   </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="skeleton-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card"></div>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && filteredLectures.length === 0" class="state-box">
+    <span class="state-icon">📂</span>
+    <p>No lectures found. Try adjusting your search.</p>
+  </div>
+
+  <!-- GRID -->
+  <div *ngIf="!loading && filteredLectures.length > 0" class="lecture-grid">
+    <div *ngFor="let lec of filteredLectures" class="lecture-card">
+
+      <div class="card-top-row">
+        <span class="type-badge" [ngClass]="lec.type?.toLowerCase()">
+          {{ lec.type?.toUpperCase() }}
+        </span>
+        <span class="subject-tag">{{ lec.subject }}</span>
+      </div>
+
+      <h3 class="card-title">{{ lec.title }}</h3>
+
+      <div class="faculty-row">
+        <div class="avatar-circle">{{ lec.faculty?.charAt(0) }}</div>
+        <span class="faculty-name">{{ lec.faculty }}</span>
+      </div>
+
+      <span class="date-added">{{ lec.createdAt | date:'mediumDate' }}</span>
+
+      <a [href]="lec.fileUrl" target="_blank" class="btn-open">
+        Open Resource →
+      </a>
+
+    </div>
+  </div>
+
 </div>

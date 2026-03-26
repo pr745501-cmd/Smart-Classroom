@@ -1,9 +1,11 @@
+import 'chart.js/auto';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartType } from 'chart.js';
+import { AdminService } from '../services/admin.service';
+import { computeRoleChartData } from '../admin/admin-utils';
 
 @Component({
   selector: 'app-admin-users',
@@ -14,123 +16,112 @@ import { ChartConfiguration, ChartType } from 'chart.js';
 })
 export class AdminUsers implements OnInit {
 
+  admin: any = {};
   users: any[] = [];
   filteredUsers: any[] = [];
-
   search = '';
   loading = true;
+  error = false;
+  activeTab: 'all' | 'students' | 'faculty' | 'pending' = 'all';
 
-  // =========================
-  // 📊 Stats
-  // =========================
   totalUsers = 0;
   totalStudents = 0;
   totalFaculty = 0;
   pendingStudents = 0;
 
-  // =========================
-  // 📊 Pie Chart
-  // =========================
- pieChartType: 'pie' = 'pie';
-
-  pieChartData: ChartConfiguration<'pie'>['data'] = {
-    labels: ['Students', 'Faculty'],
-    datasets: [
-      {
-        data: [],
-        backgroundColor: ['#3b82f6', '#10b981']
-      }
-    ]
+  pieChartType: 'pie' = 'pie';
+  pieChartData: any = {
+    labels: ['Students', 'Faculty', 'Admins'],
+    datasets: [{ data: [0, 0, 0], backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6'] }]
   };
-
-  // ✅ THIS WAS MISSING (FIX)
-  pieChartOptions: ChartConfiguration<'pie'>['options'] = {
+  pieChartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'top'
-      }
-    }
+    plugins: { legend: { position: 'right' } }
   };
 
   constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private adminService: AdminService,
+    private cdr: ChangeDetectorRef,
+    private router: Router
   ) {}
 
   ngOnInit() {
+    const user = localStorage.getItem('user');
+    if (user) this.admin = JSON.parse(user);
     this.loadUsers();
   }
 
-  /* ========================= */
   loadUsers() {
-    this.http.get<any>(
-      'http://localhost:5000/api/admin/users',
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
+    this.loading = true;
+    this.adminService.getUsers().subscribe({
+      next: (res: any) => {
+        this.users = res.users || [];
+        this.filteredUsers = this.getTabUsers();
+        this.totalUsers = this.users.length;
+        this.totalStudents = this.users.filter(u => u.role === 'student').length;
+        this.totalFaculty = this.users.filter(u => u.role === 'faculty').length;
+        this.pendingStudents = this.users.filter(u => u.role === 'student' && !u.isApproved).length;
+        const roleData = computeRoleChartData(this.users);
+        this.pieChartData = {
+          labels: ['Students', 'Faculty', 'Admins'],
+          datasets: [{ data: roleData, backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6'] }]
+        };
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.error = true;
+        this.loading = false;
+        this.cdr.detectChanges();
       }
-    ).subscribe(res => {
-
-      this.users = res.users || [];
-      this.filteredUsers = this.users;
-
-      // 🔥 Calculate stats
-      this.totalUsers = this.users.length;
-      this.totalStudents = this.users.filter(u => u.role === 'student').length;
-      this.totalFaculty = this.users.filter(u => u.role === 'faculty').length;
-      this.pendingStudents = this.users.filter(
-        u => u.role === 'student' && !u.isApproved
-      ).length;
-
-      // Update chart data
-      this.pieChartData.datasets[0].data = [
-        this.totalStudents,
-        this.totalFaculty
-      ];
-
-      this.loading = false;
-      this.cdr.detectChanges();
     });
   }
 
-  /* ========================= */
   filterUsers() {
-    this.filteredUsers = this.users.filter(u =>
-      u.name.toLowerCase().includes(this.search.toLowerCase()) ||
-      u.email.toLowerCase().includes(this.search.toLowerCase()) ||
-      u.role.toLowerCase().includes(this.search.toLowerCase())
-    );
+    const q = this.search.toLowerCase();
+    const base = this.getTabUsers();
+    this.filteredUsers = q
+      ? base.filter(u =>
+          u.name?.toLowerCase().includes(q) ||
+          u.email?.toLowerCase().includes(q) ||
+          u.role?.toLowerCase().includes(q)
+        )
+      : base;
+    this.cdr.detectChanges();
   }
 
-  /* ========================= */
-  deleteUser(id: string) {
-    if (!confirm("Delete this user?")) return;
+  setTab(tab: 'all' | 'students' | 'faculty' | 'pending') {
+    this.activeTab = tab;
+    this.search = '';
+    this.filteredUsers = this.getTabUsers();
+    this.cdr.detectChanges();
+  }
 
-    this.http.delete(
-      `http://localhost:5000/api/admin/users/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token')}`
-        }
-      }
-    ).subscribe(() => {
-      this.loadUsers();
+  getTabUsers(): any[] {
+    switch (this.activeTab) {
+      case 'students': return this.users.filter(u => u.role === 'student' && u.isApproved !== false);
+      case 'faculty':  return this.users.filter(u => u.role === 'faculty');
+      case 'pending':  return this.users.filter(u => u.role === 'student' && u.isApproved === false);
+      default:         return this.users;
+    }
+  }
+
+  deleteUser(id: string) {
+    if (!confirm('Delete this user?')) return;
+    this.adminService.rejectUser(id).subscribe({
+      next: () => { this.loadUsers(); },
+      error: () => { alert('Failed to delete user.'); }
     });
   }
 
-  /* ========================= */
-  getByRole(role: string) {
-    return this.filteredUsers.filter(u => u.role === role);
+  getRoleBadgeClass(role: string): string {
+    if (role === 'faculty') return 'badge-purple';
+    if (role === 'admin')   return 'badge-indigo';
+    return 'badge-blue';
   }
 
-  /* ========================= */
-  /* ========================= */
-getPendingStudents() {
-  return this.filteredUsers.filter(
-    u => u.role === 'student' && u.isApproved === false
-  );
-}
+  isActive(path: string): boolean { return this.router.url === path; }
+  goTo(path: string) { this.router.navigate([path]); }
+  logout() { localStorage.clear(); this.router.navigate(['/login']); }
 }

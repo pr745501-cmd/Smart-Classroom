@@ -1,43 +1,135 @@
-import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { AssignmentService } from '../services/assignment.service';
+import { AnnouncementService } from '../services/announcement.service';
+import { LiveClassService } from '../services/live-class.service';
 
 @Component({
   selector: 'app-faculty',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, DatePipe],
   templateUrl: './faculty.html',
   styleUrls: ['./faculty.css']
 })
-export class Faculty {
+export class Faculty implements OnInit {
 
-  faculty = {
-    name: '',
-    email: ''
-  };
+  faculty = { name: '', email: '' };
+  today = new Date();
 
-  constructor(private router: Router) {
+  totalAssignments = 0;
+  totalAnnouncements = 0;
+  totalLectures = 0;
+  totalStudents = 0;
+
+  recentAssignments: any[] = [];
+  recentAnnouncements: any[] = [];
+  liveClass: any = null;
+
+  loading = true;
+  private _pending = 4; // number of parallel calls
+
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private assignmentService: AssignmentService,
+    private announcementService: AnnouncementService,
+    private liveService: LiveClassService,
+    private cdr: ChangeDetectorRef
+  ) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.faculty.name = user.name || 'Faculty';
+    this.faculty.name  = user.name  || 'Faculty';
     this.faculty.email = user.email || 'N/A';
   }
 
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
+  ngOnInit() {
+    this.loadDashboardData();
   }
 
-  goTo(path: string) {
-    this.router.navigate([path]);
+  private done() {
+    this._pending--;
+    if (this._pending <= 0) {
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
   }
 
-  goToAttendance() {
-    this.router.navigate(['/faculty/attendance']);
+  loadDashboardData() {
+    const name = this.faculty.name;
+
+    // 1. Assignments
+    this.assignmentService.getFacultyAssignments(name).subscribe({
+      next: res => {
+        const list = res.assignments || [];
+        this.totalAssignments = list.length;
+        this.recentAssignments = list.slice(0, 4);
+        this.cdr.detectChanges();
+        this.done();
+      },
+      error: () => this.done()
+    });
+
+    // 2. Announcements
+    this.announcementService.getFacultyAnnouncements(name).subscribe({
+      next: res => {
+        const list = res.announcements || [];
+        this.totalAnnouncements = list.length;
+        this.recentAnnouncements = list.slice(0, 3);
+        this.cdr.detectChanges();
+        this.done();
+      },
+      error: () => this.done()
+    });
+
+    // 3. Lectures
+    this.http.get<any>('http://localhost:5000/api/lectures').subscribe({
+      next: res => {
+        const all = res.lectures || [];
+        this.totalLectures = all.filter((l: any) => l.faculty === name).length;
+        this.cdr.detectChanges();
+        this.done();
+      },
+      error: () => this.done()
+    });
+
+    // 4. Students
+    this.http.get<any>('http://localhost:5000/api/students/enrolled').subscribe({
+      next: res => {
+        this.totalStudents = (res.students || []).length;
+        this.cdr.detectChanges();
+        this.done();
+      },
+      error: () => this.done()
+    });
+
+    // Live class (non-blocking — doesn't affect loading state)
+    this.liveService.getLiveClass().subscribe({
+      next: res => {
+        this.liveClass = res;
+        this.cdr.detectChanges();
+      },
+      error: () => {}
+    });
   }
 
-  // 💬 NEW CHAT FUNCTION
-  goToChat() {
-    this.router.navigate(['/chat']);
+  getDaysUntilDue(dueDate: string): string {
+    const diff = new Date(dueDate).getTime() - Date.now();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if (days < 0) return 'Overdue';
+    if (days === 0) return 'Due today';
+    if (days === 1) return 'Due tomorrow';
+    return `${days} days left`;
   }
 
+  getDueClass(dueDate: string): string {
+    const diff = new Date(dueDate).getTime() - Date.now();
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if (days < 0) return 'overdue';
+    if (days <= 2) return 'soon';
+    return 'ok';
+  }
+
+  logout() { localStorage.clear(); this.router.navigate(['/login']); }
+  goTo(path: string) { this.router.navigate([path]); }
 }

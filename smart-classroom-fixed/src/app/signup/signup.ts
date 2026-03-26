@@ -1,13 +1,14 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-signup',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './signup.html',
   styleUrls: ['./signup.css']
 })
@@ -19,8 +20,9 @@ export class Signup {
   role = 'student';
   error = '';
   loading = false;
+  showPass = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
 
   signup() {
     this.loading = true;
@@ -34,13 +36,11 @@ export class Signup {
     }).subscribe({
       next: () => {
         this.loading = false;
-
-        // ✅ If student → go to pending page
+        this.cdr.detectChanges();
         if (this.role === 'student') {
           localStorage.setItem('pendingEmail', this.email);
           this.router.navigate(['/pending-approval']);
         } else {
-          // Faculty/Admin → normal login
           alert('Signup successful ✅');
           this.router.navigate(['/login']);
         }
@@ -48,6 +48,7 @@ export class Signup {
       error: (err) => {
         this.loading = false;
         this.error = err.error?.message || 'Signup failed';
+        this.cdr.detectChanges();
       }
     });
   }

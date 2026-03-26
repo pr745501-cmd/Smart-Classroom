@@ -1,44 +1,125 @@
 <div class="admin-layout">
-
   <!-- SIDEBAR -->
   <aside class="sidebar">
-    <h2 class="logo">👨‍💼 Admin</h2>
-
-    <nav>
-      <a class="active" (click)="goTo('/admin')">🏠 Dashboard</a>
-      <a (click)="goTo('/admin/users')">👥 Users</a>
-      <a class="disabled">📊 Stats</a>
+    <div class="sidebar-logo">🎓 SmartClass</div>
+    <div class="sidebar-admin">
+      <div class="admin-avatar">{{ admin.name?.charAt(0) | uppercase }}</div>
+      <div>
+        <div class="admin-name">{{ admin.name }}</div>
+        <div class="admin-email">{{ admin.email }}</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a [class.active]="isActive('/admin')" (click)="goTo('/admin')">🏠 Dashboard</a>
+      <a [class.active]="isActive('/admin/users')" (click)="goTo('/admin/users')">👥 Users</a>
+      <a [class.active]="isActive('/admin/stats')" (click)="goTo('/admin/stats')">📊 Stats</a>
+      <a [class.active]="isActive('/admin/approvals')" (click)="goTo('/admin/approvals')">
+        ⏳ Pending Approvals
+        <span class="badge" *ngIf="stats?.pendingApprovals > 0">{{ stats?.pendingApprovals }}</span>
+      </a>
+      <a [class.active]="isActive('/admin/announcements')" (click)="goTo('/admin/announcements')">📢 Announcements</a>
+      <a [class.active]="isActive('/admin/assignments')" (click)="goTo('/admin/assignments')">📝 Assignments</a>
+      <a [class.active]="isActive('/admin/attendance')" (click)="goTo('/admin/attendance')">✅ Attendance</a>
     </nav>
-
-    <button class="logout" (click)="logout()">Logout</button>
+    <button class="logout-btn" (click)="logout()">Logout</button>
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <main class="content">
-
-    <!-- TOP BAR -->
+  <!-- MAIN -->
+  <main class="main-content">
+    <!-- TOPBAR -->
     <header class="topbar">
       <div>
-        <h2>Admin Dashboard</h2>
-        <p>Welcome, {{ admin.name }}</p>
+        <h1 class="page-title">Admin Dashboard</h1>
+        <p class="page-subtitle">{{ today }}</p>
       </div>
-      <span class="email">{{ admin.email }}</span>
+      <div class="topbar-right">Welcome back, <strong>{{ admin.name }}</strong></div>
     </header>
 
-    <!-- CARDS -->
-    <section class="cards">
+    <!-- LOADING -->
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
 
-      <div class="card clickable" (click)="goTo('/admin/users')">
-        <h3>👥 Manage Users</h3>
-        <p>View students & faculty</p>
+    <!-- ERROR -->
+    <div *ngIf="error && !loading" class="error-banner">⚠️ Failed to load dashboard data. Please refresh.</div>
+
+    <!-- STAT CARDS -->
+    <section *ngIf="!loading" class="stat-cards">
+      <div class="stat-card blue">
+        <div class="stat-icon">👥</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats?.totalUsers ?? '-' }}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
       </div>
-
-      <div class="card disabled">
-        <h3>📊 System Stats</h3>
-        <p>Coming soon</p>
+      <div class="stat-card green">
+        <div class="stat-icon">📝</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats?.totalAssignments ?? '-' }}</div>
+          <div class="stat-label">Assignments</div>
+        </div>
       </div>
-
+      <div class="stat-card purple">
+        <div class="stat-icon">📢</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats?.totalAnnouncements ?? '-' }}</div>
+          <div class="stat-label">Announcements</div>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ stats?.pendingApprovals ?? '-' }}</div>
+          <div class="stat-label">Pending Approvals</div>
+        </div>
+      </div>
     </section>
 
+    <!-- CHARTS -->
+    <section *ngIf="!loading && !error" class="charts-section">
+      <div class="chart-card">
+        <h3 class="chart-title">👥 User Role Breakdown</h3>
+        <div class="chart-container">
+          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <h3 class="chart-title">✅ Attendance Overview</h3>
+        <div class="chart-container">
+          <canvas baseChart [data]="doughnutChartData" [type]="doughnutChartType" [options]="doughnutChartOptions"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUICK ACCESS CARDS -->
+    <section *ngIf="!loading" class="quick-cards">
+      <h2 class="section-title">Quick Access</h2>
+      <div class="quick-grid">
+        <div class="quick-card" (click)="goTo('/admin/users')">
+          <div class="quick-icon blue-bg">👥</div>
+          <div class="quick-info"><div class="quick-title">Manage Users</div><div class="quick-desc">View, search &amp; delete users</div></div>
+        </div>
+        <div class="quick-card" (click)="goTo('/admin/stats')">
+          <div class="quick-icon indigo-bg">📊</div>
+          <div class="quick-info"><div class="quick-title">System Stats</div><div class="quick-desc">Platform-wide analytics</div></div>
+        </div>
+        <div class="quick-card" (click)="goTo('/admin/approvals')">
+          <div class="quick-icon orange-bg">⏳</div>
+          <div class="quick-info"><div class="quick-title">Pending Approvals</div><div class="quick-desc">Approve student registrations</div></div>
+        </div>
+        <div class="quick-card" (click)="goTo('/admin/announcements')">
+          <div class="quick-icon purple-bg">📢</div>
+          <div class="quick-info"><div class="quick-title">Announcements</div><div class="quick-desc">Moderate faculty announcements</div></div>
+        </div>
+        <div class="quick-card" (click)="goTo('/admin/assignments')">
+          <div class="quick-icon green-bg">📝</div>
+          <div class="quick-info"><div class="quick-title">Assignments</div><div class="quick-desc">View all assignments</div></div>
+        </div>
+        <div class="quick-card" (click)="goTo('/admin/attendance')">
+          <div class="quick-icon teal-bg">✅</div>
+          <div class="quick-info"><div class="quick-title">Attendance</div><div class="quick-desc">Monitor class attendance</div></div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>

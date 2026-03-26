@@ -1,112 +1,196 @@
-<div class="faculty-layout">
-  
+﻿<div class="faculty-shell">
+
+  <!-- SIDEBAR -->
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="logo-icon">🎓</div>
-      <h2 class="logo-text">EduPortal</h2>
+    <div class="sidebar-brand">
+      <div class="brand-logo">🎓</div>
+      <div>
+        <span class="brand-name">EduPortal</span>
+        <span class="brand-sub">Faculty Panel</span>
+      </div>
     </div>
 
-    <nav class="nav-container">
-      <a class="nav-link active" (click)="goTo('/faculty')">
-        <span class="icon">🏠</span> Dashboard
-      </a>
-      <a class="nav-link" (click)="goTo('/faculty/assignments')">
-        <span class="icon">📝</span> Assignments
-      </a>
-      <a class="nav-link" (click)="goTo('/faculty/announcements')">
-        <span class="icon">📢</span> Announcements
-      </a>
-      <a class="nav-link" (click)="goTo('/faculty/students')">
-        <span class="icon">👨‍🎓</span> Students
-      </a>
-      <a class="nav-link" (click)="goTo('/faculty/lectures')">
-        <span class="icon">📚</span> Lectures
-      </a>
-      <a class="nav-link" (click)="goTo('/faculty/attendance')">
-        <span class="icon">📊</span> Attendance
-      </a>
-      <div class="nav-divider"></div>
-      <a class="nav-link chat-link" (click)="goTo('/chat')">
-        <span class="icon">💬</span> Class Chat
-      </a>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" (click)="goTo('/faculty')">
+        <span class="nav-icon">🏠</span><span>Dashboard</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/assignments')">
+        <span class="nav-icon">📝</span><span>Assignments</span>
+        <span class="nav-badge" *ngIf="totalAssignments > 0">{{ totalAssignments }}</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/announcements')">
+        <span class="nav-icon">📢</span><span>Announcements</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/students')">
+        <span class="nav-icon">👨‍🎓</span><span>Students</span>
+        <span class="nav-badge" *ngIf="totalStudents > 0">{{ totalStudents }}</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/lectures')">
+        <span class="nav-icon">📚</span><span>Lectures</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/attendance')">
+        <span class="nav-icon">📊</span><span>Attendance</span>
+      </button>
+      <button class="nav-item" (click)="goTo('/faculty/live')">
+        <span class="nav-icon">🎥</span><span>Live Class</span>
+        <span class="live-dot" *ngIf="liveClass"></span>
+      </button>
+      <button class="nav-item" (click)="goTo('/dm')">
+        <span class="nav-icon">💬</span><span>Messages</span>
+      </button>
     </nav>
 
-    <button class="logout-action" (click)="logout()">
-      <span>Logout</span>
-      <span class="arrow">→</span>
-    </button>
+    <div class="sidebar-footer">
+      <div class="faculty-profile">
+        <div class="profile-avatar">{{ faculty.name.charAt(0) }}</div>
+        <div class="profile-info">
+          <span class="profile-name">{{ faculty.name }}</span>
+          <span class="profile-email">{{ faculty.email }}</span>
+        </div>
+      </div>
+      <button class="logout-btn" (click)="logout()">⟳ Logout</button>
+    </div>
   </aside>
 
+  <!-- MAIN -->
   <main class="main-content">
-    
-    <header class="header-glass">
-      <div class="header-left">
-        <h1>Welcome back, {{ faculty.name }} 👋</h1>
-        <p>You have 3 classes scheduled for today.</p>
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1>Welcome back, <span class="name-hl">{{ faculty.name }}</span> 👋</h1>
+        <p>{{ today | date:'EEEE, d MMMM yyyy' }} · Here's your classroom overview</p>
       </div>
-      
-      <div class="header-right">
-        <div class="profile-card">
-          <div class="avatar-box">{{ faculty.name[0] }}</div>
-          <div class="profile-info">
-            <span class="p-name">{{ faculty.name }}</span>
-            <span class="p-email">{{ faculty.email }}</span>
-          </div>
-        </div>
+      <div class="topbar-actions">
+        <button class="action-btn primary" (click)="goTo('/faculty/live')">
+          <span *ngIf="!liveClass">▶ Start Live Class</span>
+          <span *ngIf="liveClass">● Live in Progress</span>
+        </button>
+        <button class="action-btn secondary" (click)="goTo('/faculty/assignments')">+ New Assignment</button>
       </div>
     </header>
 
-    <div class="grid-container">
-      
-      <div class="app-card" (click)="goTo('/faculty/assignments')">
-        <div class="app-card-icon i-blue">📝</div>
-        <div class="app-card-content">
-          <h3>Assignments</h3>
-          <p>Manage and grade student work</p>
-        </div>
+    <div class="page-body">
+
+      <!-- LOADING -->
+      <div *ngIf="loading" class="loader-row">
+        <div class="skeleton" *ngFor="let i of [1,2,3,4]"></div>
       </div>
 
-      <div class="app-card" (click)="goTo('/faculty/announcements')">
-        <div class="app-card-icon i-purple">📢</div>
-        <div class="app-card-content">
-          <h3>Announcements</h3>
-          <p>Broadcast news to your classes</p>
-        </div>
-      </div>
+      <ng-container *ngIf="!loading">
 
-      <div class="app-card" (click)="goTo('/faculty/lectures')">
-        <div class="app-card-icon i-orange">📚</div>
-        <div class="app-card-content">
-          <h3>Lectures</h3>
-          <p>Upload videos and documents</p>
-        </div>
-      </div>
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card" (click)="goTo('/faculty/assignments')">
+            <div class="stat-icon-wrap blue">📝</div>
+            <div class="stat-body">
+              <span class="stat-num">{{ totalAssignments }}</span>
+              <span class="stat-lbl">Assignments</span>
+            </div>
+            <div class="stat-trend blue-text">View all →</div>
+          </div>
 
-      <div class="app-card" (click)="goTo('/faculty/students')">
-        <div class="app-card-icon i-green">👨‍🎓</div>
-        <div class="app-card-content">
-          <h3>Students</h3>
-          <p>View roster and performance</p>
-        </div>
-      </div>
+          <div class="stat-card" (click)="goTo('/faculty/announcements')">
+            <div class="stat-icon-wrap purple">📢</div>
+            <div class="stat-body">
+              <span class="stat-num">{{ totalAnnouncements }}</span>
+              <span class="stat-lbl">Announcements</span>
+            </div>
+            <div class="stat-trend purple-text">View all →</div>
+          </div>
 
-      <div class="app-card live-status" (click)="goTo('/faculty/live')">
-        <div class="app-card-icon i-red pulse-red">🎥</div>
-        <div class="app-card-content">
-          <h3>Live Class</h3>
-          <div class="status-tag">Live Now</div>
-          <p>Click to start your session</p>
-        </div>
-      </div>
+          <div class="stat-card" (click)="goTo('/faculty/lectures')">
+            <div class="stat-icon-wrap orange">📚</div>
+            <div class="stat-body">
+              <span class="stat-num">{{ totalLectures }}</span>
+              <span class="stat-lbl">Lectures</span>
+            </div>
+            <div class="stat-trend orange-text">View all →</div>
+          </div>
 
-      <div class="app-card chat-highlight" (click)="goTo('/chat')">
-        <div class="app-card-icon i-indigo">💬</div>
-        <div class="app-card-content">
-          <h3>Class Chat</h3>
-          <p>Instant student messaging</p>
+          <div class="stat-card" (click)="goTo('/faculty/students')">
+            <div class="stat-icon-wrap green">👨‍🎓</div>
+            <div class="stat-body">
+              <span class="stat-num">{{ totalStudents }}</span>
+              <span class="stat-lbl">Students</span>
+            </div>
+            <div class="stat-trend green-text">View all →</div>
+          </div>
         </div>
-      </div>
 
+        <!-- CONTENT ROW -->
+        <div class="content-row">
+
+          <!-- RECENT ASSIGNMENTS -->
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Recent Assignments</h3>
+              <button class="panel-link" (click)="goTo('/faculty/assignments')">View all →</button>
+            </div>
+
+            <div *ngIf="recentAssignments.length === 0" class="empty-state">
+              <span>📋</span><p>No assignments yet</p>
+            </div>
+
+            <div class="assignment-list">
+              <div *ngFor="let a of recentAssignments" class="assignment-row">
+                <div class="asgn-left">
+                  <div class="asgn-icon">📝</div>
+                  <div class="asgn-info">
+                    <span class="asgn-title">{{ a.title }}</span>
+                    <span class="asgn-course">{{ a.course || 'BCA' }}</span>
+                  </div>
+                </div>
+                <div class="asgn-right">
+                  <span class="due-chip" [ngClass]="getDueClass(a.dueDate)">
+                    {{ getDaysUntilDue(a.dueDate) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- RIGHT COLUMN -->
+          <div class="right-col">
+
+            <!-- LIVE CLASS STATUS -->
+            <div class="live-panel" [class.live-active]="liveClass" (click)="goTo('/faculty/live')">
+              <div class="live-panel-icon">🎥</div>
+              <div class="live-panel-body">
+                <h4 *ngIf="!liveClass">No Live Class Running</h4>
+                <h4 *ngIf="liveClass">{{ liveClass.title }}</h4>
+                <p *ngIf="!liveClass">Click to start a new session</p>
+                <p *ngIf="liveClass">Live now · Click to manage</p>
+              </div>
+              <div class="live-status-dot" *ngIf="liveClass"></div>
+            </div>
+
+            <!-- RECENT ANNOUNCEMENTS -->
+            <div class="panel">
+              <div class="panel-header">
+                <h3>Recent Notices</h3>
+                <button class="panel-link" (click)="goTo('/faculty/announcements')">View all →</button>
+              </div>
+
+              <div *ngIf="recentAnnouncements.length === 0" class="empty-state">
+                <span>📭</span><p>No announcements yet</p>
+              </div>
+
+              <div class="notice-list">
+                <div *ngFor="let a of recentAnnouncements" class="notice-row">
+                  <div class="notice-dot"></div>
+                  <div class="notice-info">
+                    <span class="notice-title">{{ a.title }}</span>
+                    <span class="notice-date">{{ a.createdAt | date:'dd MMM yyyy' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </ng-container>
     </div>
   </main>
 </div>
