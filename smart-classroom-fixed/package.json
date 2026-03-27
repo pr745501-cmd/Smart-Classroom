@@ -1,27 +1,14 @@
 {
   "name": "smart-classroom-fixed",
   "version": "0.0.0",
-  "scripts": {
-    "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
   "private": true,
-  "packageManager": "npm@11.4.2",
+
+  "scripts": {
+    "start": "ng serve",
+    "build": "ng build --configuration production",
+    "vercel-build": "ng build --configuration production"
+  },
+
   "dependencies": {
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
@@ -36,6 +23,7 @@
     "socket.io-client": "^4.8.3",
     "tslib": "^2.3.0"
   },
+
   "devDependencies": {
     "@angular/build": "^21.0.5",
     "@angular/cli": "^21.0.5",
