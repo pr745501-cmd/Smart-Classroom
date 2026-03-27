@@ -19,7 +19,7 @@
       <button class="nav-item" (click)="goToLive()">
         <span class="nav-icon">🎥</span>
         <span>Live Class</span>
-        <span class="live-badge" *ngIf="$any(this).alreadyNotified">LIVE</span>
+        <span class="live-badge" *ngIf="activeMeeting">LIVE</span>
       </button>
       <button class="nav-item" (click)="goToAttendance()">
         <span class="nav-icon">📊</span>
@@ -61,6 +61,22 @@
         </div>
       </div>
     </header>
+
+    <!-- MEETING NOTIFICATION BANNER -->
+    <div class="meeting-banner" *ngIf="showMeetingBanner">
+      <div class="meeting-banner-left">
+        <span class="meeting-banner-pulse"></span>
+        <div>
+          <strong>Teacher has started a meeting — join class fast!</strong>
+          <span *ngIf="activeMeeting?.title"> · {{ activeMeeting.title }}</span>
+          <span *ngIf="activeMeeting?.meetingCode" class="meeting-code-chip">Code: {{ activeMeeting.meetingCode }}</span>
+        </div>
+      </div>
+      <div class="meeting-banner-actions">
+        <button class="banner-join-btn" (click)="joinMeeting()">Join Now</button>
+        <button class="banner-dismiss-btn" (click)="dismissBanner()">✕</button>
+      </div>
+    </div>
 
     <!-- PROFILE HERO -->
     <section class="profile-hero">
@@ -130,14 +146,15 @@
       </div>
 
       <div class="module-card live-card" (click)="goToLive()">
-        <div class="live-tag-card" *ngIf="$any(this).alreadyNotified">● LIVE NOW</div>
+        <div class="live-tag-card" *ngIf="activeMeeting">● LIVE NOW</div>
         <div class="module-icon live-icon">🎥</div>
         <div class="module-body">
           <h3>Live Class</h3>
-          <p>Join ongoing sessions</p>
+          <p *ngIf="!activeMeeting">Join ongoing sessions</p>
+          <p *ngIf="activeMeeting" class="live-meeting-title">{{ activeMeeting.title }}</p>
           <ul>
-            <li>Instant join</li>
-            <li>Faculty hosted</li>
+            <li>Real-time video &amp; audio</li>
+            <li>Enter code to join</li>
           </ul>
         </div>
         <div class="module-footer">Enter Room →</div>

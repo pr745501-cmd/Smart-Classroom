@@ -303,3 +303,12 @@
 }
 .btn-submit:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-wrapper { padding: 1rem 1rem 3rem; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .stats-row { grid-template-columns: 1fr; }
+  .quick-actions { flex-wrap: wrap; }
+}

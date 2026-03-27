@@ -63,8 +63,8 @@
       </div>
       <div class="topbar-actions">
         <button class="action-btn primary" (click)="goTo('/faculty/live')">
-          <span *ngIf="!liveClass">▶ Start Live Class</span>
-          <span *ngIf="liveClass">● Live in Progress</span>
+          <span *ngIf="!liveClass">▶ Start Live Meeting</span>
+          <span *ngIf="liveClass">● Meeting in Progress</span>
         </button>
         <button class="action-btn secondary" (click)="goTo('/faculty/assignments')">+ New Assignment</button>
       </div>
@@ -159,8 +159,11 @@
               <div class="live-panel-body">
                 <h4 *ngIf="!liveClass">No Live Class Running</h4>
                 <h4 *ngIf="liveClass">{{ liveClass.title }}</h4>
-                <p *ngIf="!liveClass">Click to start a new session</p>
-                <p *ngIf="liveClass">Live now · Click to manage</p>
+                <p *ngIf="!liveClass">Click to start a new video session</p>
+                <p *ngIf="liveClass">
+                  Live now · Code:
+                  <span class="meeting-code-badge">{{ liveClass.meetingCode }}</span>
+                </p>
               </div>
               <div class="live-status-dot" *ngIf="liveClass"></div>
             </div>

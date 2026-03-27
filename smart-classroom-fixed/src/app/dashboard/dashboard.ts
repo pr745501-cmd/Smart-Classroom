@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LiveClassService } from '../services/live-class.service';
 import { DashboardService } from '../services/dashboard.service';
+import { SocketService } from '../services/socket.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,14 +22,15 @@ export class Dashboard implements OnInit, OnDestroy {
   statsLoading = true;
   loading = true;
 
-  private liveTimer: any;
-  alreadyNotified = false;
+  activeMeeting: any = null;
+  showMeetingBanner = false;
 
   constructor(
     private router: Router,
     private cd: ChangeDetectorRef,
     private live: LiveClassService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private socketService: SocketService
   ) {}
 
   ngOnInit() {
@@ -58,23 +60,45 @@ export class Dashboard implements OnInit, OnDestroy {
       }
     });
 
-    this.liveTimer = setInterval(() => this.checkLiveClass(), 5000);
+    // Check for active meeting on load
+    this.live.getLiveClass().subscribe({
+      next: (res: any) => {
+        if (res && res.isLive) {
+          this.activeMeeting = res;
+          this.showMeetingBanner = true;
+          this.cd.detectChanges();
+        }
+      },
+      error: () => {}
+    });
+
+    // Real-time meeting notifications via Socket.io
+    this.socketService.onMeetingStarted((data: any) => {
+      this.activeMeeting = data;
+      this.showMeetingBanner = true;
+      const audio = new Audio('assets/notify.mp3');
+      audio.play().catch(() => {});
+      this.cd.detectChanges();
+    });
+
+    this.socketService.onMeetingEnded(() => {
+      this.activeMeeting = null;
+      this.showMeetingBanner = false;
+      this.cd.detectChanges();
+    });
   }
 
   ngOnDestroy() {
-    if (this.liveTimer) clearInterval(this.liveTimer);
+    this.socketService.offEvent('meetingStarted');
+    this.socketService.offEvent('meetingEnded');
   }
 
-  checkLiveClass() {
-    this.live.getLiveClass().subscribe((res: any) => {
-      if (res && !this.alreadyNotified) {
-        this.alreadyNotified = true;
-        const audio = new Audio('assets/notify.mp3');
-        audio.play().catch(() => {});
-        alert(`📢 A class has been started!\n\nClass: ${res.title}\nFaculty: ${res.facultyName}\n\nJoin fast!`);
-      }
-      if (!res) this.alreadyNotified = false;
-    });
+  dismissBanner() {
+    this.showMeetingBanner = false;
+  }
+
+  joinMeeting() {
+    this.router.navigate(['/student/live']);
   }
 
   logout() { localStorage.clear(); this.router.navigate(['/login']); }

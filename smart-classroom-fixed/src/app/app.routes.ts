@@ -170,6 +170,13 @@ export const routes: Routes = [
     canActivate: [roleGuard(['student', 'faculty'])]
   },
 
+  /* 🎥 MEETING ROOM */
+  {
+    path: 'meeting-room/:sessionId',
+    loadComponent: () => import('./meeting-room/meeting-room').then(m => m.MeetingRoomComponent),
+    canActivate: [roleGuard(['student', 'faculty'])]
+  },
+
   /* 🔁 FALLBACK */
   { path: '**', redirectTo: '' }
 ];

@@ -364,3 +364,11 @@
 .emoji-item:hover {
   background: #f0f2f5;
 }
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .chat-container { height: 100vh; }
+  .bubble { max-width: 85%; }
+  .emoji-panel { width: 280px; }
+}

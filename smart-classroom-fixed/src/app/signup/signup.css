@@ -173,3 +173,10 @@
   .brand-panel { display: none; }
   .form-panel { padding: 2rem 1.5rem; background: white; }
 }
+
+/* ===== RESPONSIVE — tablet (901–1024px) ===== */
+@media (min-width: 901px) and (max-width: 1024px) {
+  .auth-layout { grid-template-columns: 1fr; }
+  .brand-panel { display: none; }
+  .form-panel { padding: 2rem 1.5rem; background: white; }
+}

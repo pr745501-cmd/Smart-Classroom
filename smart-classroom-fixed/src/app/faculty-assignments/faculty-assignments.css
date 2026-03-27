@@ -298,3 +298,12 @@
   font-weight: 600;
 }
 .empty-icon { font-size: 2.5rem; opacity: 0.5; }
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-wrapper { padding: 1rem 1rem 3rem; }
+  .page-header { flex-direction: column; align-items: flex-start; }
+  .header-right .search-input { width: 100%; }
+  .form-actions { flex-direction: column; }
+}

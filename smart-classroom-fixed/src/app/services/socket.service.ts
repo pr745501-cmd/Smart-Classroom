@@ -9,25 +9,27 @@ export class SocketService {
   socket: Socket;
 
   constructor() {
-
-    this.socket = io("http://localhost:5000", {
+    this.socket = io('http://localhost:5000', {
       transports: ['websocket'],
       auth: { token: localStorage.getItem('token') }
     });
-
   }
 
+  // ── Chat / Lecture ──────────────────────────────────────────────────────────
+
   joinRoom(roomId: string) {
-    this.socket.emit("joinLecture", roomId);
+    this.socket.emit('joinLecture', roomId);
   }
 
   sendMessage(data: any) {
-    this.socket.emit("sendMessage", data);
+    this.socket.emit('sendMessage', data);
   }
 
   onMessage(callback: any) {
-    this.socket.on("receiveMessage", callback);
+    this.socket.on('receiveMessage', callback);
   }
+
+  // ── Direct Messages ─────────────────────────────────────────────────────────
 
   joinDM(roomId: string): void {
     this.socket.emit('joinDM', { roomId });
@@ -85,4 +87,53 @@ export class SocketService {
     this.socket.off(event);
   }
 
+  // ── Meeting Room ────────────────────────────────────────────────────────────
+
+  joinMeetingRoom(sessionId: string): void {
+    this.socket.emit('joinMeetingRoom', { sessionId });
+  }
+
+  leaveMeetingRoom(sessionId: string): void {
+    this.socket.emit('leaveMeetingRoom', { sessionId });
+  }
+
+  onMeetingStarted(cb: (data: any) => void): void {
+    this.socket.on('meetingStarted', cb);
+  }
+
+  onMeetingEnded(cb: (data: any) => void): void {
+    this.socket.on('meetingEnded', cb);
+  }
+
+  onParticipantJoined(cb: (data: any) => void): void {
+    this.socket.on('participantJoined', cb);
+  }
+
+  onParticipantLeft(cb: (data: any) => void): void {
+    this.socket.on('participantLeft', cb);
+  }
+
+  onOffer(cb: (data: any) => void): void {
+    this.socket.on('offer', cb);
+  }
+
+  onAnswer(cb: (data: any) => void): void {
+    this.socket.on('answer', cb);
+  }
+
+  onIceCandidate(cb: (data: any) => void): void {
+    this.socket.on('iceCandidate', cb);
+  }
+
+  sendOffer(payload: any): void {
+    this.socket.emit('offer', payload);
+  }
+
+  sendAnswer(payload: any): void {
+    this.socket.emit('answer', payload);
+  }
+
+  sendIceCandidate(payload: any): void {
+    this.socket.emit('iceCandidate', payload);
+  }
 }

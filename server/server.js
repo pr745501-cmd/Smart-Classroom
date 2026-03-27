@@ -31,7 +31,7 @@ const assignmentRoutes = require("./routes/assignmentRoutes");
 const submissionRoutes = require("./routes/submissionRoutes");
 const attendanceRoutes = require("./routes/attendanceRoutes");
 const adminRoutes = require("./routes/adminRoutes");
-const liveClassRoutes = require("./routes/liveClassRoutes");
+const liveClassRoutesFactory = require("./routes/liveClassRoutes");
 const chatRoutes = require("./routes/chatRoutes");
 const dashboardStatsRoute = require("./routes/dashboardStatsRoute");
 
@@ -46,6 +46,8 @@ const io = new Server(server, {
     origin: "*"
   }
 });
+
+const liveClassRoutes = liveClassRoutesFactory(io);
 
 /* ================= PERFORMANCE ================= */
 
@@ -169,11 +171,27 @@ io.on("connection", (socket) => {
   });
 
   /* DISCONNECT */
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
 
     console.log("❌ User disconnected:", socket.id);
     if (socket.user) {
       presenceService.userDisconnected(socket.user.id, socket.id, io);
+      // If faculty disconnects while in a meeting, end the meeting
+      if (socket.user.role === 'faculty' && socket.meetingSessionId) {
+        try {
+          const LiveClass = require('./models/LiveClass');
+          const liveClass = await LiveClass.findByIdAndUpdate(
+            socket.meetingSessionId,
+            { isLive: false, endedAt: new Date() },
+            { new: true }
+          );
+          if (liveClass) {
+            io.to(socket.meetingSessionId).emit('meetingEnded', { sessionId: socket.meetingSessionId });
+          }
+        } catch (err) {
+          console.error('Error ending meeting on disconnect:', err);
+        }
+      }
     }
 
   });
@@ -239,6 +257,42 @@ io.on("connection", (socket) => {
   socket.on("stopTyping", ({ roomId }) => {
     if (!socket.user) return;
     socket.to(roomId).emit("stopTyping", { userId: socket.user.id });
+  });
+
+  // ===== MEETING ROOM SIGNALING =====
+
+  socket.on('joinMeetingRoom', ({ sessionId }) => {
+    socket.join(sessionId);
+    socket.meetingSessionId = sessionId;
+    io.to(sessionId).emit('participantJoined', {
+      socketId: socket.id,
+      userId: socket.user?.id,
+      name: socket.user?.name || socket.user?.email,
+      role: socket.user?.role
+    });
+  });
+
+  socket.on('leaveMeetingRoom', ({ sessionId }) => {
+    socket.leave(sessionId);
+    socket.meetingSessionId = null;
+    io.to(sessionId).emit('participantLeft', {
+      socketId: socket.id,
+      userId: socket.user?.id,
+      name: socket.user?.name || socket.user?.email,
+      role: socket.user?.role
+    });
+  });
+
+  socket.on('offer', ({ sessionId, targetSocketId, sdp }) => {
+    io.to(targetSocketId).emit('offer', { fromSocketId: socket.id, sdp });
+  });
+
+  socket.on('answer', ({ sessionId, targetSocketId, sdp }) => {
+    io.to(targetSocketId).emit('answer', { fromSocketId: socket.id, sdp });
+  });
+
+  socket.on('iceCandidate', ({ sessionId, targetSocketId, candidate }) => {
+    io.to(targetSocketId).emit('iceCandidate', { fromSocketId: socket.id, candidate });
   });
 
 }); // 🔴 IMPORTANT: connection block closed here

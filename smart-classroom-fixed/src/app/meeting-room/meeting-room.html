@@ -1,0 +1,112 @@
+<div class="meeting-room">
+
+  <!-- Session Expired Banner -->
+  <div *ngIf="sessionExpired" class="banner banner-expired">
+    <span>⚠️ Your session has expired. You have been disconnected.</span>
+    <button class="banner-dismiss" (click)="dismissSessionExpired()">Go to Dashboard</button>
+  </div>
+
+  <!-- Permission Error Banner -->
+  <div *ngIf="permissionError && !sessionExpired" class="banner banner-error">
+    <span>🎤 {{ permissionError }}</span>
+    <button class="banner-dismiss" (click)="permissionError = null">Dismiss</button>
+  </div>
+
+  <!-- Meeting Code (faculty only) -->
+  <div *ngIf="role === 'faculty' && meetingCode" class="meeting-code-bar">
+    <span class="code-label">Share this code with students:</span>
+    <span class="code-value">{{ meetingCode }}</span>
+  </div>
+
+  <!-- Connection Quality Badge -->
+  <div class="quality-badge" [class]="'quality-' + connectionQuality">
+    <span class="quality-dot"></span>
+    {{ connectionQuality | titlecase }}
+  </div>
+
+  <!-- Participant List Panel -->
+  <div class="participants-panel" [class.open]="showParticipants">
+    <div class="panel-header">
+      <span>Participants ({{ participants.length + 1 }})</span>
+      <button class="panel-close" (click)="showParticipants = false">✕</button>
+    </div>
+    <div class="panel-list">
+      <div class="panel-item self">
+        <span class="participant-avatar">You</span>
+        <div>
+          <div class="participant-name">You</div>
+          <div class="participant-role">{{ role }}</div>
+        </div>
+      </div>
+      <div class="panel-item" *ngFor="let p of participants">
+        <span class="participant-avatar">{{ p.name.charAt(0).toUpperCase() }}</span>
+        <div>
+          <div class="participant-name">{{ p.name }}</div>
+          <div class="participant-role">{{ p.role }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Remote Video Grid -->
+  <div class="video-grid" [class.empty]="participants.length === 0">
+    <div *ngIf="participants.length === 0" class="waiting-message">
+      <span class="waiting-icon">👥</span>
+      <p>Waiting for participants to join...</p>
+    </div>
+    <div class="video-tile" *ngFor="let p of participants">
+      <video
+        [id]="'video-' + p.socketId"
+        autoplay
+        playsinline
+        [muted]="false"
+        class="remote-video"
+        [attr.data-socket-id]="p.socketId">
+      </video>
+      <div class="tile-label">
+        <span>{{ p.name }}</span>
+        <span class="tile-role">{{ p.role }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local Video (bottom-left) -->
+  <div class="local-video-container">
+    <video #localVideo autoplay muted playsinline class="local-video"></video>
+    <div class="local-label">You</div>
+  </div>
+
+  <!-- Control Bar -->
+  <div class="control-bar">
+    <button class="ctrl-btn" [class.active]="!audioEnabled" (click)="toggleAudio()" [title]="audioEnabled ? 'Mute' : 'Unmute'">
+      <span>{{ audioEnabled ? '🎤' : '🔇' }}</span>
+      <span class="ctrl-label">{{ audioEnabled ? 'Mute' : 'Unmute' }}</span>
+    </button>
+
+    <button class="ctrl-btn" [class.active]="!videoEnabled" (click)="toggleVideo()" [title]="videoEnabled ? 'Stop Video' : 'Start Video'">
+      <span>{{ videoEnabled ? '📹' : '📷' }}</span>
+      <span class="ctrl-label">{{ videoEnabled ? 'Stop Video' : 'Start Video' }}</span>
+    </button>
+
+    <button class="ctrl-btn" [class.active]="screenSharing" (click)="toggleScreenShare()" title="Share Screen">
+      <span>🖥️</span>
+      <span class="ctrl-label">{{ screenSharing ? 'Stop Share' : 'Share Screen' }}</span>
+    </button>
+
+    <button class="ctrl-btn" (click)="showParticipants = !showParticipants" title="Participants">
+      <span>👥</span>
+      <span class="ctrl-label">Participants</span>
+    </button>
+
+    <button *ngIf="role === 'faculty'" class="ctrl-btn ctrl-end" (click)="endMeeting()" title="End Meeting">
+      <span>📵</span>
+      <span class="ctrl-label">End Meeting</span>
+    </button>
+
+    <button *ngIf="role === 'student'" class="ctrl-btn ctrl-leave" (click)="leaveMeeting()" title="Leave Meeting">
+      <span>🚪</span>
+      <span class="ctrl-label">Leave</span>
+    </button>
+  </div>
+
+</div>

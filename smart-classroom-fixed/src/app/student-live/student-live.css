@@ -199,3 +199,206 @@
   transform: translateY(-4px) scale(1.04);
   box-shadow: 0 16px 36px rgba(67,233,123,0.5);
 }
+
+/* ── JOIN CARD ── */
+.join-card {
+  background: rgba(255,255,255,0.97);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.5);
+  border-radius: 2rem;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12);
+  animation: popIn 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.join-icon {
+  font-size: 3rem;
+  margin-bottom: 0.75rem;
+}
+
+.join-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0 0 0.4rem;
+  letter-spacing: -0.03em;
+}
+
+.join-sub {
+  font-size: 0.875rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin: 0 0 1.75rem;
+}
+
+.field-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.field-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.field-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid #eaeff6;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #0f172a;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.field-group input:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.btn-join {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(135deg, #43e97b, #38f9d7);
+  color: #fff;
+  border: none;
+  border-radius: 0.9rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  box-shadow: 0 4px 14px rgba(67,233,123,0.3);
+  margin-top: 1.25rem;
+}
+
+.btn-join:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); }
+.btn-join:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ── NOTIFICATION BANNER ── */
+.notification-banner {
+  background: linear-gradient(135deg, #1e1b4b, #312e81);
+  border: 1px solid #4338ca;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 8px 24px rgba(67,56,202,0.3);
+  animation: slideDown 0.4s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.banner-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.banner-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.banner-text strong {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #e0e7ff;
+}
+
+.banner-sub {
+  font-size: 0.8rem;
+  color: #a5b4fc;
+}
+
+.banner-code {
+  background: #4338ca;
+  color: #e0e7ff;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0.5rem;
+  font-family: monospace;
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  flex-shrink: 0;
+}
+
+.banner-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.btn-use-code {
+  background: #4338ca;
+  color: #e0e7ff;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.btn-use-code:hover { background: #3730a3; }
+
+.btn-dismiss {
+  background: rgba(255,255,255,0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(165,180,252,0.3);
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.btn-dismiss:hover { background: rgba(255,255,255,0.15); }
+
+/* ── ERROR BANNER ── */
+.error-banner {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-wrapper { padding: 1rem 1rem 3rem; }
+  .no-class-card { padding: 2.5rem 1.5rem; }
+  .live-class-card { padding: 2.5rem 1.5rem; }
+  .join-card { padding: 2rem 1.5rem; }
+}

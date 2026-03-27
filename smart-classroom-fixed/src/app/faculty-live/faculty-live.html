@@ -1,4 +1,4 @@
-﻿<div class="page-wrapper">
+﻿<div *ngIf="!inMeeting" class="page-wrapper">
 
   <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
 
@@ -6,14 +6,12 @@
     <div class="live-card">
 
       <div class="live-icon">&#127909;</div>
-      <h2 class="live-card-title">Live Class Control</h2>
-      <p class="live-card-sub">Start or end a live session for your students</p>
+      <h2 class="live-card-title">Start Live Class</h2>
+      <p class="live-card-sub">Enter a title and start your meeting</p>
 
-      <!-- Status Indicator -->
-      <div class="status-indicator" [class.live]="isLive" [class.offline]="!isLive">
-        <span *ngIf="isLive" class="live-pulse"></span>
-        <span *ngIf="!isLive" class="offline-dot"></span>
-        {{ isLive ? 'Class is Live' : 'No Active Session' }}
+      <!-- Error Message -->
+      <div *ngIf="errorMsg" class="error-banner">
+        ⚠️ {{ errorMsg }}
       </div>
 
       <!-- Form Fields -->
@@ -22,22 +20,20 @@
         <input type="text" [(ngModel)]="title" placeholder="e.g. Introduction to Angular">
       </div>
 
-      <div class="field-group">
-        <label>Meeting Link</label>
-        <input type="text" [(ngModel)]="link" placeholder="https://meet.google.com/...">
-      </div>
-
       <!-- Start Button -->
-      <button class="btn-start" [class.active-pulse]="isLive" (click)="start()" [disabled]="loading">
-        {{ loading ? 'Starting...' : isLive ? '🔴 Class is Live' : '🟢 Start Live Class' }}
-      </button>
-
-      <!-- End Button -->
-      <button class="btn-end" (click)="end()">
-        &#9209; End Class
+      <button class="btn-start" (click)="start()" [disabled]="loading">
+        {{ loading ? 'Starting...' : '🟢 Start Live Class' }}
       </button>
 
     </div>
   </div>
 
 </div>
+
+<!-- Meeting Room -->
+<app-meeting-room
+  *ngIf="inMeeting"
+  [sessionId]="sessionId"
+  [meetingCode]="meetingCode"
+  role="faculty">
+</app-meeting-room>

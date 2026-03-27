@@ -282,3 +282,16 @@
   0%, 100% { opacity: 0.6; }
   50% { opacity: 1; }
 }
+
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .page-wrapper { padding: 1rem 1rem 3rem; }
+  .header-row { flex-direction: column; align-items: flex-start; }
+  .search-box input { width: 100%; }
+  .search-box { width: 100%; }
+  .assignments-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .assignments-grid { grid-template-columns: repeat(2, 1fr); }
+}

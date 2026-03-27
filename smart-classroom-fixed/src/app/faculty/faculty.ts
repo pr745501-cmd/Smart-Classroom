@@ -1,10 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AssignmentService } from '../services/assignment.service';
 import { AnnouncementService } from '../services/announcement.service';
 import { LiveClassService } from '../services/live-class.service';
+import { SocketService } from '../services/socket.service';
 
 @Component({
   selector: 'app-faculty',
@@ -13,7 +14,7 @@ import { LiveClassService } from '../services/live-class.service';
   templateUrl: './faculty.html',
   styleUrls: ['./faculty.css']
 })
-export class Faculty implements OnInit {
+export class Faculty implements OnInit, OnDestroy {
 
   faculty = { name: '', email: '' };
   today = new Date();
@@ -36,6 +37,7 @@ export class Faculty implements OnInit {
     private assignmentService: AssignmentService,
     private announcementService: AnnouncementService,
     private liveService: LiveClassService,
+    private socketService: SocketService,
     private cdr: ChangeDetectorRef
   ) {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -111,6 +113,21 @@ export class Faculty implements OnInit {
       },
       error: () => {}
     });
+
+    // Keep live class status in sync via Socket.io
+    this.socketService.onMeetingStarted((data: any) => {
+      this.liveClass = data;
+      this.cdr.detectChanges();
+    });
+    this.socketService.onMeetingEnded(() => {
+      this.liveClass = null;
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngOnDestroy() {
+    this.socketService.offEvent('meetingStarted');
+    this.socketService.offEvent('meetingEnded');
   }
 
   getDaysUntilDue(dueDate: string): string {
