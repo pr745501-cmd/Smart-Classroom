@@ -39,7 +39,7 @@
         </div>
       </div>
       <div class="panel-item" *ngFor="let p of participants">
-        <span class="participant-avatar">{{ p.name.charAt(0).toUpperCase() }}</span>
+        <span class="participant-avatar">{{ (p.name || 'P').charAt(0).toUpperCase() }}</span>
         <div>
           <div class="participant-name">{{ p.name }}</div>
           <div class="participant-role">{{ p.role }}</div>
@@ -61,7 +61,9 @@
         playsinline
         [muted]="false"
         class="remote-video"
-        [attr.data-socket-id]="p.socketId">
+        [attr.data-socket-id]="p.socketId"
+        appSetStream
+        [stream]="p.stream">
       </video>
       <div class="tile-label">
         <span>{{ p.name }}</span>

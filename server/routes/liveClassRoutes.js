@@ -117,6 +117,20 @@ module.exports = (io) => {
     }
   });
 
+  // DELETE /force-end  — ends any stuck active meeting for this faculty
+  router.delete("/force-end", authMiddleware, roleMiddleware(["faculty"]), async (req, res) => {
+    try {
+      const facultyId = req.user.id;
+      const result = await LiveClass.updateMany(
+        { facultyId, isLive: true },
+        { isLive: false, endedAt: new Date() }
+      );
+      return res.json({ success: true, ended: result.modifiedCount });
+    } catch (err) {
+      return res.status(500).json({ message: err.message });
+    }
+  });
+
   // GET /
   router.get("/", authMiddleware, async (req, res) => {
     try {

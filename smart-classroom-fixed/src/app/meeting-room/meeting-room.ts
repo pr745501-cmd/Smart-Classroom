@@ -5,6 +5,7 @@ import { Subscription } from 'rxjs';
 import { WebRtcService } from '../services/webrtc.service';
 import { SocketService } from '../services/socket.service';
 import { LiveClassService } from '../services/live-class.service';
+import { SetStreamDirective } from './set-stream.directive';
 
 export interface Participant {
   socketId: string;
@@ -18,7 +19,7 @@ export interface Participant {
 @Component({
   selector: 'app-meeting-room',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SetStreamDirective],
   templateUrl: './meeting-room.html',
   styleUrls: ['./meeting-room.css']
 })
@@ -68,6 +69,8 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
       } else {
         this.participants.push({ socketId, userId: socketId, name: 'Participant', role: 'student', stream });
       }
+      // Force new array reference so *ngFor re-renders and directive picks up stream
+      this.participants = [...this.participants];
       this.cdr.detectChanges();
     });
 
@@ -76,9 +79,9 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
       if (!this.participants.find(p => p.socketId === data.socketId)) {
         this.participants.push({
           socketId: data.socketId,
-          userId: data.userId,
-          name: data.name,
-          role: data.role
+          userId: data.userId || data.socketId,
+          name: data.name || 'Participant',
+          role: data.role || 'student'
         });
       }
       this.webrtcService.createOffer(data.socketId, this.socketService.socket);

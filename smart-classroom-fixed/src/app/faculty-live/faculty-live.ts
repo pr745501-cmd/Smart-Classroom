@@ -20,6 +20,7 @@ export class FacultyLive {
   sessionId = '';
   inMeeting = false;
   errorMsg = '';
+  hasActiveMeeting = false;
 
   constructor(
     private live: LiveClassService,
@@ -29,6 +30,23 @@ export class FacultyLive {
 
   goBack(): void {
     this.router.navigate(['/faculty']);
+  }
+
+  forceEnd(): void {
+    this.loading = true;
+    this.live.forceEndClass().subscribe({
+      next: () => {
+        this.loading = false;
+        this.errorMsg = '';
+        this.hasActiveMeeting = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.loading = false;
+        this.errorMsg = 'Failed to end previous meeting. Please try again.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   start(): void {
@@ -51,6 +69,7 @@ export class FacultyLive {
         this.loading = false;
         if (err.status === 409) {
           this.errorMsg = 'You already have an active meeting. Please end it first.';
+          this.hasActiveMeeting = true;
         } else if (err.status === 0) {
           this.errorMsg = 'Service unavailable. Please try again.';
         } else {

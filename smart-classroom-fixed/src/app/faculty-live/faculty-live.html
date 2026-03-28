@@ -12,6 +12,9 @@
       <!-- Error Message -->
       <div *ngIf="errorMsg" class="error-banner">
         ⚠️ {{ errorMsg }}
+        <button *ngIf="hasActiveMeeting" class="btn-end" (click)="forceEnd()" [disabled]="loading" style="margin-top:10px;width:100%;">
+          {{ loading ? 'Ending...' : '🔴 End Previous Meeting' }}
+        </button>
       </div>
 
       <!-- Form Fields -->

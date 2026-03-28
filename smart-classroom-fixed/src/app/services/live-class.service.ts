@@ -23,4 +23,8 @@ export class LiveClassService {
   joinClass(meetingCode: string) {
     return this.http.post(this.API + '/join', { meetingCode });
   }
+
+  forceEndClass() {
+    return this.http.delete(this.API + '/force-end');
+  }
 }
