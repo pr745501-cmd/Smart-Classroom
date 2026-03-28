@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, Input, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -23,7 +23,7 @@ export interface Participant {
   templateUrl: './meeting-room.html',
   styleUrls: ['./meeting-room.css']
 })
-export class MeetingRoomComponent implements OnInit, OnDestroy {
+export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @Input() sessionId: string = '';
   @Input() role: 'faculty' | 'student' = 'student';
@@ -53,16 +53,6 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.socketService.joinMeetingRoom(this.sessionId);
 
-    this.webrtcService.initLocalMedia().then(stream => {
-      this.permissionError = this.webrtcService.permissionError;
-      if (stream && this.localVideoRef?.nativeElement) {
-        this.localVideoRef.nativeElement.srcObject = stream;
-        // Register local video element so screen share can update it
-        this.webrtcService.setLocalVideoElement(this.localVideoRef.nativeElement);
-      }
-      this.cdr.detectChanges();
-    });
-
     // Subscribe to remote streams
     this.remoteStreamSub = this.webrtcService.remoteStreams$.subscribe(({ socketId, stream }) => {
       const existing = this.participants.find(p => p.socketId === socketId);
@@ -71,7 +61,6 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
       } else {
         this.participants.push({ socketId, userId: socketId, name: 'Participant', role: 'student', stream });
       }
-      // Force new array reference so *ngFor re-renders and directive picks up stream
       this.participants = [...this.participants];
       this.cdr.detectChanges();
     });
@@ -87,14 +76,11 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
             role: p.role || 'student'
           });
         }
-        // WE are the newcomer — create offer to each existing participant
         this.webrtcService.createOffer(p.socketId, this.socketService.socket);
       }
       this.cdr.detectChanges();
     });
 
-    // Wire socket signaling events
-    // Only the EXISTING participant creates the offer to the newcomer
     this.socketService.onParticipantJoined((data: any) => {
       if (!this.participants.find(p => p.socketId === data.socketId)) {
         this.participants.push({
@@ -104,8 +90,6 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
           role: data.role || 'student'
         });
       }
-      // Only create offer if WE were already in the room (data.isNew means they just joined)
-      // The newcomer will receive offers from everyone already present
       this.webrtcService.createOffer(data.socketId, this.socketService.socket);
       this.cdr.detectChanges();
     });
@@ -137,6 +121,18 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
     this.socketService.onConnectError(() => {
       this.sessionExpired = true;
       this.webrtcService.closeAll();
+      this.cdr.detectChanges();
+    });
+  }
+
+  ngAfterViewInit(): void {
+    // Init local media AFTER view is ready so localVideoRef is available
+    this.webrtcService.initLocalMedia().then(stream => {
+      this.permissionError = this.webrtcService.permissionError;
+      if (stream && this.localVideoRef?.nativeElement) {
+        this.localVideoRef.nativeElement.srcObject = stream;
+        this.webrtcService.setLocalVideoElement(this.localVideoRef.nativeElement);
+      }
       this.cdr.detectChanges();
     });
   }
