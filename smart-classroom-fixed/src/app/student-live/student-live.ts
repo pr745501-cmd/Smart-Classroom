@@ -21,6 +21,7 @@ export class StudentLive implements OnInit, OnDestroy {
   meetingCodeInput = '';
   inMeeting = false;
   sessionId = '';
+  meetingTitle = '';
   errorMsg = '';
   loading = false;
 
@@ -92,6 +93,7 @@ export class StudentLive implements OnInit, OnDestroy {
     this.live.joinClass(this.meetingCodeInput.trim()).subscribe({
       next: (res: any) => {
         this.sessionId = res.sessionId;
+        this.meetingTitle = res.title || 'Live class';
         this.inMeeting = true;
         this.loading = false;
         this.cdr.detectChanges();

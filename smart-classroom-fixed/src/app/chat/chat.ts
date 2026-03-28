@@ -1,7 +1,25 @@
-import { Component, OnInit, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ViewChild,
+  ElementRef,
+  NgZone
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { io, Socket } from 'socket.io-client';
+import { SocketService } from '../services/socket.service';
+
+/** Saved lecture chat document shape from API / socket */
+export interface LectureChatMessage {
+  _id?: string;
+  senderName?: string;
+  senderRole?: string;
+  message?: string;
+  createdAt?: string | Date;
+  lectureId?: string;
+}
 
 @Component({
   selector: 'app-chat',
@@ -10,108 +28,84 @@ import { io, Socket } from 'socket.io-client';
   templateUrl: './chat.html',
   styleUrls: ['./chat.css']
 })
-export class Chat implements OnInit {
+export class Chat implements OnInit, OnDestroy {
 
-  socket!: Socket;
+  message = '';
+  lectureId = 'classroom';
+  messages: LectureChatMessage[] = [];
+  user: { name?: string; role?: string } = {};
 
-  message = "";
+  @ViewChild('scrollContainer') scroll!: ElementRef;
 
-  lectureId = "classroom";
-
-  messages:any[] = [];
-
-  user:any;
-
-  @ViewChild('scrollContainer') scroll!:ElementRef;
-
-  constructor(private cd:ChangeDetectorRef){}
-
-  ngOnInit(){
-
-    this.user = JSON.parse(localStorage.getItem("user") || "{}");
-
-    this.socket = io("http://localhost:5000");
-
-    this.socket.on("connect",()=>{
-
-      console.log("Socket connected:",this.socket.id);
-
-      this.socket.emit("joinLecture",this.lectureId);
-
-    });
-
-    /* LOAD CHAT HISTORY */
-
-    this.socket.on("chatHistory",(history:any)=>{
-
+  private readonly onChatHistory = (history: LectureChatMessage[]) => {
+    this.ngZone.run(() => {
       this.messages = history;
-
       this.cd.detectChanges();
-
       this.scrollDown();
-
     });
+  };
 
-    /* RECEIVE MESSAGE */
-
-    this.socket.on("receiveMessage",(data:any)=>{
-
-      this.messages.push(data);
-
-      // force UI refresh
+  private readonly onReceiveMessage = (data: LectureChatMessage) => {
+    this.ngZone.run(() => {
+      this.messages = [...this.messages, data];
       this.cd.detectChanges();
-
       this.scrollDown();
-
     });
+  };
 
+  private readonly onSocketConnect = () => {
+    this.ngZone.run(() => {
+      this.socketService.joinRoom(this.lectureId);
+    });
+  };
+
+  constructor(
+    private cd: ChangeDetectorRef,
+    private ngZone: NgZone,
+    private socketService: SocketService
+  ) {}
+
+  ngOnInit(): void {
+    this.user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    const s = this.socketService.socket;
+    s.on('chatHistory', this.onChatHistory);
+    s.on('receiveMessage', this.onReceiveMessage);
+    s.on('connect', this.onSocketConnect);
+
+    if (s.connected) {
+      this.socketService.joinRoom(this.lectureId);
+    }
   }
 
-  sendMessage(){
+  ngOnDestroy(): void {
+    const s = this.socketService.socket;
+    s.off('chatHistory', this.onChatHistory);
+    s.off('receiveMessage', this.onReceiveMessage);
+    s.off('connect', this.onSocketConnect);
+  }
 
-    if(!this.message.trim()) return;
-
+  sendMessage(): void {
+    if (!this.message.trim()) return;
     const data = {
-
-      lectureId:this.lectureId,
-
-      senderName:this.user.name,
-
-      senderRole:this.user.role,
-
-      message:this.message
-
+      lectureId: this.lectureId,
+      senderName: this.user.name,
+      senderRole: this.user.role,
+      message: this.message.trim()
     };
-
-    this.socket.emit("sendMessage",data);
-
-    this.message="";
-
+    this.socketService.sendMessage(data);
+    this.message = '';
   }
 
-  /* AUTO SCROLL */
-
-  scrollDown(){
-
-    setTimeout(()=>{
-
-      if(this.scroll){
-
-        this.scroll.nativeElement.scrollTop =
-        this.scroll.nativeElement.scrollHeight;
-
+  scrollDown(): void {
+    setTimeout(() => {
+      if (this.scroll?.nativeElement) {
+        this.scroll.nativeElement.scrollTop = this.scroll.nativeElement.scrollHeight;
       }
-
-    },10);
-
+    }, 10);
   }
 
-  /* TRACK BY (performance boost) */
-
-  trackMsg(index:number,item:any){
-
-    return item._id || index;
-
+  trackMsg(index: number, item: LectureChatMessage): string | number {
+    return item._id ?? index;
   }
-
 }

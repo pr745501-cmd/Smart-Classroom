@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -49,12 +49,102 @@ export class DmChatComponent implements OnInit, OnDestroy {
   private typingDebounceTimeout: any;
   private lastTypingEmit = 0;
 
+  /** Stable refs so we only remove our own socket listeners (shared socket app-wide). */
+  private readonly handleReceiveDM = (msg: DirectMessage) => {
+    this.ngZone.run(() => {
+      const msgRoom = [msg.sender, msg.recipient].sort().join('_');
+      if (msgRoom !== this.roomId) return;
+      const enriched = { ...msg, readReceipt: msg.sender === this.currentUserId ? ('sent' as const) : undefined };
+      this.messages.push(enriched);
+      this.cd.detectChanges();
+      if (!this.isUserScrolledUp) this.scrollToBottom();
+      if (msg.sender !== this.currentUserId) {
+        this.socketService.markRead(this.roomId, this.contactId);
+      }
+    });
+  };
+
+  private readonly handleDelivered = (data: { msgId: string }) => {
+    this.ngZone.run(() => {
+      const msg = this.messages.find(m => m._id === data.msgId);
+      if (msg && msg.readReceipt === 'sent') msg.readReceipt = 'delivered';
+      this.cd.detectChanges();
+    });
+  };
+
+  private readonly handleMessagesRead = (data: { contactId: string }) => {
+    this.ngZone.run(() => {
+      if (data.contactId !== this.contactId) return;
+      this.messages.forEach(m => {
+        if (m.sender === this.currentUserId) m.readReceipt = 'read';
+      });
+      this.cd.detectChanges();
+    });
+  };
+
+  private readonly handleTyping = (data: { userId: string }) => {
+    this.ngZone.run(() => {
+      if (data.userId === this.contactId) {
+        this.isTyping = true;
+        this.typingName = this.contactName || 'Contact';
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly handleStopTyping = (data: { userId: string }) => {
+    this.ngZone.run(() => {
+      if (data.userId === this.contactId) {
+        this.isTyping = false;
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly handleUserOnlineDm = (data: { userId: string }) => {
+    this.ngZone.run(() => {
+      if (data.userId === this.contactId) {
+        this.contactIsOnline = true;
+        this.contactLastSeen = null;
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly handleUserOfflineDm = (data: { userId: string; lastSeen: string }) => {
+    this.ngZone.run(() => {
+      if (data.userId === this.contactId) {
+        this.contactIsOnline = false;
+        this.contactLastSeen = data.lastSeen;
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly handleDmConnectError = () => {
+    this.ngZone.run(() => {
+      this.isReconnecting = true;
+      this.cd.detectChanges();
+    });
+  };
+
+  private readonly handleDmConnect = () => {
+    this.ngZone.run(() => {
+      this.isReconnecting = false;
+      if (this.roomId) {
+        this.socketService.joinDM(this.roomId);
+      }
+      this.cd.detectChanges();
+    });
+  };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private dmChatService: DmChatService,
     private socketService: SocketService,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -63,11 +153,21 @@ export class DmChatComponent implements OnInit, OnDestroy {
     this.currentUserName = user.name || '';
 
     this.route.params.subscribe(params => {
-      this.contactId = params['contactId'];
+      const prevRoom = this.roomId;
+      this.tearDownDmSocketListeners();
+      if (prevRoom) {
+        this.socketService.leaveDM(prevRoom);
+      }
+
+      this.contactId = params['contactId'] || '';
+      if (!this.contactId) {
+        this.roomId = '';
+        return;
+      }
       this.roomId = [this.currentUserId, this.contactId].sort().join('_');
       this.loadContact();
       this.loadMessages();
-      this.setupSocket();
+      this.registerDmSocketListeners();
     });
   }
 
@@ -110,73 +210,31 @@ export class DmChatComponent implements OnInit, OnDestroy {
     });
   }
 
-  private setupSocket(): void {
+  private tearDownDmSocketListeners(): void {
+    const s = this.socketService.socket;
+    s.off('receiveDM', this.handleReceiveDM);
+    s.off('delivered', this.handleDelivered);
+    s.off('messagesRead', this.handleMessagesRead);
+    s.off('typing', this.handleTyping);
+    s.off('stopTyping', this.handleStopTyping);
+    s.off('userOnline', this.handleUserOnlineDm);
+    s.off('userOffline', this.handleUserOfflineDm);
+    s.off('connect_error', this.handleDmConnectError);
+    s.off('connect', this.handleDmConnect);
+  }
+
+  private registerDmSocketListeners(): void {
+    const s = this.socketService.socket;
+    s.on('receiveDM', this.handleReceiveDM);
+    s.on('delivered', this.handleDelivered);
+    s.on('messagesRead', this.handleMessagesRead);
+    s.on('typing', this.handleTyping);
+    s.on('stopTyping', this.handleStopTyping);
+    s.on('userOnline', this.handleUserOnlineDm);
+    s.on('userOffline', this.handleUserOfflineDm);
+    s.on('connect_error', this.handleDmConnectError);
+    s.on('connect', this.handleDmConnect);
     this.socketService.joinDM(this.roomId);
-
-    this.socketService.onReceiveDM((msg: DirectMessage) => {
-      const enriched = { ...msg, readReceipt: msg.sender === this.currentUserId ? ('sent' as const) : undefined };
-      this.messages.push(enriched);
-      this.cd.detectChanges();
-      if (!this.isUserScrolledUp) this.scrollToBottom();
-      if (msg.sender !== this.currentUserId) {
-        this.socketService.markRead(this.roomId, this.contactId);
-      }
-    });
-
-    this.socketService.onDelivered((data: { msgId: string }) => {
-      const msg = this.messages.find(m => m._id === data.msgId);
-      if (msg && msg.readReceipt === 'sent') msg.readReceipt = 'delivered';
-      this.cd.detectChanges();
-    });
-
-    this.socketService.onMessagesRead(() => {
-      this.messages.forEach(m => {
-        if (m.sender === this.currentUserId) m.readReceipt = 'read';
-      });
-      this.cd.detectChanges();
-    });
-
-    this.socketService.onTyping((data: { userId: string }) => {
-      if (data.userId === this.contactId) {
-        this.isTyping = true;
-        // contactName may not be loaded yet — use it if available, else show generic
-        this.typingName = this.contactName || 'Contact';
-        this.cd.detectChanges();
-      }
-    });
-
-    this.socketService.onStopTyping((data: { userId: string }) => {
-      if (data.userId === this.contactId) {
-        this.isTyping = false;
-        this.cd.detectChanges();
-      }
-    });
-
-    this.socketService.onUserOnline((data: { userId: string }) => {
-      if (data.userId === this.contactId) {
-        this.contactIsOnline = true;
-        this.contactLastSeen = null;
-        this.cd.detectChanges();
-      }
-    });
-
-    this.socketService.onUserOffline((data: { userId: string; lastSeen: string }) => {
-      if (data.userId === this.contactId) {
-        this.contactIsOnline = false;
-        this.contactLastSeen = data.lastSeen;
-        this.cd.detectChanges();
-      }
-    });
-
-    this.socketService.onConnectError(() => {
-      this.isReconnecting = true;
-      this.cd.detectChanges();
-    });
-
-    this.socketService.socket.on('connect', () => {
-      this.isReconnecting = false;
-      this.cd.detectChanges();
-    });
   }
 
   sendMessage(): void {
@@ -315,14 +373,9 @@ export class DmChatComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     clearTimeout(this.typingTimeout);
     clearTimeout(this.typingDebounceTimeout);
-    this.socketService.offEvent('receiveDM');
-    this.socketService.offEvent('delivered');
-    this.socketService.offEvent('messagesRead');
-    this.socketService.offEvent('typing');
-    this.socketService.offEvent('stopTyping');
-    this.socketService.offEvent('userOnline');
-    this.socketService.offEvent('userOffline');
-    this.socketService.offEvent('connect_error');
-    this.socketService.offEvent('connect');
+    if (this.roomId) {
+      this.socketService.leaveDM(this.roomId);
+    }
+    this.tearDownDmSocketListeners();
   }
 }

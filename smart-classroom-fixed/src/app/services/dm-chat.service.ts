@@ -32,6 +32,14 @@ export interface StudentContact {
   unreadCount: number;
 }
 
+/** Server → client: refresh inbox row for /dm list without full page reload */
+export interface DmInboxUpdatePayload {
+  peerId: string;
+  lastMessage?: { text: string; timestamp: string | Date };
+  incrementUnread?: boolean;
+  resetUnread?: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DmChatService {
   private apiUrl = 'http://localhost:5000/api/chat';

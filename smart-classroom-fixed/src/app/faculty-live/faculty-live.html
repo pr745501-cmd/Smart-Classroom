@@ -1,4 +1,4 @@
-﻿<div *ngIf="!inMeeting" class="page-wrapper">
+<div *ngIf="!inMeeting" class="page-wrapper">
 
   <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
 
@@ -38,5 +38,6 @@
   *ngIf="inMeeting"
   [sessionId]="sessionId"
   [meetingCode]="meetingCode"
+  [meetingTitle]="title"
   role="faculty">
 </app-meeting-room>

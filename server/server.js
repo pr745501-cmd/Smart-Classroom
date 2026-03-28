@@ -201,11 +201,17 @@ io.on("connection", (socket) => {
   if (socket.user) {
     presenceService.userConnected(socket.user.id, socket.id);
     presenceService.userOnline(socket.user.id, io);
+    // Personal inbox channel — receive DM list updates without joining each chat room
+    socket.join(`user:${String(socket.user.id)}`);
   }
 
   // ===== JOIN DM ROOM =====
   socket.on("joinDM", ({ roomId }) => {
     socket.join(roomId);
+  });
+
+  socket.on("leaveDM", ({ roomId }) => {
+    if (roomId) socket.leave(roomId);
   });
 
   // ===== SEND DM =====
@@ -223,6 +229,24 @@ io.on("connection", (socket) => {
       });
       await msg.save();
       io.to(roomId).emit("receiveDM", msg);
+
+      const lastMessage = {
+        text: msg.text,
+        timestamp: msg.timestamp || new Date()
+      };
+      const rid = String(recipientId);
+      const sid = String(senderId);
+      io.to(`user:${rid}`).emit("dmInboxUpdate", {
+        peerId: sid,
+        lastMessage,
+        incrementUnread: true
+      });
+      io.to(`user:${sid}`).emit("dmInboxUpdate", {
+        peerId: rid,
+        lastMessage,
+        incrementUnread: false
+      });
+
       // Check if recipient is in the room
       const roomSockets = await io.in(roomId).fetchSockets();
       const recipientInRoom = roomSockets.some(s => s.user && s.user.id === recipientId);
@@ -244,6 +268,10 @@ io.on("connection", (socket) => {
         { readStatus: true }
       );
       io.to(roomId).emit("messagesRead", { contactId: socket.user.id });
+      io.to(`user:${String(socket.user.id)}`).emit("dmInboxUpdate", {
+        peerId: String(contactId),
+        resetUnread: true
+      });
     } catch (err) {
       console.error("markRead error:", err);
     }
@@ -315,6 +343,40 @@ io.on("connection", (socket) => {
 
   socket.on('iceCandidate', ({ sessionId, targetSocketId, candidate }) => {
     io.to(targetSocketId).emit('iceCandidate', { fromSocketId: socket.id, candidate });
+  });
+
+  // —— In-meeting Zoom-like features (chat, hands, mic/cam indicators) ——
+  socket.on('meetingChat', ({ sessionId, text }) => {
+    if (!socket.user || !sessionId || !text || !String(text).trim()) return;
+    const trimmed = String(text).trim().slice(0, 4000);
+    io.to(sessionId).emit('meetingChat', {
+      socketId: socket.id,
+      name: socket.user.name || socket.user.email || 'Participant',
+      text: trimmed,
+      at: Date.now()
+    });
+  });
+
+  socket.on('meetingMediaState', ({ sessionId, audioEnabled, videoEnabled }) => {
+    if (!sessionId) return;
+    socket.to(sessionId).emit('meetingMediaState', {
+      socketId: socket.id,
+      audioEnabled: !!audioEnabled,
+      videoEnabled: !!videoEnabled
+    });
+  });
+
+  socket.on('meetingRaiseHand', ({ sessionId }) => {
+    if (!socket.user || !sessionId) return;
+    io.to(sessionId).emit('meetingRaiseHand', {
+      socketId: socket.id,
+      name: socket.user.name || socket.user.email || 'Participant'
+    });
+  });
+
+  socket.on('meetingLowerHand', ({ sessionId }) => {
+    if (!sessionId) return;
+    socket.to(sessionId).emit('meetingLowerHand', { socketId: socket.id });
   });
 
 }); // 🔴 IMPORTANT: connection block closed here

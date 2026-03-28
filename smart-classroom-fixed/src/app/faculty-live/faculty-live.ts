@@ -1,8 +1,9 @@
-﻿import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { LiveClassService } from '../services/live-class.service';
+import { SocketService } from '../services/socket.service';
 import { MeetingRoomComponent } from '../meeting-room/meeting-room';
 
 @Component({
@@ -12,7 +13,7 @@ import { MeetingRoomComponent } from '../meeting-room/meeting-room';
   templateUrl: './faculty-live.html',
   styleUrls: ['./faculty-live.css']
 })
-export class FacultyLive {
+export class FacultyLive implements OnInit {
 
   title = '';
   loading = false;
@@ -24,9 +25,14 @@ export class FacultyLive {
 
   constructor(
     private live: LiveClassService,
+    private socketService: SocketService,
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    this.socketService.reconnectWithToken();
+  }
 
   goBack(): void {
     this.router.navigate(['/faculty']);

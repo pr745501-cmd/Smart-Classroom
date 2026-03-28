@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { DmChatService, StudentContact } from '../../services/dm-chat.service';
+import { DmChatService, StudentContact, DmInboxUpdatePayload } from '../../services/dm-chat.service';
 import { SocketService } from '../../services/socket.service';
 
 @Component({
@@ -14,11 +14,38 @@ import { SocketService } from '../../services/socket.service';
 export class FacultyContactsComponent implements OnInit, OnDestroy {
   contacts: StudentContact[] = [];
 
+  private readonly onUserOnlineList = (data: { userId: string }) => {
+    this.ngZone.run(() => {
+      const contact = this.contacts.find(c => String(c._id) === String(data.userId));
+      if (contact) {
+        contact.isOnline = true;
+        contact.lastSeen = null;
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly onUserOfflineList = (data: { userId: string; lastSeen: string }) => {
+    this.ngZone.run(() => {
+      const contact = this.contacts.find(c => String(c._id) === String(data.userId));
+      if (contact) {
+        contact.isOnline = false;
+        contact.lastSeen = data.lastSeen;
+        this.cd.detectChanges();
+      }
+    });
+  };
+
+  private readonly onDmInbox = (payload: DmInboxUpdatePayload) => {
+    this.ngZone.run(() => this.applyInboxUpdate(payload));
+  };
+
   constructor(
     private dmChatService: DmChatService,
     private socketService: SocketService,
     private router: Router,
-    private cd: ChangeDetectorRef
+    private cd: ChangeDetectorRef,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
@@ -27,26 +54,59 @@ export class FacultyContactsComponent implements OnInit, OnDestroy {
       this.cd.detectChanges();
     });
 
-    this.socketService.onUserOnline((data: { userId: string }) => {
-      const contact = this.contacts.find(c => c._id === data.userId);
-      if (contact) {
-        contact.isOnline = true;
-        contact.lastSeen = null;
-      }
-    });
+    const s = this.socketService.socket;
+    s.on('userOnline', this.onUserOnlineList);
+    s.on('userOffline', this.onUserOfflineList);
+    s.on('dmInboxUpdate', this.onDmInbox);
+  }
 
-    this.socketService.onUserOffline((data: { userId: string; lastSeen: string }) => {
-      const contact = this.contacts.find(c => c._id === data.userId);
-      if (contact) {
-        contact.isOnline = false;
-        contact.lastSeen = data.lastSeen;
-      }
+  private applyInboxUpdate(payload: DmInboxUpdatePayload): void {
+    if (payload.resetUnread) {
+      const c = this.contacts.find(x => String(x._id) === String(payload.peerId));
+      if (c) c.unreadCount = 0;
+      this.cd.detectChanges();
+      return;
+    }
+    if (!payload.lastMessage) return;
+
+    let c = this.contacts.find(x => String(x._id) === String(payload.peerId));
+    if (!c) {
+      this.dmChatService.getStudentContacts().subscribe(data => {
+        this.contacts = data;
+        this.cd.detectChanges();
+      });
+      return;
+    }
+
+    c.lastMessage = {
+      text: payload.lastMessage.text,
+      timestamp: this.normalizeTs(payload.lastMessage.timestamp)
+    };
+    if (payload.incrementUnread) {
+      c.unreadCount = (c.unreadCount || 0) + 1;
+    }
+    this.sortContactsByRecent();
+    this.cd.detectChanges();
+  }
+
+  private normalizeTs(ts: string | Date): string {
+    if (ts instanceof Date) return ts.toISOString();
+    return String(ts);
+  }
+
+  private sortContactsByRecent(): void {
+    this.contacts = [...this.contacts].sort((a, b) => {
+      const ta = a.lastMessage?.timestamp ? new Date(a.lastMessage.timestamp).getTime() : 0;
+      const tb = b.lastMessage?.timestamp ? new Date(b.lastMessage.timestamp).getTime() : 0;
+      return tb - ta;
     });
   }
 
   ngOnDestroy(): void {
-    this.socketService.offEvent('userOnline');
-    this.socketService.offEvent('userOffline');
+    const s = this.socketService.socket;
+    s.off('userOnline', this.onUserOnlineList);
+    s.off('userOffline', this.onUserOfflineList);
+    s.off('dmInboxUpdate', this.onDmInbox);
   }
 
   getInitials(name: string): string {

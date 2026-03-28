@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-
 @Injectable({
   providedIn: 'root'
 })
@@ -29,10 +28,18 @@ export class SocketService {
     this.socket.on('receiveMessage', callback);
   }
 
+  onChatHistory(callback: (history: unknown[]) => void): void {
+    this.socket.on('chatHistory', callback);
+  }
+
   // ── Direct Messages ─────────────────────────────────────────────────────────
 
   joinDM(roomId: string): void {
     this.socket.emit('joinDM', { roomId });
+  }
+
+  leaveDM(roomId: string): void {
+    if (roomId) this.socket.emit('leaveDM', { roomId });
   }
 
   sendDM(payload: { roomId: string; recipientId: string; text: string; senderId: string }): void {
@@ -161,5 +168,39 @@ export class SocketService {
 
   sendIceCandidate(payload: any): void {
     this.socket.emit('iceCandidate', payload);
+  }
+
+  // ── Live meeting (Zoom-like: chat, hands, media state) ──────────────────────
+
+  emitMeetingChat(sessionId: string, text: string): void {
+    this.socket.emit('meetingChat', { sessionId, text });
+  }
+
+  emitMeetingMediaState(sessionId: string, audioEnabled: boolean, videoEnabled: boolean): void {
+    this.socket.emit('meetingMediaState', { sessionId, audioEnabled, videoEnabled });
+  }
+
+  emitMeetingRaiseHand(sessionId: string): void {
+    this.socket.emit('meetingRaiseHand', { sessionId });
+  }
+
+  emitMeetingLowerHand(sessionId: string): void {
+    this.socket.emit('meetingLowerHand', { sessionId });
+  }
+
+  onMeetingChat(cb: (data: { socketId: string; name: string; text: string; at: number }) => void): void {
+    this.socket.on('meetingChat', cb);
+  }
+
+  onMeetingMediaState(cb: (data: { socketId: string; audioEnabled: boolean; videoEnabled: boolean }) => void): void {
+    this.socket.on('meetingMediaState', cb);
+  }
+
+  onMeetingRaiseHand(cb: (data: { socketId: string; name: string }) => void): void {
+    this.socket.on('meetingRaiseHand', cb);
+  }
+
+  onMeetingLowerHand(cb: (data: { socketId: string }) => void): void {
+    this.socket.on('meetingLowerHand', cb);
   }
 }

@@ -155,19 +155,24 @@ export class WebRtcService {
     return state;
   }
 
+  /** One peer must be "polite" during offer glare. Tie-break with socket IDs so both ends agree. */
+  private politeForPeer(remoteSocketId: string): boolean {
+    const mine = this.socket?.id ?? '';
+    if (!mine) return true;
+    return mine.localeCompare(remoteSocketId) < 0;
+  }
+
   // ── Called when a new participant joins (we initiate) ─────────────────────
 
   initiateConnection(remoteSocketId: string): void {
-    // We are impolite (we initiated), remote is polite
-    this.getOrCreatePeer(remoteSocketId, false);
+    this.getOrCreatePeer(remoteSocketId, this.politeForPeer(remoteSocketId));
     // onnegotiationneeded fires automatically after addTrack
   }
 
   // ── Signaling ──────────────────────────────────────────────────────────────
 
   async handleOffer(fromSocketId: string, sdp: RTCSessionDescriptionInit): Promise<void> {
-    // We are polite when receiving an offer we didn't initiate
-    const state = this.getOrCreatePeer(fromSocketId, true);
+    const state = this.getOrCreatePeer(fromSocketId, this.politeForPeer(fromSocketId));
     const pc = state.pc;
 
     const offerCollision =
