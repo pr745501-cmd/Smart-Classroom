@@ -19,7 +19,7 @@ export class LiveNotifyService {
         this.alreadyNotified = true;
 
         // 🔔 Sound
-        const audio = new Audio('assets/notify.mp3');
+        const audio = new Audio('notify.mp3');
         audio.play().catch(()=>{});
 
         // 📢 Popup

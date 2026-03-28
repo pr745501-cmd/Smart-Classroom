@@ -48,6 +48,7 @@ const io = new Server(server, {
 });
 
 const liveClassRoutes = liveClassRoutesFactory(io);
+const announcementRoutesWithIo = announcementRoutes(io);
 
 /* ================= PERFORMANCE ================= */
 
@@ -91,7 +92,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/test", testRoutes);
-app.use("/api/announcements", announcementRoutes);
+app.use("/api/announcements", announcementRoutesWithIo);
 app.use("/api/students", studentRoutes);
 app.use("/api/lectures", lectureRoutes);
 app.use("/api/assignments", assignmentRoutes);
@@ -259,15 +260,36 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("stopTyping", { userId: socket.user.id });
   });
 
+  // ===== ANNOUNCEMENTS REAL-TIME =====
+  socket.on("joinAnnouncements", () => {
+    socket.join("announcements");
+  });
+
   // ===== MEETING ROOM SIGNALING =====
 
-  socket.on('joinMeetingRoom', ({ sessionId }) => {
+  socket.on('joinMeetingRoom', async ({ sessionId }) => {
     socket.join(sessionId);
     socket.meetingSessionId = sessionId;
-    io.to(sessionId).emit('participantJoined', {
+
+    // Get all existing sockets in the room (excluding the newcomer)
+    const roomSockets = await io.in(sessionId).fetchSockets();
+    const existingParticipants = roomSockets
+      .filter(s => s.id !== socket.id)
+      .map(s => ({
+        socketId: s.id,
+        userId: s.user?.id,
+        name: s.user?.name || s.user?.email || 'Participant',
+        role: s.user?.role || 'student'
+      }));
+
+    // Tell the newcomer who is already in the room
+    socket.emit('existingParticipants', existingParticipants);
+
+    // Tell everyone else that a new participant joined
+    socket.to(sessionId).emit('participantJoined', {
       socketId: socket.id,
       userId: socket.user?.id,
-      name: socket.user?.name || socket.user?.email,
+      name: socket.user?.name || socket.user?.email || 'Participant',
       role: socket.user?.role
     });
   });

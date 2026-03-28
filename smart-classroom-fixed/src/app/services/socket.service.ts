@@ -87,7 +87,23 @@ export class SocketService {
     this.socket.off(event);
   }
 
-  // ── Meeting Room ────────────────────────────────────────────────────────────
+  // ── Announcements Real-Time ─────────────────────────────────────────────────
+
+  joinAnnouncements(): void {
+    this.socket.emit('joinAnnouncements');
+  }
+
+  onAnnouncementCreated(cb: (data: any) => void): void {
+    this.socket.on('announcementCreated', cb);
+  }
+
+  onAnnouncementUpdated(cb: (data: any) => void): void {
+    this.socket.on('announcementUpdated', cb);
+  }
+
+  onAnnouncementDeleted(cb: (data: { _id: string }) => void): void {
+    this.socket.on('announcementDeleted', cb);
+  }
 
   joinMeetingRoom(sessionId: string): void {
     this.socket.emit('joinMeetingRoom', { sessionId });
@@ -107,6 +123,10 @@ export class SocketService {
 
   onParticipantJoined(cb: (data: any) => void): void {
     this.socket.on('participantJoined', cb);
+  }
+
+  onExistingParticipants(cb: (data: any[]) => void): void {
+    this.socket.on('existingParticipants', cb);
   }
 
   onParticipantLeft(cb: (data: any) => void): void {

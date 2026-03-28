@@ -351,3 +351,25 @@
   .ctrl-label { font-size: 0.6rem; }
   .meeting-code-bar { flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem 1rem; }
 }
+
+/* ── Avatar fallback when camera is off ── */
+.tile-avatar {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1e1b4b;
+}
+.tile-avatar span {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

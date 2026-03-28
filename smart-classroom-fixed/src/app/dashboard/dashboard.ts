@@ -76,7 +76,7 @@ export class Dashboard implements OnInit, OnDestroy {
     this.socketService.onMeetingStarted((data: any) => {
       this.activeMeeting = data;
       this.showMeetingBanner = true;
-      const audio = new Audio('assets/notify.mp3');
+      const audio = new Audio('notify.mp3');
       audio.play().catch(() => {});
       this.cd.detectChanges();
     });

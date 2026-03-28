@@ -57,6 +57,8 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
       this.permissionError = this.webrtcService.permissionError;
       if (stream && this.localVideoRef?.nativeElement) {
         this.localVideoRef.nativeElement.srcObject = stream;
+        // Register local video element so screen share can update it
+        this.webrtcService.setLocalVideoElement(this.localVideoRef.nativeElement);
       }
       this.cdr.detectChanges();
     });
@@ -74,7 +76,25 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
       this.cdr.detectChanges();
     });
 
+    // When WE join, get list of existing participants and create offers to them
+    this.socketService.onExistingParticipants((participants: any[]) => {
+      for (const p of participants) {
+        if (!this.participants.find(x => x.socketId === p.socketId)) {
+          this.participants.push({
+            socketId: p.socketId,
+            userId: p.userId || p.socketId,
+            name: p.name || 'Participant',
+            role: p.role || 'student'
+          });
+        }
+        // WE are the newcomer — create offer to each existing participant
+        this.webrtcService.createOffer(p.socketId, this.socketService.socket);
+      }
+      this.cdr.detectChanges();
+    });
+
     // Wire socket signaling events
+    // Only the EXISTING participant creates the offer to the newcomer
     this.socketService.onParticipantJoined((data: any) => {
       if (!this.participants.find(p => p.socketId === data.socketId)) {
         this.participants.push({
@@ -84,6 +104,8 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
           role: data.role || 'student'
         });
       }
+      // Only create offer if WE were already in the room (data.isNew means they just joined)
+      // The newcomer will receive offers from everyone already present
       this.webrtcService.createOffer(data.socketId, this.socketService.socket);
       this.cdr.detectChanges();
     });
@@ -123,6 +145,7 @@ export class MeetingRoomComponent implements OnInit, OnDestroy {
     this.socketService.leaveMeetingRoom(this.sessionId);
     this.webrtcService.closeAll();
     this.remoteStreamSub?.unsubscribe();
+    this.socketService.offEvent('existingParticipants');
     this.socketService.offEvent('participantJoined');
     this.socketService.offEvent('offer');
     this.socketService.offEvent('answer');

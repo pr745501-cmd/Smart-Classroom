@@ -65,6 +65,10 @@
         appSetStream
         [stream]="p.stream">
       </video>
+      <!-- Avatar fallback when no stream -->
+      <div class="tile-avatar" *ngIf="!p.stream">
+        <span>{{ (p.name || 'P').charAt(0).toUpperCase() }}</span>
+      </div>
       <div class="tile-label">
         <span>{{ p.name }}</span>
         <span class="tile-role">{{ p.role }}</span>
