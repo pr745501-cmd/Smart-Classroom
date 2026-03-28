@@ -32,6 +32,8 @@ export class StudentLive implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.socketService.reconnectWithToken();
+
     // Check for active meeting on load
     this.live.getLiveClass().subscribe({
       next: (res: any) => {

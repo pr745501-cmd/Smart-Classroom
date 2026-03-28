@@ -1,4 +1,7 @@
-import { Component, Input, OnInit, OnDestroy, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import {
+  Component, Input, OnInit, OnDestroy, AfterViewInit,
+  ViewChild, ElementRef, ChangeDetectorRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -13,7 +16,6 @@ export interface Participant {
   name: string;
   role: 'faculty' | 'student';
   stream?: MediaStream;
-  connectionState?: RTCPeerConnectionState;
 }
 
 @Component({
@@ -21,13 +23,14 @@ export interface Participant {
   standalone: true,
   imports: [CommonModule, SetStreamDirective],
   templateUrl: './meeting-room.html',
-  styleUrls: ['./meeting-room.css']
+  styleUrls: ['./meeting-room.css'],
+  providers: [WebRtcService]
 })
 export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
-  @Input() sessionId: string = '';
+  @Input() sessionId = '';
   @Input() role: 'faculty' | 'student' = 'student';
-  @Input() meetingCode: string = '';
+  @Input() meetingCode = '';
 
   @ViewChild('localVideo') localVideoRef!: ElementRef<HTMLVideoElement>;
 
@@ -50,52 +53,56 @@ export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.socketService.joinMeetingRoom(this.sessionId);
+  private offMeetingEvents(): void {
+    this.socketService.offEvent('existingParticipants');
+    this.socketService.offEvent('participantJoined');
+    this.socketService.offEvent('offer');
+    this.socketService.offEvent('answer');
+    this.socketService.offEvent('iceCandidate');
+    this.socketService.offEvent('participantLeft');
+    this.socketService.offEvent('meetingEnded');
+  }
 
-    // Subscribe to remote streams
+  async ngOnInit(): Promise<void> {
+    // Clean up any stale listeners first
+    this.offMeetingEvents();
+
+    // Give the service a reference to the socket for signaling
+    this.webrtcService.setSocket(this.socketService.socket);
+
+    // Init local media before joining so tracks are ready when offers are created
+    await this.webrtcService.initLocalMedia();
+    this.permissionError = this.webrtcService.permissionError;
+
+    // Subscribe to remote stream updates
     this.remoteStreamSub = this.webrtcService.remoteStreams$.subscribe(({ socketId, stream }) => {
-      const existing = this.participants.find(p => p.socketId === socketId);
-      if (existing) {
-        existing.stream = stream;
-      } else {
-        this.participants.push({ socketId, userId: socketId, name: 'Participant', role: 'student', stream });
+      const p = this.participants.find(x => x.socketId === socketId);
+      if (p) {
+        p.stream = stream;
+        this.participants = [...this.participants];
       }
-      this.participants = [...this.participants];
       this.cdr.detectChanges();
     });
 
-    // When WE join, get list of existing participants and create offers to them
-    this.socketService.onExistingParticipants((participants: any[]) => {
-      for (const p of participants) {
-        if (!this.participants.find(x => x.socketId === p.socketId)) {
-          this.participants.push({
-            socketId: p.socketId,
-            userId: p.userId || p.socketId,
-            name: p.name || 'Participant',
-            role: p.role || 'student'
-          });
-        }
-        this.webrtcService.createOffer(p.socketId, this.socketService.socket);
+    // Register signaling handlers
+    this.socketService.onExistingParticipants((list: any[]) => {
+      for (const p of list) {
+        this.addParticipant(p);
+        // We initiate the connection to existing participants
+        this.webrtcService.initiateConnection(p.socketId);
       }
       this.cdr.detectChanges();
     });
 
     this.socketService.onParticipantJoined((data: any) => {
-      if (!this.participants.find(p => p.socketId === data.socketId)) {
-        this.participants.push({
-          socketId: data.socketId,
-          userId: data.userId || data.socketId,
-          name: data.name || 'Participant',
-          role: data.role || 'student'
-        });
-      }
-      this.webrtcService.createOffer(data.socketId, this.socketService.socket);
+      this.addParticipant(data);
+      // We initiate the connection to the new participant
+      this.webrtcService.initiateConnection(data.socketId);
       this.cdr.detectChanges();
     });
 
     this.socketService.onOffer((data: any) => {
-      this.webrtcService.handleOffer(data.fromSocketId, data.sdp, this.socketService.socket);
+      this.webrtcService.handleOffer(data.fromSocketId, data.sdp);
     });
 
     this.socketService.onAnswer((data: any) => {
@@ -114,8 +121,7 @@ export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.socketService.onMeetingEnded(() => {
       this.webrtcService.closeAll();
-      const dest = this.role === 'faculty' ? '/faculty' : '/dashboard';
-      this.router.navigate([dest]);
+      this.router.navigate([this.role === 'faculty' ? '/faculty' : '/dashboard']);
     });
 
     this.socketService.onConnectError(() => {
@@ -123,31 +129,35 @@ export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
       this.webrtcService.closeAll();
       this.cdr.detectChanges();
     });
+
+    // Join the meeting room — server will send existingParticipants + participantJoined to others
+    this.socketService.joinMeetingRoom(this.sessionId);
   }
 
   ngAfterViewInit(): void {
-    // Init local media AFTER view is ready so localVideoRef is available
-    this.webrtcService.initLocalMedia().then(stream => {
-      this.permissionError = this.webrtcService.permissionError;
-      if (stream && this.localVideoRef?.nativeElement) {
-        this.localVideoRef.nativeElement.srcObject = stream;
-        this.webrtcService.setLocalVideoElement(this.localVideoRef.nativeElement);
-      }
-      this.cdr.detectChanges();
-    });
+    const el = this.localVideoRef?.nativeElement;
+    if (el) {
+      this.webrtcService.setLocalVideoElement(el);
+    }
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy(): void {
+    this.offMeetingEvents();
+    this.remoteStreamSub?.unsubscribe();
     this.socketService.leaveMeetingRoom(this.sessionId);
     this.webrtcService.closeAll();
-    this.remoteStreamSub?.unsubscribe();
-    this.socketService.offEvent('existingParticipants');
-    this.socketService.offEvent('participantJoined');
-    this.socketService.offEvent('offer');
-    this.socketService.offEvent('answer');
-    this.socketService.offEvent('iceCandidate');
-    this.socketService.offEvent('participantLeft');
-    this.socketService.offEvent('meetingEnded');
+  }
+
+  private addParticipant(data: any): void {
+    if (!this.participants.find(p => p.socketId === data.socketId)) {
+      this.participants.push({
+        socketId: data.socketId,
+        userId: data.userId || data.socketId,
+        name: data.name || 'Participant',
+        role: data.role || 'student'
+      });
+    }
   }
 
   toggleAudio(): void {
@@ -161,25 +171,24 @@ export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async toggleScreenShare(): Promise<void> {
-    if (!this.screenSharing) {
-      await this.webrtcService.startScreenShare(this.socketService.socket);
-      this.screenSharing = true;
-    } else {
-      await this.webrtcService.stopScreenShare();
+    try {
+      if (!this.screenSharing) {
+        await this.webrtcService.startScreenShare();
+        this.screenSharing = true;
+      } else {
+        await this.webrtcService.stopScreenShare();
+        this.screenSharing = false;
+      }
+    } catch (err) {
+      // User cancelled screen share picker
       this.screenSharing = false;
     }
   }
 
   endMeeting(): void {
     this.liveClassService.endClass().subscribe({
-      next: () => {
-        this.webrtcService.closeAll();
-        this.router.navigate(['/faculty']);
-      },
-      error: () => {
-        this.webrtcService.closeAll();
-        this.router.navigate(['/faculty']);
-      }
+      next: () => { this.webrtcService.closeAll(); this.router.navigate(['/faculty']); },
+      error: () => { this.webrtcService.closeAll(); this.router.navigate(['/faculty']); }
     });
   }
 
@@ -190,19 +199,5 @@ export class MeetingRoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
   dismissSessionExpired(): void {
     this.router.navigate([this.role === 'faculty' ? '/faculty' : '/dashboard']);
-  }
-
-  getQualityClass(): string {
-    return this.connectionQuality;
-  }
-
-  getStreamForParticipant(participant: Participant): MediaStream | undefined {
-    return participant.stream;
-  }
-
-  setVideoElement(el: HTMLVideoElement, stream: MediaStream): void {
-    if (el && el.srcObject !== stream) {
-      el.srcObject = stream;
-    }
   }
 }

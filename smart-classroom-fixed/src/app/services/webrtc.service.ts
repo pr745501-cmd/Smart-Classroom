@@ -12,45 +12,56 @@ const ICE_SERVERS: RTCConfiguration = {
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'stun:stun3.l.google.com:19302' }
-  ]
+  ],
+  iceCandidatePoolSize: 10
 };
 
-@Injectable({ providedIn: 'root' })
+interface PeerState {
+  pc: RTCPeerConnection;
+  makingOffer: boolean;
+  ignoreOffer: boolean;
+  isSettingRemoteAnswerPending: boolean;
+  polite: boolean; // polite peer yields on glare
+}
+
+@Injectable()
 export class WebRtcService {
 
   localStream: MediaStream | null = null;
-  peers: Map<string, RTCPeerConnection> = new Map();
-  // Keep one MediaStream per remote peer so tracks accumulate correctly
-  private remoteStreamsMap: Map<string, MediaStream> = new Map();
   permissionError: string | null = null;
   cameraTrack: MediaStreamTrack | null = null;
+
+  private peerStates: Map<string, PeerState> = new Map();
+  private remoteStreamsMap: Map<string, MediaStream> = new Map();
   private localVideoEl: HTMLVideoElement | null = null;
+  private socket: any = null;
 
   remoteStreams$ = new Subject<RemoteStreamEvent>();
-
-  private renegotiationAttempts: Map<string, number> = new Map();
 
   // ── Local Media ────────────────────────────────────────────────────────────
 
   async initLocalMedia(videoEnabled = true, audioEnabled = true): Promise<MediaStream | null> {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: audioEnabled });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: videoEnabled,
+        audio: audioEnabled
+      });
       this.localStream = stream;
       this.permissionError = null;
       return stream;
     } catch (err: any) {
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         this.permissionError = 'Camera/microphone access was denied.';
-        if (videoEnabled) {
-          try {
-            const audioStream = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
-            this.localStream = audioStream;
-            return audioStream;
-          } catch { this.localStream = null; return null; }
+        try {
+          const audioOnly = await navigator.mediaDevices.getUserMedia({ video: false, audio: true });
+          this.localStream = audioOnly;
+          return audioOnly;
+        } catch {
+          this.localStream = null;
+          return null;
         }
-      } else {
-        this.permissionError = 'Could not access media devices.';
       }
+      this.permissionError = 'Could not access media devices.';
       this.localStream = null;
       return null;
     }
@@ -58,50 +69,38 @@ export class WebRtcService {
 
   setLocalVideoElement(el: HTMLVideoElement): void {
     this.localVideoEl = el;
+    if (this.localStream && el) {
+      el.srcObject = this.localStream;
+    }
   }
 
-  // ── Peer Connection ────────────────────────────────────────────────────────
+  setSocket(socket: any): void {
+    this.socket = socket;
+  }
 
-  private createPeerConnection(targetSocketId: string, socket: any): RTCPeerConnection {
-    // Close existing if any
-    const existing = this.peers.get(targetSocketId);
-    if (existing) { existing.close(); }
+  // ── Peer Connection (Perfect Negotiation Pattern) ──────────────────────────
+
+  private getOrCreatePeer(remoteSocketId: string, polite: boolean): PeerState {
+    const existing = this.peerStates.get(remoteSocketId);
+    if (existing && existing.pc.signalingState !== 'closed') {
+      return existing;
+    }
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
 
-    // Ensure a MediaStream exists for this peer
-    if (!this.remoteStreamsMap.has(targetSocketId)) {
-      this.remoteStreamsMap.set(targetSocketId, new MediaStream());
+    if (!this.remoteStreamsMap.has(remoteSocketId)) {
+      this.remoteStreamsMap.set(remoteSocketId, new MediaStream());
     }
 
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        socket.emit('iceCandidate', { targetSocketId, candidate: event.candidate.toJSON() });
-      }
+    const state: PeerState = {
+      pc,
+      makingOffer: false,
+      ignoreOffer: false,
+      isSettingRemoteAnswerPending: false,
+      polite
     };
 
-    pc.ontrack = (event) => {
-      const remoteStream = this.remoteStreamsMap.get(targetSocketId)!;
-      // Add track if not already present
-      const existingTrack = remoteStream.getTracks().find(t => t.id === event.track.id);
-      if (!existingTrack) {
-        remoteStream.addTrack(event.track);
-      }
-      // Emit every time so the video element gets updated
-      this.remoteStreams$.next({ socketId: targetSocketId, stream: remoteStream });
-    };
-
-    pc.onconnectionstatechange = () => {
-      if (pc.connectionState === 'failed') {
-        const attempts = this.renegotiationAttempts.get(targetSocketId) ?? 0;
-        if (attempts < 2) {
-          this.renegotiationAttempts.set(targetSocketId, attempts + 1);
-          pc.restartIce();
-        } else {
-          this.removePeer(targetSocketId);
-        }
-      }
-    };
+    this.peerStates.set(remoteSocketId, state);
 
     // Add local tracks
     if (this.localStream) {
@@ -110,60 +109,127 @@ export class WebRtcService {
       }
     }
 
-    this.peers.set(targetSocketId, pc);
-    return pc;
+    // Perfect negotiation: onnegotiationneeded handles offer creation
+    pc.onnegotiationneeded = async () => {
+      try {
+        state.makingOffer = true;
+        await pc.setLocalDescription();
+        this.socket?.emit('offer', {
+          targetSocketId: remoteSocketId,
+          sdp: pc.localDescription
+        });
+      } catch (err) {
+        console.error('onnegotiationneeded error:', err);
+      } finally {
+        state.makingOffer = false;
+      }
+    };
+
+    pc.onicecandidate = ({ candidate }) => {
+      if (candidate) {
+        this.socket?.emit('iceCandidate', {
+          targetSocketId: remoteSocketId,
+          candidate: candidate.toJSON()
+        });
+      }
+    };
+
+    pc.ontrack = ({ track, streams }) => {
+      const remoteStream = this.remoteStreamsMap.get(remoteSocketId)!;
+      const existing = remoteStream.getTracks().find(t => t.id === track.id);
+      if (!existing) {
+        remoteStream.addTrack(track);
+      }
+      this.remoteStreams$.next({ socketId: remoteSocketId, stream: remoteStream });
+    };
+
+    pc.onconnectionstatechange = () => {
+      if (pc.connectionState === 'failed') {
+        pc.restartIce();
+      }
+      if (pc.connectionState === 'closed' || pc.connectionState === 'disconnected') {
+        // Will be cleaned up on participantLeft
+      }
+    };
+
+    return state;
+  }
+
+  // ── Called when a new participant joins (we initiate) ─────────────────────
+
+  initiateConnection(remoteSocketId: string): void {
+    // We are impolite (we initiated), remote is polite
+    this.getOrCreatePeer(remoteSocketId, false);
+    // onnegotiationneeded fires automatically after addTrack
   }
 
   // ── Signaling ──────────────────────────────────────────────────────────────
 
-  async createOffer(targetSocketId: string, socket: any): Promise<void> {
-    const pc = this.createPeerConnection(targetSocketId, socket);
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    socket.emit('offer', { targetSocketId, sdp: pc.localDescription });
-  }
+  async handleOffer(fromSocketId: string, sdp: RTCSessionDescriptionInit): Promise<void> {
+    // We are polite when receiving an offer we didn't initiate
+    const state = this.getOrCreatePeer(fromSocketId, true);
+    const pc = state.pc;
 
-  async handleOffer(fromSocketId: string, sdp: RTCSessionDescriptionInit, socket: any): Promise<void> {
-    let pc = this.peers.get(fromSocketId);
-    if (!pc || pc.signalingState === 'closed') {
-      pc = this.createPeerConnection(fromSocketId, socket);
+    const offerCollision =
+      sdp.type === 'offer' &&
+      (state.makingOffer || pc.signalingState !== 'stable');
+
+    state.ignoreOffer = !state.polite && offerCollision;
+    if (state.ignoreOffer) return;
+
+    try {
+      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+
+      if (sdp.type === 'offer') {
+        await pc.setLocalDescription();
+        this.socket?.emit('answer', {
+          targetSocketId: fromSocketId,
+          sdp: pc.localDescription
+        });
+      }
+    } catch (err) {
+      console.error('handleOffer error:', err);
     }
-    if (pc.signalingState !== 'stable') return;
-    await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    socket.emit('answer', { targetSocketId: fromSocketId, sdp: pc.localDescription });
   }
 
   async handleAnswer(fromSocketId: string, sdp: RTCSessionDescriptionInit): Promise<void> {
-    const pc = this.peers.get(fromSocketId);
-    if (pc && pc.signalingState === 'have-local-offer') {
-      await pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    const state = this.peerStates.get(fromSocketId);
+    if (!state) return;
+    try {
+      state.isSettingRemoteAnswerPending = true;
+      await state.pc.setRemoteDescription(new RTCSessionDescription(sdp));
+    } catch (err) {
+      console.error('handleAnswer error:', err);
+    } finally {
+      state.isSettingRemoteAnswerPending = false;
     }
   }
 
   async addIceCandidate(fromSocketId: string, candidate: RTCIceCandidateInit): Promise<void> {
-    const pc = this.peers.get(fromSocketId);
-    if (pc && pc.remoteDescription && pc.signalingState !== 'closed') {
-      try {
-        await pc.addIceCandidate(new RTCIceCandidate(candidate));
-      } catch { /* ignore stale candidates */ }
+    const state = this.peerStates.get(fromSocketId);
+    if (!state) return;
+    try {
+      await state.pc.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (err) {
+      if (!state.ignoreOffer) {
+        console.error('addIceCandidate error:', err);
+      }
     }
   }
 
   // ── Media Controls ─────────────────────────────────────────────────────────
 
   toggleAudio(enabled: boolean): void {
-    this.localStream?.getAudioTracks().forEach(t => t.enabled = enabled);
+    this.localStream?.getAudioTracks().forEach(t => (t.enabled = enabled));
   }
 
   toggleVideo(enabled: boolean): void {
-    this.localStream?.getVideoTracks().forEach(t => t.enabled = enabled);
+    this.localStream?.getVideoTracks().forEach(t => (t.enabled = enabled));
   }
 
   // ── Screen Share ───────────────────────────────────────────────────────────
 
-  async startScreenShare(socket: any): Promise<void> {
+  async startScreenShare(): Promise<void> {
     const screenStream = await (navigator.mediaDevices as any).getDisplayMedia({
       video: { cursor: 'always' },
       audio: false
@@ -173,46 +239,57 @@ export class WebRtcService {
     // Save camera track for restore
     this.cameraTrack = this.localStream?.getVideoTracks()[0] ?? null;
 
-    // Replace video track in local stream so local preview updates
-    if (this.localStream && this.cameraTrack) {
-      this.localStream.removeTrack(this.cameraTrack);
+    // Replace video track in local stream
+    if (this.localStream) {
+      if (this.cameraTrack) this.localStream.removeTrack(this.cameraTrack);
       this.localStream.addTrack(screenTrack);
+    } else {
+      this.localStream = new MediaStream([screenTrack]);
     }
 
-    // Update local video element preview
+    // Update local preview
     if (this.localVideoEl) {
       this.localVideoEl.srcObject = this.localStream;
     }
 
-    // Replace sender track on all peers
-    for (const pc of this.peers.values()) {
-      const sender = pc.getSenders().find(s => s.track?.kind === 'video');
-      if (sender) await sender.replaceTrack(screenTrack);
+    // Replace sender track on all peers — onnegotiationneeded handles renegotiation
+    for (const state of this.peerStates.values()) {
+      const sender = state.pc.getSenders().find(s => s.track?.kind === 'video');
+      if (sender) {
+        await sender.replaceTrack(screenTrack);
+      } else {
+        // No video sender yet — addTrack triggers onnegotiationneeded automatically
+        state.pc.addTrack(screenTrack, this.localStream!);
+      }
     }
 
-    // Auto-stop when user clicks browser's "Stop sharing"
-    screenTrack.onended = () => { this.stopScreenShare(); };
+    screenTrack.onended = () => this.stopScreenShare();
   }
 
   async stopScreenShare(): Promise<void> {
     if (!this.cameraTrack) return;
 
-    // Restore camera track in local stream
+    const screenTrack = this.localStream?.getVideoTracks()[0] ?? null;
+
     if (this.localStream) {
-      const screenTrack = this.localStream.getVideoTracks()[0];
       if (screenTrack) this.localStream.removeTrack(screenTrack);
       this.localStream.addTrack(this.cameraTrack);
     }
 
-    // Update local video element preview
     if (this.localVideoEl) {
       this.localVideoEl.srcObject = this.localStream;
     }
 
-    // Restore sender track on all peers
-    for (const pc of this.peers.values()) {
-      const sender = pc.getSenders().find(s => s.track?.kind === 'video');
-      if (sender) await sender.replaceTrack(this.cameraTrack);
+    // Restore camera track on all peers
+    for (const state of this.peerStates.values()) {
+      const sender = state.pc.getSenders().find(s => s.track === screenTrack);
+      if (sender) {
+        await sender.replaceTrack(this.cameraTrack);
+      }
+    }
+
+    if (screenTrack) {
+      screenTrack.stop();
     }
 
     this.cameraTrack = null;
@@ -221,19 +298,32 @@ export class WebRtcService {
   // ── Cleanup ────────────────────────────────────────────────────────────────
 
   removePeer(socketId: string): void {
-    this.peers.get(socketId)?.close();
-    this.peers.delete(socketId);
+    const state = this.peerStates.get(socketId);
+    if (state) {
+      state.pc.close();
+      this.peerStates.delete(socketId);
+    }
     this.remoteStreamsMap.delete(socketId);
-    this.renegotiationAttempts.delete(socketId);
   }
 
   closeAll(): void {
-    for (const pc of this.peers.values()) pc.close();
-    this.peers.clear();
+    for (const state of this.peerStates.values()) {
+      state.pc.close();
+    }
+    this.peerStates.clear();
     this.remoteStreamsMap.clear();
-    this.renegotiationAttempts.clear();
     this.localStream?.getTracks().forEach(t => t.stop());
     this.localStream = null;
     this.localVideoEl = null;
+    this.cameraTrack = null;
+  }
+
+  // Legacy getter for compatibility
+  get peers(): Map<string, RTCPeerConnection> {
+    const map = new Map<string, RTCPeerConnection>();
+    for (const [id, state] of this.peerStates.entries()) {
+      map.set(id, state.pc);
+    }
+    return map;
   }
 }

@@ -87,6 +87,12 @@ export class SocketService {
     this.socket.off(event);
   }
 
+  reconnectWithToken(): void {
+    this.socket.disconnect();
+    this.socket.auth = { token: localStorage.getItem('token') };
+    this.socket.connect();
+  }
+
   // ── Announcements Real-Time ─────────────────────────────────────────────────
 
   joinAnnouncements(): void {

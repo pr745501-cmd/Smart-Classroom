@@ -13,6 +13,7 @@ export class SetStreamDirective implements OnChanges {
     const video = this.el.nativeElement;
     if (this.stream && video.srcObject !== this.stream) {
       video.srcObject = this.stream;
+      video.muted = false;
       video.play().catch(() => {});
     }
   }
