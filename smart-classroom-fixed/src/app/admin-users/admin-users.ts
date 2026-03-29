@@ -20,6 +20,7 @@ export class AdminUsers implements OnInit {
   users: any[] = [];
   filteredUsers: any[] = [];
   search = '';
+  filterYear = '';
   loading = true;
   error = false;
   activeTab: 'all' | 'students' | 'faculty' | 'pending' = 'all';
@@ -81,19 +82,24 @@ export class AdminUsers implements OnInit {
   filterUsers() {
     const q = this.search.toLowerCase();
     const base = this.getTabUsers();
-    this.filteredUsers = q
+    let result = q
       ? base.filter(u =>
           u.name?.toLowerCase().includes(q) ||
           u.email?.toLowerCase().includes(q) ||
           u.role?.toLowerCase().includes(q)
         )
       : base;
+    if (this.filterYear) {
+      result = result.filter(u => u.role !== 'student' || u.year === this.filterYear);
+    }
+    this.filteredUsers = result;
     this.cdr.detectChanges();
   }
 
   setTab(tab: 'all' | 'students' | 'faculty' | 'pending') {
     this.activeTab = tab;
     this.search = '';
+    this.filterYear = '';
     this.filteredUsers = this.getTabUsers();
     this.cdr.detectChanges();
   }

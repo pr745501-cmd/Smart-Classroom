@@ -16,12 +16,24 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
 
   title = '';
   message = '';
+  targetYear = '';
+  targetSemester: number | null = null;
+  filterYear = '';
+  filterSemester: number | null = null;
 
   announcements: any[] = [];
   editingId: string | null = null;
 
   facultyName = '';
   course = 'BCA';
+
+  get filteredAnnouncements(): any[] {
+    return this.announcements.filter(a => {
+      if (this.filterYear && a.targetYear !== this.filterYear) return false;
+      if (this.filterSemester != null && a.targetSemester !== this.filterSemester) return false;
+      return true;
+    });
+  }
 
   constructor(
     private announcementService: AnnouncementService,
@@ -82,11 +94,17 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
       alert("All fields required");
       return;
     }
+    if (!this.targetYear || !this.targetSemester) {
+      alert("Please select target year and semester");
+      return;
+    }
     const data = {
       title: this.title,
       message: this.message,
       faculty: this.facultyName,
-      course: this.course
+      course: this.course,
+      targetYear: this.targetYear,
+      targetSemester: this.targetSemester
     };
     this.announcementService.createAnnouncement(data)
       .subscribe(() => {
@@ -129,6 +147,8 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
   resetForm() {
     this.title = '';
     this.message = '';
+    this.targetYear = '';
+    this.targetSemester = null;
     this.editingId = null;
     this.cdr.detectChanges();
   }

@@ -15,14 +15,20 @@ router.get(
   roleMiddleware(["faculty"]),
   async (req, res) => {
     try {
-     const students = await User.find({
-  role: "student",
-  $or: [
-    { isApproved: true },
-    { isApproved: { $exists: false } }
-  ]
-})
-        .select("_id name email course createdAt")
+      const filter = {
+        role: "student",
+        $or: [
+          { isApproved: true },
+          { isApproved: { $exists: false } }
+        ]
+      };
+
+      // Optional year and semester filters
+      if (req.query.year) filter.year = req.query.year;
+      if (req.query.semester) filter.semester = Number(req.query.semester);
+
+     const students = await User.find(filter)
+        .select("_id name email course year semester createdAt")
         .sort({ createdAt: -1 });
 
       res.json({
@@ -52,7 +58,7 @@ router.get(
         role: "student",
         isApproved: false
       })
-        .select("_id name email course createdAt")
+        .select("_id name email course year semester createdAt")
         .sort({ createdAt: -1 });
 
       res.json({

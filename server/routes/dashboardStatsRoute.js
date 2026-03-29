@@ -20,8 +20,11 @@ router.get(
     try {
       const studentId = req.user.id;
 
-      // 1. SUBJECTS — distinct subjects from lectures
-      const lectures = await Lecture.find().select("subject");
+      // 1. SUBJECTS — distinct subjects from lectures matching student's year+semester
+      const yearFilter = req.user.year && req.user.semester
+        ? { targetYear: req.user.year, targetSemester: req.user.semester }
+        : {};
+      const lectures = await Lecture.find(yearFilter).select("subject");
       const subjects = new Set(lectures.map(l => l.subject).filter(Boolean));
       const subjectCount = subjects.size;
 

@@ -62,7 +62,13 @@ export class Login {
         },
         error: (err) => {
           console.error('LOGIN ERROR 👉', err);
-          this.error = err.error?.message || 'Invalid credentials';
+          // If pending approval, redirect to pending page
+          if (err.status === 403 && err.error?.message?.includes('pending')) {
+            localStorage.setItem('pendingEmail', this.email.trim().toLowerCase());
+            this.router.navigate(['/pending-approval']);
+          } else {
+            this.error = err.error?.message || 'Invalid credentials';
+          }
           this.loading = false;
           this.cdr.detectChanges();
         }

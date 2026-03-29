@@ -39,6 +39,19 @@ const userSchema = new mongoose.Schema(
       }
     },
 
+    // ✅ Year and Semester (students only)
+    year: {
+      type: String,
+      enum: ['1st Year', '2nd Year', '3rd Year'],
+      default: null
+    },
+    semester: {
+      type: Number,
+      min: 1,
+      max: 6,
+      default: null
+    },
+
     // ✅ Presence fields
     isOnline: { type: Boolean, default: false },
     lastSeen: { type: Date, default: null }

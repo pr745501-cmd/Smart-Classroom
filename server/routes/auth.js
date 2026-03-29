@@ -8,7 +8,7 @@ const router = express.Router();
 /* ===================== SIGNUP ===================== */
 router.post("/signup", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, year, semester } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({
@@ -21,6 +21,16 @@ router.post("/signup", async (req, res) => {
     const finalRole = ["student", "faculty", "admin"].includes(role)
       ? role
       : "student";
+
+    // ✅ Year and semester required for students
+    if (finalRole === "student") {
+      if (!year || semester == null) {
+        return res.status(400).json({
+          success: false,
+          message: "Year and semester are required for students"
+        });
+      }
+    }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
@@ -38,7 +48,8 @@ router.post("/signup", async (req, res) => {
       email: email.toLowerCase(),
       password: hashedPassword,
       role: finalRole,
-      isApproved: finalRole === "student" ? false : true   // ✅ IMPORTANT
+      isApproved: finalRole === "student" ? false : true,   // ✅ IMPORTANT
+      ...(finalRole === "student" ? { year, semester: Number(semester) } : {})
     });
 
     res.status(201).json({
@@ -97,7 +108,7 @@ router.post("/login", async (req, res) => {
   
 
     const token = jwt.sign(
-      { id: user._id, role: user.role, name: user.name, email: user.email },
+      { id: user._id, role: user.role, name: user.name, email: user.email, year: user.year, semester: user.semester },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -111,7 +122,9 @@ router.post("/login", async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
-        isApproved: user.isApproved
+        isApproved: user.isApproved,
+        year: user.year,
+        semester: user.semester
       }
     });
 

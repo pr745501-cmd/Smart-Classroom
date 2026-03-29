@@ -18,8 +18,11 @@ router.get(
   role(["admin"]),
   async (req, res) => {
     try {
-      const users = await User.find()
-        .select("name email role isApproved course createdAt")
+      const filter = {};
+      if (req.query.year) filter.year = req.query.year;
+
+      const users = await User.find(filter)
+        .select("name email role isApproved course year semester createdAt")
         .sort({ createdAt: -1 });
 
       res.json({

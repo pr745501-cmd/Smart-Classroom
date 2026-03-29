@@ -17,6 +17,10 @@ export class FacultyAssignments implements OnInit {
   description = '';
   dueDate = '';
   fileUrl = '';
+  targetYear = '';
+  targetSemester: number | null = null;
+  filterYear = '';
+  filterSemester: number | null = null;
 
   assignments: any[] = [];
   searchText = '';
@@ -43,7 +47,12 @@ export class FacultyAssignments implements OnInit {
 
   get filteredAssignments(): any[] {
     const q = this.searchText.toLowerCase();
-    return this.assignments.filter(a => a.title?.toLowerCase().includes(q));
+    return this.assignments.filter(a => {
+      if (q && !a.title?.toLowerCase().includes(q)) return false;
+      if (this.filterYear && a.targetYear !== this.filterYear) return false;
+      if (this.filterSemester != null && a.targetSemester !== this.filterSemester) return false;
+      return true;
+    });
   }
 
   goBack(): void { this.router.navigate(['/faculty']); }
@@ -60,7 +69,8 @@ export class FacultyAssignments implements OnInit {
 
   addAssignment() {
     if (!this.title || !this.dueDate) { alert('Title and Due Date are required'); return; }
-    const data = { title: this.title, description: this.description, dueDate: this.dueDate, fileUrl: this.fileUrl, faculty: this.facultyName, course: this.course };
+    if (!this.targetYear || !this.targetSemester) { alert('Please select target year and semester'); return; }
+    const data = { title: this.title, description: this.description, dueDate: this.dueDate, fileUrl: this.fileUrl, faculty: this.facultyName, course: this.course, targetYear: this.targetYear, targetSemester: this.targetSemester };
     this.assignmentService.createAssignment(data).subscribe(() => {
       this.resetForm();
       this.loadAssignments();
@@ -91,6 +101,7 @@ export class FacultyAssignments implements OnInit {
 
   resetForm() {
     this.title = ''; this.description = ''; this.dueDate = ''; this.fileUrl = '';
+    this.targetYear = ''; this.targetSemester = null;
     this.editingAssignmentId = null;
     this.cdr.detectChanges();
   }

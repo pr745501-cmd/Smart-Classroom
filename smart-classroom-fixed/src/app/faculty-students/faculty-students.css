@@ -306,3 +306,35 @@ td {
   .page-header { flex-direction: column; align-items: flex-start; }
   .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 }
+
+/* ── FILTER ROW ── */
+.filter-row {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+
+.filter-row select {
+  padding: 0.5rem 2.2rem 0.5rem 0.85rem;
+  border: 1px solid #eaeff6;
+  border-radius: 0.75rem;
+  font-size: 0.82rem;
+  font-family: inherit;
+  font-weight: 600;
+  color: #0f172a;
+  background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2364748b' d='M6 8L1 3h10z'/%3E%3C/svg%3E") no-repeat right 0.75rem center;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  min-width: 140px;
+}
+
+.filter-row select:focus {
+  outline: none;
+  border-color: #6366f1;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}

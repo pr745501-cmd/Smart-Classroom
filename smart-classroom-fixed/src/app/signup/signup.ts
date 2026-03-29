@@ -18,6 +18,8 @@ export class Signup {
   email = '';
   password = '';
   role = 'student';
+  year = '';
+  semester: number | null = null;
   error = '';
   loading = false;
   showPass = false;
@@ -28,17 +30,29 @@ export class Signup {
     this.loading = true;
     this.error = '';
 
-    this.http.post<any>('http://localhost:5000/api/auth/signup', {
+    if (this.role === 'student') {
+      if (!this.year) { this.error = 'Please select your year'; this.loading = false; return; }
+      if (!this.semester) { this.error = 'Please select your semester'; this.loading = false; return; }
+    }
+
+    const body: any = {
       name: this.name,
       email: this.email,
       password: this.password,
       role: this.role
-    }).subscribe({
+    };
+    if (this.role === 'student') {
+      body.year = this.year;
+      body.semester = this.semester;
+    }
+
+    this.http.post<any>('http://localhost:5000/api/auth/signup', body).subscribe({
       next: () => {
         this.loading = false;
         this.cdr.detectChanges();
         if (this.role === 'student') {
           localStorage.setItem('pendingEmail', this.email);
+          localStorage.setItem('pendingName', this.name);
           this.router.navigate(['/pending-approval']);
         } else {
           alert('Signup successful ✅');

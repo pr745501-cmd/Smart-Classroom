@@ -15,7 +15,7 @@ router.post(
   roleMiddleware(["faculty"]),
   async (req, res) => {
     try {
-      const { date, faculty, course, records } = req.body;
+      const { date, faculty, course, records, targetYear, targetSemester } = req.body;
 
       if (!date || !faculty || !course || !records || records.length === 0) {
         return res.status(400).json({
@@ -24,8 +24,15 @@ router.post(
         });
       }
 
+      if (!targetYear || !targetSemester) {
+        return res.status(400).json({
+          success: false,
+          message: "Target year and semester are required"
+        });
+      }
+
       // 🔒 DUPLICATE CHECK
-      const existing = await Attendance.findOne({ date, faculty, course });
+      const existing = await Attendance.findOne({ date, faculty, course, targetYear, targetSemester });
       if (existing) {
         return res.status(400).json({
           success: false,
@@ -37,6 +44,8 @@ router.post(
         date,
         faculty,
         course,
+        targetYear,
+        targetSemester,
         records
       });
 
@@ -66,8 +75,16 @@ router.get(
     try {
       const studentId = req.user.id;
 
+      // Filter by student's year and semester
+      if (!req.user.year || req.user.semester == null) {
+        console.warn(`Student ${req.user.id} has no year/semester in token`);
+        return res.json({ success: true, attendance: [] });
+      }
+
       const attendanceDocs = await Attendance.find({
-        "records.studentId": studentId
+        "records.studentId": studentId,
+        targetYear: req.user.year,
+        targetSemester: req.user.semester
       }).sort({ date: -1 });
 
       const myAttendance = attendanceDocs.map(doc => {

@@ -34,7 +34,18 @@ const attendanceSchema = new mongoose.Schema(
           required: true
         }
       }
-    ]
+    ],
+    targetYear: {
+      type: String,
+      enum: ['1st Year', '2nd Year', '3rd Year'],
+      required: true
+    },
+    targetSemester: {
+      type: Number,
+      min: 1,
+      max: 6,
+      required: true
+    }
   },
   { timestamps: true }
 );

@@ -1,12 +1,13 @@
 ﻿import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-faculty-students',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './faculty-students.html',
   styleUrls: ['./faculty-students.css']
 })
@@ -15,6 +16,12 @@ export class FacultyStudents implements OnInit {
   students: any[] = [];
   pendingStudents: any[] = [];
   loading = true;
+  filterYear = '';
+
+  get filteredStudents(): any[] {
+    if (!this.filterYear) return this.students;
+    return this.students.filter(s => s.year === this.filterYear);
+  }
 
   constructor(
     private http: HttpClient,

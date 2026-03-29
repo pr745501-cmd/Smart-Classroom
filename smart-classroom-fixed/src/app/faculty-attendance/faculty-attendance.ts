@@ -14,12 +14,14 @@ import { HttpClient } from '@angular/common/http';
 export class FacultyAttendance implements OnInit {
 
   students: any[] = [];
-  loading = true;
+  loading = false;
   submitting = false;
 
   date = new Date().toISOString().split('T')[0];
   faculty = '';
   course = 'BCA';
+  selectedYear = '';
+  selectedSemester: number | null = null;
 
   constructor(
     private http: HttpClient,
@@ -30,7 +32,6 @@ export class FacultyAttendance implements OnInit {
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.faculty = user.name || '';
-    this.loadStudents();
   }
 
   goBack(): void {
@@ -51,8 +52,9 @@ export class FacultyAttendance implements OnInit {
   }
 
   loadStudents() {
+    if (!this.selectedYear || !this.selectedSemester) return;
     this.loading = true;
-    this.http.get<any>('http://localhost:5000/api/students/enrolled').subscribe({
+    this.http.get<any>(`http://localhost:5000/api/students/enrolled?year=${this.selectedYear}&semester=${this.selectedSemester}`).subscribe({
       next: (res) => {
         this.students = (res.students || []).map((s: any) => ({
           ...s,
@@ -82,6 +84,8 @@ export class FacultyAttendance implements OnInit {
       date: this.date,
       faculty: this.faculty,
       course: this.course,
+      targetYear: this.selectedYear,
+      targetSemester: this.selectedSemester,
       records
     };
 

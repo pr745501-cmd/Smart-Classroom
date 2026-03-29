@@ -110,6 +110,35 @@
           </div>
         </div>
 
+        <!-- Year and Semester (students only) -->
+        <ng-container *ngIf="role === 'student'">
+          <div class="field-group">
+            <label>Academic Year</label>
+            <div class="input-wrap select-wrap">
+              <select [(ngModel)]="year" name="year">
+                <option value="">-- Select Year --</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+              </select>
+            </div>
+          </div>
+          <div class="field-group">
+            <label>Semester</label>
+            <div class="input-wrap select-wrap">
+              <select [(ngModel)]="semester" name="semester">
+                <option [ngValue]="null">-- Select Semester --</option>
+                <option [ngValue]="1">Semester 1</option>
+                <option [ngValue]="2">Semester 2</option>
+                <option [ngValue]="3">Semester 3</option>
+                <option [ngValue]="4">Semester 4</option>
+                <option [ngValue]="5">Semester 5</option>
+                <option [ngValue]="6">Semester 6</option>
+              </select>
+            </div>
+          </div>
+        </ng-container>
+
         <p class="error-msg" *ngIf="error">{{ error }}</p>
 
         <button type="submit" class="submit-btn" [disabled]="loading">

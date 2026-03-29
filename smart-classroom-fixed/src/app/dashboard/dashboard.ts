@@ -14,9 +14,21 @@ import { SocketService } from '../services/socket.service';
 })
 export class Dashboard implements OnInit, OnDestroy {
 
-  user: { name: string; email: string; role: string; course: string; profilePic?: string } = {
+  user: { name: string; email: string; role: string; course: string; profilePic?: string; year?: string; semester?: number; avatarUrl?: string } = {
     name: '', email: '', role: '', course: '', profilePic: ''
   };
+
+  // Common female names for gender detection
+  private femaleNames = ['riya','priya','nikita','neha','pooja','anjali','kavya','shreya','divya','ananya','isha','nisha','meera','sonal','komal','swati','deepa','rekha','sunita','geeta','lata','usha','asha','maya','sita','radha','puja','ritu','mona','tina','nina','rina','seema','reena','veena','leena','heena','meena','teena','sheena','preeti','preety','preety','jyoti','jyotsna','pallavi','madhuri','manisha','namita','namrata','smita','sunita','savita','kavita','lalita','mamta','shweta','shwetha','sweta','sweta','amrita','amruta','archana','archita','aruna','arushi','avni','bhavna','charu','chhaya','deepika','disha','esha','garima','gayatri','harsha','hemal','hema','himani','indira','ishita','jhanvi','juhi','kalpana','kamla','kanchan','karuna','khushi','kirti','kriti','kritika','kumari','laxmi','madhavi','malini','mansi','manya','megha','minal','mitali','monika','mukta','nalini','nandini','nandita','nidhi','nisha','nita','nitu','parvati','payal','pinki','poonam','prachi','pragati','pragya','pratibha','pratima','prerna','priyanka','rachna','radha','radhika','rajni','rakhi','rani','rashmi','renu','rima','ritu','rohini','rupal','rupali','sadhana','sagarika','sakshi','saloni','sandhya','sangita','sanjana','sapna','sarita','sarla','shalini','shanti','sharda','shikha','shilpa','shobha','shraddha','shruti','shubha','shweta','simran','sneha','sonam','sonia','sonu','subha','sudha','sujata','sukanya','sulekha','sumita','sunanda','supriya','surbhi','sushma','swapna','tanvi','taruna','trupti','tulsi','urvashi','vandana','varsha','vasudha','vidya','vimla','vinita','vipula','vrinda','yamini','yashoda','zara','zoya'];
+
+  getAvatarUrl(name: string): string {
+    const firstName = (name || '').split(' ')[0].toLowerCase().trim();
+    const isFemale = this.femaleNames.includes(firstName);
+    if (isFemale) {
+      return 'https://cdn-icons-png.flaticon.com/512/6997/6997662.png';
+    }
+    return 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+  }
 
   stats = { subjects: 0, pending: 0, attendance: 0 };
   statsLoading = true;
@@ -43,6 +55,8 @@ export class Dashboard implements OnInit, OnDestroy {
     this.user.role     = parsed.role;
     this.user.course   = parsed.course || 'BCA';
     this.user.profilePic = parsed.profilePic || '';
+    this.user.year     = parsed.year;
+    this.user.semester = parsed.semester;
 
     this.loading = false;
     this.cd.detectChanges();

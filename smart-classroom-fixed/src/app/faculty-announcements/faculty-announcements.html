@@ -20,6 +20,27 @@
         <label>Message</label>
         <textarea [(ngModel)]="message" rows="4" placeholder="Share details with your students..."></textarea>
       </div>
+      <div class="field-group">
+        <label>Target Year</label>
+        <select [(ngModel)]="targetYear">
+          <option value="">-- Select Year --</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+      </div>
+      <div class="field-group">
+        <label>Target Semester</label>
+        <select [(ngModel)]="targetSemester">
+          <option [ngValue]="null">-- Select Semester --</option>
+          <option [ngValue]="1">Semester 1</option>
+          <option [ngValue]="2">Semester 2</option>
+          <option [ngValue]="3">Semester 3</option>
+          <option [ngValue]="4">Semester 4</option>
+          <option [ngValue]="5">Semester 5</option>
+          <option [ngValue]="6">Semester 6</option>
+        </select>
+      </div>
       <div class="form-actions">
         <button *ngIf="editingId" class="btn-cancel" (click)="resetForm()">Cancel</button>
         <button class="btn-primary" (click)="editingId ? updateAnnouncement() : addAnnouncement()">
@@ -28,8 +49,27 @@
       </div>
     </div>
 
+    <!-- Filter Row -->
+    <div class="filter-row">
+      <select [(ngModel)]="filterYear">
+        <option value="">All Years</option>
+        <option value="1st Year">1st Year</option>
+        <option value="2nd Year">2nd Year</option>
+        <option value="3rd Year">3rd Year</option>
+      </select>
+      <select [(ngModel)]="filterSemester">
+        <option [ngValue]="null">All Semesters</option>
+        <option [ngValue]="1">Sem 1</option>
+        <option [ngValue]="2">Sem 2</option>
+        <option [ngValue]="3">Sem 3</option>
+        <option [ngValue]="4">Sem 4</option>
+        <option [ngValue]="5">Sem 5</option>
+        <option [ngValue]="6">Sem 6</option>
+      </select>
+    </div>
+
     <!-- Announcement Cards -->
-    <div *ngFor="let a of announcements" class="announcement-card">
+    <div *ngFor="let a of filteredAnnouncements" class="announcement-card">
       <div class="accent-bar"></div>
       <div class="card-body">
         <h3 class="card-title">{{ a.title }}</h3>
@@ -38,6 +78,8 @@
           <div class="card-meta">
             <span class="date-tag">&#128337; Recently posted</span>
             <span class="course-tag">{{ course }}</span>
+            <span class="course-tag" *ngIf="a.targetYear">🎓 {{ a.targetYear }}</span>
+            <span class="course-tag" *ngIf="a.targetSemester">📅 Sem {{ a.targetSemester }}</span>
           </div>
           <div class="card-actions">
             <button class="btn-edit" (click)="editAnnouncement(a)">✏️ Edit</button>
@@ -47,7 +89,7 @@
       </div>
     </div>
 
-    <div *ngIf="announcements.length === 0" class="empty-state">
+    <div *ngIf="filteredAnnouncements.length === 0" class="empty-state">
       <div class="empty-icon">&#128226;</div>
       <p>No announcements yet. Post your first one above.</p>
     </div>

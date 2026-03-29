@@ -47,23 +47,34 @@
         <span class="panel-count">{{ students.length }}</span>
       </div>
 
+      <div class="filter-row">
+        <select [(ngModel)]="filterYear">
+          <option value="">All Years</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+      </div>
+
       <div class="table-wrapper">
         <table>
           <thead>
             <tr>
               <th>Student</th>
               <th>Course</th>
+              <th>Year</th>
+              <th>Semester</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngIf="loading" class="loading-row">
-              <td colspan="3">Loading students...</td>
+              <td colspan="5">Loading students...</td>
             </tr>
-            <tr *ngIf="!loading && students.length === 0" class="loading-row">
-              <td colspan="3">No students enrolled yet</td>
+            <tr *ngIf="!loading && filteredStudents.length === 0" class="loading-row">
+              <td colspan="5">No students enrolled yet</td>
             </tr>
-            <tr *ngFor="let s of students">
+            <tr *ngFor="let s of filteredStudents">
               <td>
                 <div class="td-student">
                   <div class="table-avatar">{{ s.name[0] }}</div>
@@ -74,6 +85,8 @@
                 </div>
               </td>
               <td><span class="course-tag">{{ s.course || 'BCA' }}</span></td>
+              <td>{{ s.year || 'N/A' }}</td>
+              <td>{{ s.semester || 'N/A' }}</td>
               <td>
                 <span class="auth-badge">
                   <span class="auth-dot"></span>

@@ -1,6 +1,7 @@
 ﻿const express = require("express");
 const router = express.Router();
 const Lecture = require("../models/Lecture");
+const authMiddleware = require("../middleware/authMiddleware");
 
 router.post("/", async (req, res) => {
   try {
@@ -11,9 +12,17 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const lectures = await Lecture.find().sort({ createdAt: -1 });
+    let query = {};
+    if (req.user.role === 'student') {
+      if (!req.user.year || req.user.semester == null) {
+        console.warn(`Student ${req.user.id} has no year/semester in token`);
+        return res.json({ success: true, lectures: [] });
+      }
+      query = { targetYear: req.user.year, targetSemester: req.user.semester };
+    }
+    const lectures = await Lecture.find(query).sort({ createdAt: -1 });
     res.json({ success: true, lectures });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

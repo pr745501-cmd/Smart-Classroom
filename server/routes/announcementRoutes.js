@@ -1,5 +1,6 @@
 ﻿const express = require("express");
 const Announcement = require("../models/Announcement");
+const authMiddleware = require("../middleware/authMiddleware");
 
 module.exports = (io) => {
   const router = express.Router();
@@ -15,9 +16,17 @@ module.exports = (io) => {
     }
   });
 
-  router.get("/", async (req, res) => {
+  router.get("/", authMiddleware, async (req, res) => {
     try {
-      const announcements = await Announcement.find().sort({ createdAt: -1 });
+      let query = {};
+      if (req.user.role === 'student') {
+        if (!req.user.year || req.user.semester == null) {
+          console.warn(`Student ${req.user.id} has no year/semester in token`);
+          return res.json({ success: true, announcements: [] });
+        }
+        query = { targetYear: req.user.year, targetSemester: req.user.semester };
+      }
+      const announcements = await Announcement.find(query).sort({ createdAt: -1 });
       res.json({ success: true, announcements });
     } catch {
       res.status(500).json({ success: false, message: "Failed to fetch announcements" });

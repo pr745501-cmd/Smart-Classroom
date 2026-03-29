@@ -12,6 +12,38 @@
     </div>
   </div>
 
+  <!-- Year and Semester Selectors -->
+  <div class="year-sem-row">
+    <div class="field-group">
+      <label>Year</label>
+      <select [(ngModel)]="selectedYear" (ngModelChange)="loadStudents()">
+        <option value="">-- Select Year --</option>
+        <option value="1st Year">1st Year</option>
+        <option value="2nd Year">2nd Year</option>
+        <option value="3rd Year">3rd Year</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Semester</label>
+      <select [(ngModel)]="selectedSemester" (ngModelChange)="loadStudents()">
+        <option [ngValue]="null">-- Select Semester --</option>
+        <option [ngValue]="1">Semester 1</option>
+        <option [ngValue]="2">Semester 2</option>
+        <option [ngValue]="3">Semester 3</option>
+        <option [ngValue]="4">Semester 4</option>
+        <option [ngValue]="5">Semester 5</option>
+        <option [ngValue]="6">Semester 6</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Prompt when year/semester not selected -->
+  <div *ngIf="!selectedYear || !selectedSemester" class="empty-state">
+    <p>Please select a year and semester to load students.</p>
+  </div>
+
+  <ng-container *ngIf="selectedYear && selectedSemester">
+
   <!-- Stats Row -->
   <div class="stats-row">
     <div class="stat-card">
@@ -78,5 +110,7 @@
       {{ submitting ? 'Submitting...' : '📋 Submit Attendance' }}
     </button>
   </div>
+
+  </ng-container>
 
 </div>

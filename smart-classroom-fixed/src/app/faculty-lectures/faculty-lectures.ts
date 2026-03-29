@@ -17,12 +17,24 @@ export class FacultyLectures implements OnInit {
   subject = '';
   type = 'PDF';
   fileUrl = '';
+  targetYear = '';
+  targetSemester: number | null = null;
+  filterYear = '';
+  filterSemester: number | null = null;
 
   lectures: any[] = [];
   editingLectureId: string | null = null;
 
   facultyName = '';
   course = 'BCA';
+
+  get filteredLectures(): any[] {
+    return this.lectures.filter(l => {
+      if (this.filterYear && l.targetYear !== this.filterYear) return false;
+      if (this.filterSemester != null && l.targetSemester !== this.filterSemester) return false;
+      return true;
+    });
+  }
 
   constructor(
     private http: HttpClient,
@@ -51,13 +63,16 @@ export class FacultyLectures implements OnInit {
   }
 
   uploadLecture() {
+    if (!this.targetYear || !this.targetSemester) { alert('Please select target year and semester'); return; }
     const payload = {
       title: this.title,
       subject: this.subject,
       type: this.type.toLowerCase(),
       fileUrl: this.fileUrl,
       faculty: this.facultyName,
-      course: this.course
+      course: this.course,
+      targetYear: this.targetYear,
+      targetSemester: this.targetSemester
     };
     this.http.post('http://localhost:5000/api/lectures', payload)
       .subscribe(() => {
@@ -109,6 +124,8 @@ export class FacultyLectures implements OnInit {
     this.subject = '';
     this.type = 'PDF';
     this.fileUrl = '';
+    this.targetYear = '';
+    this.targetSemester = null;
     this.editingLectureId = null;
     this.cdr.detectChanges();
   }

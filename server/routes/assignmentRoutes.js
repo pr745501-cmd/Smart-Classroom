@@ -32,9 +32,17 @@ router.post(
 /* ===============================
    GET ALL ASSIGNMENTS (STUDENT)
 ================================ */
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
-    const assignments = await Assignment.find()
+    let query = {};
+    if (req.user.role === 'student') {
+      if (!req.user.year || req.user.semester == null) {
+        console.warn(`Student ${req.user.id} has no year/semester in token`);
+        return res.json({ success: true, assignments: [] });
+      }
+      query = { targetYear: req.user.year, targetSemester: req.user.semester };
+    }
+    const assignments = await Assignment.find(query)
       .sort({ createdAt: -1 });
 
     res.json({
