@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacultyListComponent } from '../faculty-list/faculty-list.component';
 import { FacultyContactsComponent } from '../faculty-contacts/faculty-contacts.component';
@@ -14,4 +14,8 @@ import { FacultyContactsComponent } from '../faculty-contacts/faculty-contacts.c
 })
 export class DmContainerComponent {
   role = JSON.parse(localStorage.getItem('user') || '{}').role || '';
+
+  constructor(private cdr: ChangeDetectorRef) {
+    this.cdr.detectChanges();
+  }
 }
