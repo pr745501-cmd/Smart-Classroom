@@ -12,66 +12,41 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./faculty-students.css']
 })
 export class FacultyStudents implements OnInit {
-
   students: any[] = [];
   pendingStudents: any[] = [];
   loading = true;
   filterYear = '';
 
   get filteredStudents(): any[] {
-    if (!this.filterYear) return this.students;
-    return this.students.filter(s => s.year === this.filterYear);
+    return this.filterYear ? this.students.filter(s => s.year === this.filterYear) : this.students;
   }
 
-  constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.loadStudents();
     this.loadPendingStudents();
   }
 
-  goBack(): void {
-    this.router.navigate(['/faculty']);
-  }
+  goBack() { this.router.navigate(['/faculty']); }
 
   loadStudents() {
-    this.http
-      .get<any>('http://localhost:5000/api/students/enrolled')
-      .subscribe({
-        next: (res) => {
-          this.students = res.students || [];
-          this.loading = false;
-          this.cdr.detectChanges();
-        },
-        error: () => {
-          this.loading = false;
-          this.cdr.detectChanges();
-        }
-      });
+    this.http.get<any>('http://localhost:5000/api/students/enrolled').subscribe({
+      next: (res) => { this.students = res.students || []; this.loading = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
+    });
   }
 
   loadPendingStudents() {
-    this.http
-      .get<any>('http://localhost:5000/api/students/pending')
-      .subscribe({
-        next: (res) => {
-          this.pendingStudents = res.students || [];
-          this.cdr.detectChanges();
-        }
-      });
+    this.http.get<any>('http://localhost:5000/api/students/pending').subscribe({
+      next: (res) => { this.pendingStudents = res.students || []; this.cdr.detectChanges(); }
+    });
   }
 
   approveStudent(id: string) {
-    this.http
-      .put(`http://localhost:5000/api/students/approve/${id}`, {})
-      .subscribe(() => {
-        this.loadStudents();
-        this.loadPendingStudents();
-        this.cdr.detectChanges();
-      });
+    this.http.put(`http://localhost:5000/api/students/approve/${id}`, {}).subscribe(() => {
+      this.loadStudents();
+      this.loadPendingStudents();
+    });
   }
 }

@@ -12,94 +12,55 @@ import { HttpClient } from '@angular/common/http';
   styleUrls: ['./faculty-attendance.css']
 })
 export class FacultyAttendance implements OnInit {
-
   students: any[] = [];
   loading = false;
   submitting = false;
-
   date = new Date().toISOString().split('T')[0];
   faculty = '';
   course = 'BCA';
   selectedYear = '';
   selectedSemester: number | null = null;
 
-  constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  get presentCount(): number { return this.students.filter(s => s.present).length; }
+  get absentCount(): number  { return this.students.filter(s => !s.present).length; }
+
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.faculty = user.name || '';
   }
 
-  goBack(): void {
-    this.router.navigate(['/faculty']);
-  }
+  goBack() { this.router.navigate(['/faculty']); }
 
-  get presentCount(): number {
-    return this.students.filter(s => s.present).length;
-  }
-
-  get absentCount(): number {
-    return this.students.filter(s => !s.present).length;
-  }
-
+  // Mark all students present or absent at once
   selectAll(present: boolean) {
     this.students = this.students.map(s => ({ ...s, present }));
     this.cdr.detectChanges();
   }
 
+  // Load students for the selected year and semester
   loadStudents() {
     if (!this.selectedYear || !this.selectedSemester) return;
     this.loading = true;
     this.http.get<any>(`http://localhost:5000/api/students/enrolled?year=${this.selectedYear}&semester=${this.selectedSemester}`).subscribe({
       next: (res) => {
-        this.students = (res.students || []).map((s: any) => ({
-          ...s,
-          present: true
-        }));
+        this.students = (res.students || []).map((s: any) => ({ ...s, present: true }));
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
   submitAttendance() {
-    if (this.students.length === 0) return;
+    if (!this.students.length) return;
     this.submitting = true;
-
-    const records = this.students.map(s => ({
-      studentId: s._id,
-      name: s.name,
-      status: s.present ? 'present' : 'absent'
-    }));
-
-    const payload = {
-      date: this.date,
-      faculty: this.faculty,
-      course: this.course,
-      targetYear: this.selectedYear,
-      targetSemester: this.selectedSemester,
-      records
-    };
-
+    const records = this.students.map(s => ({ studentId: s._id, name: s.name, status: s.present ? 'present' : 'absent' }));
+    const payload = { date: this.date, faculty: this.faculty, course: this.course, targetYear: this.selectedYear, targetSemester: this.selectedSemester, records };
     this.http.post('http://localhost:5000/api/attendance', payload).subscribe({
-      next: () => {
-        alert('Attendance marked successfully');
-        this.submitting = false;
-        this.cdr.detectChanges();
-      },
-      error: err => {
-        alert(err.error?.message || 'Failed');
-        this.submitting = false;
-        this.cdr.detectChanges();
-      }
+      next: () => { alert('Attendance marked successfully'); this.submitting = false; this.cdr.detectChanges(); },
+      error: err => { alert(err.error?.message || 'Failed'); this.submitting = false; this.cdr.detectChanges(); }
     });
   }
 }

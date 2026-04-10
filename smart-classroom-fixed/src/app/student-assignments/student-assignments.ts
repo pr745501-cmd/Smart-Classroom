@@ -12,26 +12,21 @@ import { AssignmentService } from '../services/assignment.service';
   styleUrls: ['./student-assignments.css']
 })
 export class StudentAssignments implements OnInit {
-
   assignments: any[] = [];
-  get filteredAssignments(): any[] { const q = this.searchText.toLowerCase(); return this.assignments.filter(a => a.title?.toLowerCase().includes(q)); }
-
   searchText = '';
   loading = true;
 
-  constructor(
-    private assignmentService: AssignmentService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
-
-  ngOnInit() {
-    this.loadAssignments();
+  // Filter assignments by search text
+  get filteredAssignments(): any[] {
+    const q = this.searchText.toLowerCase();
+    return this.assignments.filter(a => a.title?.toLowerCase().includes(q));
   }
 
-  goBack() {
-    this.router.navigate(['/dashboard']);
-  }
+  constructor(private assignmentService: AssignmentService, private cdr: ChangeDetectorRef, private router: Router) {}
+
+  ngOnInit() { this.loadAssignments(); }
+
+  goBack() { this.router.navigate(['/dashboard']); }
 
   loadAssignments() {
     this.assignmentService.getAssignments().subscribe({
@@ -40,22 +35,15 @@ export class StudentAssignments implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
-
+  // Returns 'overdue', 'due-soon', or 'active' based on due date
   getStatus(dueDate: string): 'overdue' | 'due-soon' | 'active' {
-    const now = new Date();
-    const due = new Date(dueDate);
-    const diffMs = due.getTime() - now.getTime();
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    if (diffMs < 0) return 'overdue';
+    const diffDays = (new Date(dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+    if (diffDays < 0) return 'overdue';
     if (diffDays <= 3) return 'due-soon';
     return 'active';
   }
 }
-

@@ -12,75 +12,41 @@ import { filterPendingApprovals } from '../admin/admin-utils';
   styleUrls: ['./admin-approvals.css']
 })
 export class AdminApprovalsComponent implements OnInit {
-
   admin: any = {};
   pendingUsers: any[] = [];
   loading = true;
   error = false;
   actionErrors: Record<string, string> = {};
 
-  constructor(
-    private adminService: AdminService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  constructor(private adminService: AdminService, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit() {
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.admin = JSON.parse(user);
-    }
-
+    this.admin = JSON.parse(localStorage.getItem('user') || '{}');
     this.adminService.getUsers().subscribe({
       next: (res: any) => {
         this.pendingUsers = filterPendingApprovals(res.users || []);
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.error = true;
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.error = true; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
   approve(id: string) {
     this.adminService.approveUser(id).subscribe({
-      next: () => {
-        this.pendingUsers = this.pendingUsers.filter(u => u._id !== id);
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.actionErrors[id] = 'Failed to approve';
-        this.cdr.detectChanges();
-      }
+      next: () => { this.pendingUsers = this.pendingUsers.filter(u => u._id !== id); this.cdr.detectChanges(); },
+      error: () => { this.actionErrors[id] = 'Failed to approve'; this.cdr.detectChanges(); }
     });
   }
 
   reject(id: string) {
     this.adminService.rejectUser(id).subscribe({
-      next: () => {
-        this.pendingUsers = this.pendingUsers.filter(u => u._id !== id);
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.actionErrors[id] = 'Failed to reject';
-        this.cdr.detectChanges();
-      }
+      next: () => { this.pendingUsers = this.pendingUsers.filter(u => u._id !== id); this.cdr.detectChanges(); },
+      error: () => { this.actionErrors[id] = 'Failed to reject'; this.cdr.detectChanges(); }
     });
   }
 
-  isActive(path: string): boolean {
-    return this.router.url === path;
-  }
-
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
-  }
-
-  goTo(path: string) {
-    this.router.navigate([path]);
-  }
+  isActive(path: string) { return this.router.url === path; }
+  goTo(path: string)     { this.router.navigate([path]); }
+  logout()               { localStorage.clear(); this.router.navigate(['/login']); }
 }

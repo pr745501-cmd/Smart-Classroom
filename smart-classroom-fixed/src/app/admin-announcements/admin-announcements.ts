@@ -13,7 +13,6 @@ import { filterByFaculty } from '../admin/admin-utils';
   styleUrls: ['./admin-announcements.css']
 })
 export class AdminAnnouncementsComponent implements OnInit {
-
   admin: any = {};
   announcements: any[] = [];
   filtered: any[] = [];
@@ -22,18 +21,10 @@ export class AdminAnnouncementsComponent implements OnInit {
   error = false;
   deleteError = '';
 
-  constructor(
-    private adminService: AdminService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  constructor(private adminService: AdminService, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit() {
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.admin = JSON.parse(user);
-    }
-
+    this.admin = JSON.parse(localStorage.getItem('user') || '{}');
     this.adminService.getAnnouncements().subscribe({
       next: (res: any) => {
         this.announcements = res.announcements || res || [];
@@ -41,11 +32,7 @@ export class AdminAnnouncementsComponent implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.error = true;
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.error = true; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -62,23 +49,11 @@ export class AdminAnnouncementsComponent implements OnInit {
         this.filtered = this.filtered.filter(a => a._id !== id);
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.deleteError = 'Failed to delete announcement';
-        this.cdr.detectChanges();
-      }
+      error: () => { this.deleteError = 'Failed to delete announcement'; this.cdr.detectChanges(); }
     });
   }
 
-  isActive(path: string): boolean {
-    return this.router.url === path;
-  }
-
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
-  }
-
-  goTo(path: string) {
-    this.router.navigate([path]);
-  }
+  isActive(path: string) { return this.router.url === path; }
+  goTo(path: string)     { this.router.navigate([path]); }
+  logout()               { localStorage.clear(); this.router.navigate(['/login']); }
 }

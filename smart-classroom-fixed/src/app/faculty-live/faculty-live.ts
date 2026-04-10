@@ -14,7 +14,6 @@ import { MeetingRoomComponent } from '../meeting-room/meeting-room';
   styleUrls: ['./faculty-live.css']
 })
 export class FacultyLive implements OnInit {
-
   title = '';
   loading = false;
   meetingCode = '';
@@ -30,36 +29,21 @@ export class FacultyLive implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
-    this.socketService.reconnectWithToken();
-  }
+  ngOnInit() { this.socketService.reconnectWithToken(); }
 
-  goBack(): void {
-    this.router.navigate(['/faculty']);
-  }
+  goBack() { this.router.navigate(['/faculty']); }
 
-  forceEnd(): void {
+  // Force-end any stuck active meeting before starting a new one
+  forceEnd() {
     this.loading = true;
     this.live.forceEndClass().subscribe({
-      next: () => {
-        this.loading = false;
-        this.errorMsg = '';
-        this.hasActiveMeeting = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.loading = false;
-        this.errorMsg = 'Failed to end previous meeting. Please try again.';
-        this.cdr.detectChanges();
-      }
+      next: () => { this.loading = false; this.errorMsg = ''; this.hasActiveMeeting = false; this.cdr.detectChanges(); },
+      error: () => { this.loading = false; this.errorMsg = 'Failed to end previous meeting. Please try again.'; this.cdr.detectChanges(); }
     });
   }
 
-  start(): void {
-    if (!this.title.trim()) {
-      this.errorMsg = 'Please enter a class title.';
-      return;
-    }
+  start() {
+    if (!this.title.trim()) { this.errorMsg = 'Please enter a class title.'; return; }
     this.errorMsg = '';
     this.loading = true;
 
@@ -73,14 +57,9 @@ export class FacultyLive implements OnInit {
       },
       error: (err: any) => {
         this.loading = false;
-        if (err.status === 409) {
-          this.errorMsg = 'You already have an active meeting. Please end it first.';
-          this.hasActiveMeeting = true;
-        } else if (err.status === 0) {
-          this.errorMsg = 'Service unavailable. Please try again.';
-        } else {
-          this.errorMsg = err.error?.message || 'Failed to start meeting. Please try again.';
-        }
+        if (err.status === 409)     this.errorMsg = 'You already have an active meeting. Please end it first.', this.hasActiveMeeting = true;
+        else if (err.status === 0)  this.errorMsg = 'Service unavailable. Please try again.';
+        else                        this.errorMsg = err.error?.message || 'Failed to start meeting. Please try again.';
         this.cdr.detectChanges();
       }
     });

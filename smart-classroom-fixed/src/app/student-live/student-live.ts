@@ -14,7 +14,6 @@ import { MeetingRoomComponent } from '../meeting-room/meeting-room';
   styleUrls: ['./student-live.css']
 })
 export class StudentLive implements OnInit, OnDestroy {
-
   showBanner = false;
   bannerCode = '';
   bannerTitle = '';
@@ -32,61 +31,40 @@ export class StudentLive implements OnInit, OnDestroy {
     private router: Router
   ) {}
 
-  ngOnInit(): void {
+  ngOnInit() {
     this.socketService.reconnectWithToken();
 
-    // Check for active meeting on load
+    // Check if a meeting is already active when page loads
     this.live.getLiveClass().subscribe({
       next: (res: any) => {
-        if (res && res.isLive) {
-          this.showBanner = true;
-          this.bannerCode = res.meetingCode;
-          this.bannerTitle = res.title;
-          this.cdr.detectChanges();
-        }
+        if (res?.isLive) { this.showBanner = true; this.bannerCode = res.meetingCode; this.bannerTitle = res.title; this.cdr.detectChanges(); }
       },
       error: () => {}
     });
 
-    // Listen for meetingStarted socket event
+    // Listen for new meeting started
     this.socketService.onMeetingStarted((data: any) => {
-      this.showBanner = true;
-      this.bannerCode = data.meetingCode;
-      this.bannerTitle = data.title;
+      this.showBanner = true; this.bannerCode = data.meetingCode; this.bannerTitle = data.title;
       this.cdr.detectChanges();
     });
 
-    // Listen for meetingEnded socket event
+    // If meeting ends while student is inside, go back to dashboard
     this.socketService.onMeetingEnded(() => {
-      if (this.inMeeting) {
-        this.router.navigate(['/dashboard']);
-      }
+      if (this.inMeeting) this.router.navigate(['/dashboard']);
     });
   }
 
-  ngOnDestroy(): void {
+  ngOnDestroy() {
     this.socketService.offEvent('meetingStarted');
     this.socketService.offEvent('meetingEnded');
   }
 
-  goBack(): void {
-    this.router.navigate(['/dashboard']);
-  }
+  goBack()        { this.router.navigate(['/dashboard']); }
+  dismissBanner() { this.showBanner = false; }
+  useBannerCode() { this.meetingCodeInput = this.bannerCode; this.showBanner = false; }
 
-  dismissBanner(): void {
-    this.showBanner = false;
-  }
-
-  useBannerCode(): void {
-    this.meetingCodeInput = this.bannerCode;
-    this.showBanner = false;
-  }
-
-  joinMeeting(): void {
-    if (!this.meetingCodeInput.trim()) {
-      this.errorMsg = 'Please enter a meeting code.';
-      return;
-    }
+  joinMeeting() {
+    if (!this.meetingCodeInput.trim()) { this.errorMsg = 'Please enter a meeting code.'; return; }
     this.errorMsg = '';
     this.loading = true;
 
@@ -100,13 +78,9 @@ export class StudentLive implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.loading = false;
-        if (err.status === 404) {
-          this.errorMsg = 'Invalid or expired meeting code.';
-        } else if (err.status === 0) {
-          this.errorMsg = 'Service unavailable. Please try again.';
-        } else {
-          this.errorMsg = err.error?.message || 'Failed to join meeting. Please try again.';
-        }
+        if (err.status === 404)    this.errorMsg = 'Invalid or expired meeting code.';
+        else if (err.status === 0) this.errorMsg = 'Service unavailable. Please try again.';
+        else                       this.errorMsg = err.error?.message || 'Failed to join meeting. Please try again.';
         this.cdr.detectChanges();
       }
     });

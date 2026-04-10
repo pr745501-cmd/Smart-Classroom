@@ -12,13 +12,15 @@ import { AssignmentService } from '../services/assignment.service';
   styleUrls: ['./faculty-assignments.css']
 })
 export class FacultyAssignments implements OnInit {
-
+  // Form fields
   title = '';
   description = '';
   dueDate = '';
   fileUrl = '';
   targetYear = '';
   targetSemester: number | null = null;
+
+  // Filter fields
   filterYear = '';
   filterSemester: number | null = null;
 
@@ -27,23 +29,6 @@ export class FacultyAssignments implements OnInit {
   editingAssignmentId: string | null = null;
   facultyName = '';
   course = 'BCA';
-
-  constructor(
-    private assignmentService: AssignmentService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const parsed = JSON.parse(user);
-      this.facultyName = parsed.name;
-      this.course = parsed.course || 'BCA';
-    }
-  }
-
-  ngOnInit(): void {
-    this.loadAssignments();
-  }
 
   get filteredAssignments(): any[] {
     const q = this.searchText.toLowerCase();
@@ -55,14 +40,19 @@ export class FacultyAssignments implements OnInit {
     });
   }
 
-  goBack(): void { this.router.navigate(['/faculty']); }
+  constructor(private assignmentService: AssignmentService, private cdr: ChangeDetectorRef, private router: Router) {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.facultyName = user.name;
+    this.course = user.course || 'BCA';
+  }
+
+  ngOnInit() { this.loadAssignments(); }
+
+  goBack() { this.router.navigate(['/faculty']); }
 
   loadAssignments() {
     this.assignmentService.getFacultyAssignments(this.facultyName).subscribe({
-      next: res => {
-        this.assignments = res.assignments || [];
-        this.cdr.detectChanges();
-      },
+      next: res => { this.assignments = res.assignments || []; this.cdr.detectChanges(); },
       error: () => this.cdr.detectChanges()
     });
   }
@@ -71,10 +61,7 @@ export class FacultyAssignments implements OnInit {
     if (!this.title || !this.dueDate) { alert('Title and Due Date are required'); return; }
     if (!this.targetYear || !this.targetSemester) { alert('Please select target year and semester'); return; }
     const data = { title: this.title, description: this.description, dueDate: this.dueDate, fileUrl: this.fileUrl, faculty: this.facultyName, course: this.course, targetYear: this.targetYear, targetSemester: this.targetSemester };
-    this.assignmentService.createAssignment(data).subscribe(() => {
-      this.resetForm();
-      this.loadAssignments();
-    });
+    this.assignmentService.createAssignment(data).subscribe(() => { this.resetForm(); this.loadAssignments(); });
   }
 
   editAssignment(a: any) {
@@ -87,11 +74,8 @@ export class FacultyAssignments implements OnInit {
   }
 
   updateAssignment() {
-    const data = { title: this.title, description: this.description, dueDate: this.dueDate, fileUrl: this.fileUrl };
-    this.assignmentService.updateAssignment(this.editingAssignmentId!, data).subscribe(() => {
-      this.resetForm();
-      this.loadAssignments();
-    });
+    this.assignmentService.updateAssignment(this.editingAssignmentId!, { title: this.title, description: this.description, dueDate: this.dueDate, fileUrl: this.fileUrl })
+      .subscribe(() => { this.resetForm(); this.loadAssignments(); });
   }
 
   deleteAssignment(id: string) {
@@ -101,8 +85,7 @@ export class FacultyAssignments implements OnInit {
 
   resetForm() {
     this.title = ''; this.description = ''; this.dueDate = ''; this.fileUrl = '';
-    this.targetYear = ''; this.targetSemester = null;
-    this.editingAssignmentId = null;
+    this.targetYear = ''; this.targetSemester = null; this.editingAssignmentId = null;
     this.cdr.detectChanges();
   }
 

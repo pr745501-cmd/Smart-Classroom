@@ -4,14 +4,12 @@ import { map } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class LectureService {
-
-  private api = 'http://localhost:5000/api/lectures'; // ✅ FIXED
+  private API = 'http://localhost:5000/api/lectures';
 
   constructor(private http: HttpClient) {}
 
+  // Always returns an array (never undefined)
   getLectures() {
-    return this.http.get<any>(this.api).pipe(
-      map(res => res.lectures || []) // ✅ ALWAYS ARRAY
-    );
+    return this.http.get<any>(this.API).pipe(map(res => res.lectures || []));
   }
 }

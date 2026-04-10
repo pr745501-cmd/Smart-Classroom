@@ -13,17 +13,14 @@ import { SocketService } from '../services/socket.service';
   styleUrls: ['./faculty-announcements.css']
 })
 export class FacultyAnnouncements implements OnInit, OnDestroy {
-
   title = '';
   message = '';
   targetYear = '';
   targetSemester: number | null = null;
   filterYear = '';
   filterSemester: number | null = null;
-
   announcements: any[] = [];
   editingId: string | null = null;
-
   facultyName = '';
   course = 'BCA';
 
@@ -41,29 +38,22 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private router: Router
   ) {
-    const user = localStorage.getItem('user');
-    if (user) {
-      const parsed = JSON.parse(user);
-      this.facultyName = parsed.name;
-      this.course = parsed.course || 'BCA';
-    }
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    this.facultyName = user.name;
+    this.course = user.course || 'BCA';
   }
 
   ngOnInit() {
     this.loadAnnouncements();
     this.socketService.joinAnnouncements();
 
-    // When another faculty posts — refresh list
-    this.socketService.onAnnouncementCreated(() => {
-      this.loadAnnouncements();
-    });
-
+    // Real-time updates
+    this.socketService.onAnnouncementCreated(() => this.loadAnnouncements());
     this.socketService.onAnnouncementUpdated((a: any) => {
       const idx = this.announcements.findIndex(x => x._id === a._id);
       if (idx !== -1) { this.announcements[idx] = a; this.announcements = [...this.announcements]; }
       this.cdr.detectChanges();
     });
-
     this.socketService.onAnnouncementDeleted(({ _id }) => {
       this.announcements = this.announcements.filter(x => x._id !== _id);
       this.cdr.detectChanges();
@@ -76,43 +66,24 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
     this.socketService.offEvent('announcementDeleted');
   }
 
-  goBack(): void {
-    this.router.navigate(['/faculty']);
-  }
+  goBack() { this.router.navigate(['/faculty']); }
 
   loadAnnouncements() {
-    this.announcementService
-      .getFacultyAnnouncements(this.facultyName)
-      .subscribe(res => {
-        this.announcements = res.announcements || [];
-        this.cdr.detectChanges();
-      });
+    this.announcementService.getFacultyAnnouncements(this.facultyName).subscribe(res => {
+      this.announcements = res.announcements || [];
+      this.cdr.detectChanges();
+    });
   }
 
   addAnnouncement() {
-    if (!this.title || !this.message) {
-      alert("All fields required");
-      return;
-    }
-    if (!this.targetYear || !this.targetSemester) {
-      alert("Please select target year and semester");
-      return;
-    }
-    const data = {
-      title: this.title,
-      message: this.message,
-      faculty: this.facultyName,
-      course: this.course,
-      targetYear: this.targetYear,
-      targetSemester: this.targetSemester
-    };
-    this.announcementService.createAnnouncement(data)
-      .subscribe(() => {
-        alert("Announcement Posted");
-        this.resetForm();
-        this.loadAnnouncements();
-        this.cdr.detectChanges();
-      });
+    if (!this.title || !this.message) { alert('All fields required'); return; }
+    if (!this.targetYear || !this.targetSemester) { alert('Please select target year and semester'); return; }
+    const data = { title: this.title, message: this.message, faculty: this.facultyName, course: this.course, targetYear: this.targetYear, targetSemester: this.targetSemester };
+    this.announcementService.createAnnouncement(data).subscribe(() => {
+      alert('Announcement Posted');
+      this.resetForm();
+      this.loadAnnouncements();
+    });
   }
 
   editAnnouncement(a: any) {
@@ -123,33 +94,20 @@ export class FacultyAnnouncements implements OnInit, OnDestroy {
   }
 
   updateAnnouncement() {
-    const data = { title: this.title, message: this.message };
-    this.announcementService
-      .updateAnnouncement(this.editingId!, data)
-      .subscribe(() => {
-        alert("Updated");
-        this.resetForm();
-        this.loadAnnouncements();
-        this.cdr.detectChanges();
-      });
+    this.announcementService.updateAnnouncement(this.editingId!, { title: this.title, message: this.message }).subscribe(() => {
+      alert('Updated');
+      this.resetForm();
+      this.loadAnnouncements();
+    });
   }
 
   deleteAnnouncement(id: string) {
-    if (!confirm("Delete announcement?")) return;
-    this.announcementService
-      .deleteAnnouncement(id)
-      .subscribe(() => {
-        this.loadAnnouncements();
-        this.cdr.detectChanges();
-      });
+    if (!confirm('Delete announcement?')) return;
+    this.announcementService.deleteAnnouncement(id).subscribe(() => this.loadAnnouncements());
   }
 
   resetForm() {
-    this.title = '';
-    this.message = '';
-    this.targetYear = '';
-    this.targetSemester = null;
-    this.editingId = null;
+    this.title = ''; this.message = ''; this.targetYear = ''; this.targetSemester = null; this.editingId = null;
     this.cdr.detectChanges();
   }
 }

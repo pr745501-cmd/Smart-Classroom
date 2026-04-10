@@ -12,28 +12,18 @@ import { Router } from '@angular/router';
   styleUrls: ['./lecture.css']
 })
 export class Lectures implements OnInit {
-
   lectures: any[] = [];
   filteredLectures: any[] = [];
   subjects: string[] = [];
+  searchText = '';
+  selectedSubject = '';
+  loading = true;
 
-  searchText: string = '';
-  selectedSubject: string = '';
-  loading: boolean = true;
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private router: Router) {}
 
-  constructor(
-    private http: HttpClient,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  ngOnInit() { this.loadLectures(); }
 
-  ngOnInit() {
-    this.loadLectures();
-  }
-
-  goBack() {
-    this.router.navigate(['/dashboard']);
-  }
+  goBack() { this.router.navigate(['/dashboard']); }
 
   loadLectures() {
     this.http.get<any>('http://localhost:5000/api/lectures').subscribe({
@@ -44,11 +34,7 @@ export class Lectures implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error(err);
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 

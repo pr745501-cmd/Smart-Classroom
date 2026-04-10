@@ -13,7 +13,6 @@ import { filterAssignments, computeAssignmentSummary } from '../admin/admin-util
   styleUrls: ['./admin-assignments.css']
 })
 export class AdminAssignmentsComponent implements OnInit {
-
   admin: any = {};
   assignments: any[] = [];
   filtered: any[] = [];
@@ -22,18 +21,10 @@ export class AdminAssignmentsComponent implements OnInit {
   error = false;
   summary = { total: 0, dueSoonCount: 0, overdueCount: 0 };
 
-  constructor(
-    private adminService: AdminService,
-    private cdr: ChangeDetectorRef,
-    private router: Router
-  ) {}
+  constructor(private adminService: AdminService, private cdr: ChangeDetectorRef, private router: Router) {}
 
   ngOnInit() {
-    const user = localStorage.getItem('user');
-    if (user) {
-      this.admin = JSON.parse(user);
-    }
-
+    this.admin = JSON.parse(localStorage.getItem('user') || '{}');
     this.adminService.getAssignments().subscribe({
       next: (res: any) => {
         this.assignments = res.assignments || [];
@@ -42,11 +33,7 @@ export class AdminAssignmentsComponent implements OnInit {
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.error = true;
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.error = true; this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
@@ -56,25 +43,13 @@ export class AdminAssignmentsComponent implements OnInit {
   }
 
   getStatus(dueDate: string): string {
-    const due = new Date(dueDate);
-    const now = new Date();
-    const diffMs = due.getTime() - now.getTime();
-    const days = diffMs / (1000 * 60 * 60 * 24);
+    const days = (new Date(dueDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
     if (days < 0) return 'overdue';
     if (days <= 7) return 'due-soon';
     return 'active';
   }
 
-  isActive(path: string): boolean {
-    return this.router.url === path;
-  }
-
-  logout() {
-    localStorage.clear();
-    this.router.navigate(['/login']);
-  }
-
-  goTo(path: string) {
-    this.router.navigate([path]);
-  }
+  isActive(path: string) { return this.router.url === path; }
+  goTo(path: string)     { this.router.navigate([path]); }
+  logout()               { localStorage.clear(); this.router.navigate(['/login']); }
 }

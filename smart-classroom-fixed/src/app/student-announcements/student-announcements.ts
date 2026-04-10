@@ -13,7 +13,6 @@ import { SocketService } from '../services/socket.service';
   styleUrls: ['./student-announcements.css']
 })
 export class StudentAnnouncements implements OnInit, OnDestroy {
-
   announcements: any[] = [];
   searchText = '';
   loading = true;
@@ -34,17 +33,16 @@ export class StudentAnnouncements implements OnInit, OnDestroy {
     this.loadAnnouncements();
     this.socketService.joinAnnouncements();
 
+    // Real-time updates via Socket.io
     this.socketService.onAnnouncementCreated((a: any) => {
       this.announcements.unshift(a);
       this.cdr.detectChanges();
     });
-
     this.socketService.onAnnouncementUpdated((a: any) => {
       const idx = this.announcements.findIndex(x => x._id === a._id);
       if (idx !== -1) { this.announcements[idx] = a; this.announcements = [...this.announcements]; }
       this.cdr.detectChanges();
     });
-
     this.socketService.onAnnouncementDeleted(({ _id }) => {
       this.announcements = this.announcements.filter(x => x._id !== _id);
       this.cdr.detectChanges();
@@ -66,10 +64,7 @@ export class StudentAnnouncements implements OnInit, OnDestroy {
         this.loading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.loading = false;
-        this.cdr.detectChanges();
-      }
+      error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 }
