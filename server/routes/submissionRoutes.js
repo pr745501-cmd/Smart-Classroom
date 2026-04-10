@@ -1,12 +1,11 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Submission = require('../models/Submission');
+const Submission = require("../models/Submission");
 
-// STUDENT → SUBMIT ASSIGNMENT
-router.post('/submit', async (req, res) => {
+// POST /api/submissions/submit — student submits an assignment
+router.post("/submit", async (req, res) => {
   try {
-    const submission = new Submission(req.body);
-    await submission.save();
+    const submission = await new Submission(req.body).save();
     res.json({ success: true, submission });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });

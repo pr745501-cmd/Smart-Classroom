@@ -1,72 +1,51 @@
 const express = require("express");
 const router = express.Router();
-
 const Lecture = require("../models/Lecture");
 const Assignment = require("../models/Assignment");
 const Submission = require("../models/Submission");
 const Attendance = require("../models/Attendance");
-const authMiddleware = require("../middleware/authMiddleware");
-const roleMiddleware = require("../middleware/roleMiddleware");
+const auth = require("../middleware/authMiddleware");
+const role = require("../middleware/roleMiddleware");
 
-/**
- * GET /api/dashboard/stats
- * Returns: subjects count, pending assignments count, attendance %
- */
-router.get(
-  "/stats",
-  authMiddleware,
-  roleMiddleware(["student"]),
-  async (req, res) => {
-    try {
-      const studentId = req.user.id;
+// GET /api/dashboard/stats — student dashboard summary
+router.get("/stats", auth, role(["student"]), async (req, res) => {
+  try {
+    const studentId = req.user.id;
+    const yearFilter = req.user.year && req.user.semester
+      ? { targetYear: req.user.year, targetSemester: req.user.semester }
+      : {};
 
-      // 1. SUBJECTS — distinct subjects from lectures matching student's year+semester
-      const yearFilter = req.user.year && req.user.semester
-        ? { targetYear: req.user.year, targetSemester: req.user.semester }
-        : {};
-      const lectures = await Lecture.find(yearFilter).select("subject");
-      const subjects = new Set(lectures.map(l => l.subject).filter(Boolean));
-      const subjectCount = subjects.size;
+    // 1. Count distinct subjects from lectures
+    const lectures = await Lecture.find(yearFilter).select("subject");
+    const subjectCount = new Set(lectures.map(l => l.subject).filter(Boolean)).size;
 
-      // 2. PENDING ASSIGNMENTS — not yet submitted by this student, due date not passed
-      const now = new Date();
-      const allAssignments = await Assignment.find({ dueDate: { $gte: now } }).select("_id");
-      const assignmentIds = allAssignments.map(a => a._id);
+    // 2. Count pending assignments (due in future, not yet submitted)
+    const upcomingAssignments = await Assignment.find({ dueDate: { $gte: new Date() } }).select("_id");
+    const upcomingIds = upcomingAssignments.map(a => a._id);
 
-      const submitted = await Submission.find({
-        student: studentId,
-        assignment: { $in: assignmentIds }
-      }).select("assignment");
+    const submitted = await Submission.find({ student: studentId, assignment: { $in: upcomingIds } }).select("assignment");
+    const submittedIds = new Set(submitted.map(s => s.assignment.toString()));
+    const pendingCount = upcomingIds.filter(id => !submittedIds.has(id.toString())).length;
 
-      const submittedIds = new Set(submitted.map(s => s.assignment.toString()));
-      const pendingCount = assignmentIds.filter(id => !submittedIds.has(id.toString())).length;
+    // 3. Calculate attendance percentage
+    const attendanceDocs = await Attendance.find({ "records.studentId": studentId });
+    const total = attendanceDocs.length;
+    const present = attendanceDocs.filter(doc => {
+      const record = doc.records.find(r => r.studentId.toString() === studentId);
+      return record?.status === "present";
+    }).length;
 
-      // 3. ATTENDANCE % — present / total records for this student
-      const attendanceDocs = await Attendance.find({
-        "records.studentId": studentId
-      });
-
-      const total = attendanceDocs.length;
-      const present = attendanceDocs.filter(doc => {
-        const record = doc.records.find(r => r.studentId.toString() === studentId);
-        return record?.status === "present";
-      }).length;
-
-      const attendancePct = total > 0 ? Math.round((present / total) * 100) : 0;
-
-      res.json({
-        success: true,
-        stats: {
-          subjects: subjectCount,
-          pending: pendingCount,
-          attendance: attendancePct
-        }
-      });
-
-    } catch (err) {
-      res.status(500).json({ success: false, message: err.message });
-    }
+    res.json({
+      success: true,
+      stats: {
+        subjects: subjectCount,
+        pending: pendingCount,
+        attendance: total > 0 ? Math.round((present / total) * 100) : 0
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
-);
+});
 
 module.exports = router;

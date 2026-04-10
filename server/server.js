@@ -1,109 +1,73 @@
-// 🔥 FORCE GOOGLE DNS (Fix SRV ECONNREFUSED)
+// Fix MongoDB SRV DNS resolution issues
 const dns = require("dns");
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 require("dotenv").config();
 
 const express = require("express");
+const http = require("http");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const compression = require("compression");
 const path = require("path");
 const fs = require("fs");
-
-/* 🔥 CHAT */
-const http = require("http");
+const jwt = require("jsonwebtoken");
 const { Server } = require("socket.io");
 
-/* 🔥 CHAT MODEL */
 const ChatMessage = require("./models/ChatMessage");
-const jwt = require("jsonwebtoken");
 const DirectMessage = require("./models/DirectMessage");
+const LiveClass = require("./models/LiveClass");
 const presenceService = require("./services/presenceService");
 
-/* ROUTES */
-const authRoutes = require("./routes/auth");
-const testRoutes = require("./routes/test");
-const announcementRoutes = require("./routes/announcementRoutes");
-const studentRoutes = require("./routes/studentRoutes");
-const lectureRoutes = require("./routes/lectureRoutes");
-const assignmentRoutes = require("./routes/assignmentRoutes");
-const submissionRoutes = require("./routes/submissionRoutes");
-const attendanceRoutes = require("./routes/attendanceRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-const liveClassRoutesFactory = require("./routes/liveClassRoutes");
-const chatRoutes = require("./routes/chatRoutes");
-const dashboardStatsRoute = require("./routes/dashboardStatsRoute");
-
 const app = express();
-
-/* 🔥 HTTP SERVER */
 const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-/* 🔥 SOCKET SERVER */
-const io = new Server(server, {
-  cors: {
-    origin: "*"
-  }
-});
-
-const liveClassRoutes = liveClassRoutesFactory(io);
-const announcementRoutesWithIo = announcementRoutes(io);
-
-/* ================= PERFORMANCE ================= */
+// ─── Middleware ───────────────────────────────────────────────────────────────
 
 app.use(compression());
+app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use((req, res, next) => { res.setHeader("Cache-Control", "no-store"); next(); });
 
-/* ================= NO CACHE ================= */
-
-app.use((req, res, next) => {
-  res.setHeader("Cache-Control", "no-store");
-  next();
-});
-
-/* ================= UPLOADS ================= */
+// ─── Uploads folder ───────────────────────────────────────────────────────────
 
 const uploadsDir = path.join(__dirname, "uploads");
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir);
-}
-
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 app.use("/uploads", express.static(uploadsDir));
 
-/* ================= MONGODB ================= */
+// ─── MongoDB ──────────────────────────────────────────────────────────────────
 
 mongoose.connect(process.env.MONGO_URI, {
   serverSelectionTimeoutMS: 30000,
   socketTimeoutMS: 45000,
   maxPoolSize: 10
 })
-.then(() => console.log("✅ MongoDB Atlas Connected"))
+.then(() => console.log("✅ MongoDB Connected"))
 .catch((err) => console.error("❌ MongoDB Error:", err));
 
-/* ================= ROUTES ================= */
+// ─── Routes ───────────────────────────────────────────────────────────────────
 
-app.get("/", (req, res) => {
-  res.send("🚀 Smart Classroom API Running");
-});
+const liveClassRoutes = require("./routes/liveClassRoutes")(io);
+const announcementRoutes = require("./routes/announcementRoutes")(io);
 
-app.use("/api/auth", authRoutes);
-app.use("/api/test", testRoutes);
-app.use("/api/announcements", announcementRoutesWithIo);
-app.use("/api/students", studentRoutes);
-app.use("/api/lectures", lectureRoutes);
-app.use("/api/assignments", assignmentRoutes);
-app.use("/api/submissions", submissionRoutes);
-app.use("/api/attendance", attendanceRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/live-class", liveClassRoutes);
-app.use("/api/chat", chatRoutes);
-app.use("/api/dashboard", dashboardStatsRoute);
+app.get("/", (req, res) => res.send("Smart Classroom API Running"));
 
-/* ================= SOCKET CHAT ================= */
+app.use("/api/auth",        require("./routes/auth"));
+app.use("/api/test",        require("./routes/test"));
+app.use("/api/announcements", announcementRoutes);
+app.use("/api/students",    require("./routes/studentRoutes"));
+app.use("/api/lectures",    require("./routes/lectureRoutes"));
+app.use("/api/assignments", require("./routes/assignmentRoutes"));
+app.use("/api/submissions", require("./routes/submissionRoutes"));
+app.use("/api/attendance",  require("./routes/attendanceRoutes"));
+app.use("/api/admin",       require("./routes/adminRoutes"));
+app.use("/api/live-class",  liveClassRoutes);
+app.use("/api/chat",        require("./routes/chatRoutes"));
+app.use("/api/dashboard",   require("./routes/dashboardStatsRoute"));
+
+// ─── Socket.io Auth ───────────────────────────────────────────────────────────
 
 io.use((socket, next) => {
   const token = socket.handshake.auth?.token;
@@ -116,150 +80,70 @@ io.use((socket, next) => {
   }
 });
 
+// ─── Socket.io Events ────────────────────────────────────────────────────────
+
 io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
 
-  console.log("💬 User connected:", socket.id);
+  // Register presence and personal inbox channel
+  if (socket.user) {
+    presenceService.userConnected(socket.user.id, socket.id);
+    presenceService.userOnline(socket.user.id, io);
+    socket.join(`user:${socket.user.id}`);
+  }
 
-  /* JOIN ROOM */
+  // ── Lecture Chat ──────────────────────────────────────────────────────────
+
   socket.on("joinLecture", async (lectureId) => {
-
     socket.join(lectureId);
-
-    console.log("User joined room:", lectureId);
-
     try {
-
-      const history = await ChatMessage
-        .find({ lectureId })
-        .sort({ createdAt: 1 })
-        .limit(100);
-
+      const history = await ChatMessage.find({ lectureId }).sort({ createdAt: 1 }).limit(100);
       socket.emit("chatHistory", history);
-
     } catch (err) {
-
-      console.error("History load error:", err);
-
+      console.error("Chat history error:", err);
     }
-
   });
 
-  /* SEND MESSAGE */
   socket.on("sendMessage", async (data) => {
-
     try {
-
-      console.log("Message received:", data);
-
-      const msg = new ChatMessage({
+      const msg = await ChatMessage.create({
         lectureId: data.lectureId,
         senderName: data.senderName,
         senderRole: data.senderRole,
         message: data.message
       });
-
-      await msg.save();
-
-      // broadcast to everyone in room
       io.to(data.lectureId).emit("receiveMessage", msg);
-
     } catch (err) {
-
       console.error("Message save error:", err);
-
     }
-
   });
 
-  /* DISCONNECT */
-  socket.on("disconnect", async () => {
+  // ── Direct Messages ───────────────────────────────────────────────────────
 
-    console.log("❌ User disconnected:", socket.id);
-    if (socket.user) {
-      presenceService.userDisconnected(socket.user.id, socket.id, io);
-      // If faculty disconnects while in a meeting, end the meeting
-      if (socket.user.role === 'faculty' && socket.meetingSessionId) {
-        try {
-          const LiveClass = require('./models/LiveClass');
-          const liveClass = await LiveClass.findByIdAndUpdate(
-            socket.meetingSessionId,
-            { isLive: false, endedAt: new Date() },
-            { new: true }
-          );
-          if (liveClass) {
-            io.to(socket.meetingSessionId).emit('meetingEnded', { sessionId: socket.meetingSessionId });
-          }
-        } catch (err) {
-          console.error('Error ending meeting on disconnect:', err);
-        }
-      }
-    }
+  socket.on("joinDM", ({ roomId }) => socket.join(roomId));
+  socket.on("leaveDM", ({ roomId }) => { if (roomId) socket.leave(roomId); });
 
-  });
-
-  // ===== PRESENCE =====
-  if (socket.user) {
-    presenceService.userConnected(socket.user.id, socket.id);
-    presenceService.userOnline(socket.user.id, io);
-    // Personal inbox channel — receive DM list updates without joining each chat room
-    socket.join(`user:${String(socket.user.id)}`);
-  }
-
-  // ===== JOIN DM ROOM =====
-  socket.on("joinDM", ({ roomId }) => {
-    socket.join(roomId);
-  });
-
-  socket.on("leaveDM", ({ roomId }) => {
-    if (roomId) socket.leave(roomId);
-  });
-
-  // ===== SEND DM =====
   socket.on("sendDM", async ({ roomId, recipientId, text, senderId }) => {
     if (!socket.user || socket.user.id !== senderId) {
-      socket.emit("error", { message: "Unauthorized sender" });
-      return;
+      return socket.emit("error", { message: "Unauthorized sender" });
     }
     try {
-      const msg = new DirectMessage({
-        sender: senderId,
-        recipient: recipientId,
-        text,
-        readStatus: false
-      });
-      await msg.save();
+      const msg = await DirectMessage.create({ sender: senderId, recipient: recipientId, text, readStatus: false });
       io.to(roomId).emit("receiveDM", msg);
 
-      const lastMessage = {
-        text: msg.text,
-        timestamp: msg.timestamp || new Date()
-      };
-      const rid = String(recipientId);
-      const sid = String(senderId);
-      io.to(`user:${rid}`).emit("dmInboxUpdate", {
-        peerId: sid,
-        lastMessage,
-        incrementUnread: true
-      });
-      io.to(`user:${sid}`).emit("dmInboxUpdate", {
-        peerId: rid,
-        lastMessage,
-        incrementUnread: false
-      });
+      const lastMessage = { text: msg.text, timestamp: msg.timestamp || new Date() };
+      io.to(`user:${String(recipientId)}`).emit("dmInboxUpdate", { peerId: String(senderId), lastMessage, incrementUnread: true });
+      io.to(`user:${String(senderId)}`).emit("dmInboxUpdate", { peerId: String(recipientId), lastMessage, incrementUnread: false });
 
-      // Check if recipient is in the room
       const roomSockets = await io.in(roomId).fetchSockets();
       const recipientInRoom = roomSockets.some(s => s.user && s.user.id === recipientId);
-      if (recipientInRoom) {
-        socket.emit("delivered", { msgId: msg._id });
-      }
+      if (recipientInRoom) socket.emit("delivered", { msgId: msg._id });
     } catch (err) {
       console.error("sendDM error:", err);
       socket.emit("error", { message: "Failed to send message" });
     }
   });
 
-  // ===== MARK READ =====
   socket.on("markRead", async ({ roomId, contactId }) => {
     if (!socket.user) return;
     try {
@@ -268,123 +152,103 @@ io.on("connection", (socket) => {
         { readStatus: true }
       );
       io.to(roomId).emit("messagesRead", { contactId: socket.user.id });
-      io.to(`user:${String(socket.user.id)}`).emit("dmInboxUpdate", {
-        peerId: String(contactId),
-        resetUnread: true
-      });
+      io.to(`user:${socket.user.id}`).emit("dmInboxUpdate", { peerId: String(contactId), resetUnread: true });
     } catch (err) {
       console.error("markRead error:", err);
     }
   });
 
-  // ===== TYPING =====
   socket.on("typing", ({ roomId }) => {
-    if (!socket.user) return;
-    socket.to(roomId).emit("typing", { userId: socket.user.id });
+    if (socket.user) socket.to(roomId).emit("typing", { userId: socket.user.id });
   });
 
   socket.on("stopTyping", ({ roomId }) => {
-    if (!socket.user) return;
-    socket.to(roomId).emit("stopTyping", { userId: socket.user.id });
+    if (socket.user) socket.to(roomId).emit("stopTyping", { userId: socket.user.id });
   });
 
-  // ===== ANNOUNCEMENTS REAL-TIME =====
-  socket.on("joinAnnouncements", () => {
-    socket.join("announcements");
-  });
+  // ── Announcements ─────────────────────────────────────────────────────────
 
-  // ===== MEETING ROOM SIGNALING =====
+  socket.on("joinAnnouncements", () => socket.join("announcements"));
 
-  socket.on('joinMeetingRoom', async ({ sessionId }) => {
+  // ── Meeting Room (WebRTC Signaling) ───────────────────────────────────────
+
+  socket.on("joinMeetingRoom", async ({ sessionId }) => {
     socket.join(sessionId);
     socket.meetingSessionId = sessionId;
 
-    // Get all existing sockets in the room (excluding the newcomer)
     const roomSockets = await io.in(sessionId).fetchSockets();
-    const existingParticipants = roomSockets
+    const existing = roomSockets
       .filter(s => s.id !== socket.id)
-      .map(s => ({
-        socketId: s.id,
-        userId: s.user?.id,
-        name: s.user?.name || s.user?.email || 'Participant',
-        role: s.user?.role || 'student'
-      }));
+      .map(s => ({ socketId: s.id, userId: s.user?.id, name: s.user?.name || s.user?.email || "Participant", role: s.user?.role || "student" }));
 
-    // Tell the newcomer who is already in the room
-    socket.emit('existingParticipants', existingParticipants);
-
-    // Tell everyone else that a new participant joined
-    socket.to(sessionId).emit('participantJoined', {
-      socketId: socket.id,
-      userId: socket.user?.id,
-      name: socket.user?.name || socket.user?.email || 'Participant',
-      role: socket.user?.role
+    socket.emit("existingParticipants", existing);
+    socket.to(sessionId).emit("participantJoined", {
+      socketId: socket.id, userId: socket.user?.id,
+      name: socket.user?.name || socket.user?.email || "Participant", role: socket.user?.role
     });
   });
 
-  socket.on('leaveMeetingRoom', ({ sessionId }) => {
+  socket.on("leaveMeetingRoom", ({ sessionId }) => {
     socket.leave(sessionId);
     socket.meetingSessionId = null;
-    io.to(sessionId).emit('participantLeft', {
-      socketId: socket.id,
-      userId: socket.user?.id,
-      name: socket.user?.name || socket.user?.email,
-      role: socket.user?.role
+    io.to(sessionId).emit("participantLeft", {
+      socketId: socket.id, userId: socket.user?.id,
+      name: socket.user?.name || socket.user?.email, role: socket.user?.role
     });
   });
 
-  socket.on('offer', ({ sessionId, targetSocketId, sdp }) => {
-    io.to(targetSocketId).emit('offer', { fromSocketId: socket.id, sdp });
-  });
+  socket.on("offer",        ({ targetSocketId, sdp }) => io.to(targetSocketId).emit("offer",        { fromSocketId: socket.id, sdp }));
+  socket.on("answer",       ({ targetSocketId, sdp }) => io.to(targetSocketId).emit("answer",       { fromSocketId: socket.id, sdp }));
+  socket.on("iceCandidate", ({ targetSocketId, candidate }) => io.to(targetSocketId).emit("iceCandidate", { fromSocketId: socket.id, candidate }));
 
-  socket.on('answer', ({ sessionId, targetSocketId, sdp }) => {
-    io.to(targetSocketId).emit('answer', { fromSocketId: socket.id, sdp });
-  });
-
-  socket.on('iceCandidate', ({ sessionId, targetSocketId, candidate }) => {
-    io.to(targetSocketId).emit('iceCandidate', { fromSocketId: socket.id, candidate });
-  });
-
-  // —— In-meeting Zoom-like features (chat, hands, mic/cam indicators) ——
-  socket.on('meetingChat', ({ sessionId, text }) => {
-    if (!socket.user || !sessionId || !text || !String(text).trim()) return;
-    const trimmed = String(text).trim().slice(0, 4000);
-    io.to(sessionId).emit('meetingChat', {
+  socket.on("meetingChat", ({ sessionId, text }) => {
+    if (!socket.user || !sessionId || !String(text || "").trim()) return;
+    io.to(sessionId).emit("meetingChat", {
       socketId: socket.id,
-      name: socket.user.name || socket.user.email || 'Participant',
-      text: trimmed,
+      name: socket.user.name || socket.user.email || "Participant",
+      text: String(text).trim().slice(0, 4000),
       at: Date.now()
     });
   });
 
-  socket.on('meetingMediaState', ({ sessionId, audioEnabled, videoEnabled }) => {
-    if (!sessionId) return;
-    socket.to(sessionId).emit('meetingMediaState', {
-      socketId: socket.id,
-      audioEnabled: !!audioEnabled,
-      videoEnabled: !!videoEnabled
-    });
+  socket.on("meetingMediaState", ({ sessionId, audioEnabled, videoEnabled }) => {
+    if (sessionId) socket.to(sessionId).emit("meetingMediaState", { socketId: socket.id, audioEnabled: !!audioEnabled, videoEnabled: !!videoEnabled });
   });
 
-  socket.on('meetingRaiseHand', ({ sessionId }) => {
-    if (!socket.user || !sessionId) return;
-    io.to(sessionId).emit('meetingRaiseHand', {
-      socketId: socket.id,
-      name: socket.user.name || socket.user.email || 'Participant'
-    });
+  socket.on("meetingRaiseHand", ({ sessionId }) => {
+    if (socket.user && sessionId)
+      io.to(sessionId).emit("meetingRaiseHand", { socketId: socket.id, name: socket.user.name || socket.user.email || "Participant" });
   });
 
-  socket.on('meetingLowerHand', ({ sessionId }) => {
-    if (!sessionId) return;
-    socket.to(sessionId).emit('meetingLowerHand', { socketId: socket.id });
+  socket.on("meetingLowerHand", ({ sessionId }) => {
+    if (sessionId) socket.to(sessionId).emit("meetingLowerHand", { socketId: socket.id });
   });
 
-}); // 🔴 IMPORTANT: connection block closed here
+  // ── Disconnect ────────────────────────────────────────────────────────────
 
-/* ================= SERVER ================= */
+  socket.on("disconnect", async () => {
+    console.log("User disconnected:", socket.id);
+    if (!socket.user) return;
+
+    presenceService.userDisconnected(socket.user.id, socket.id, io);
+
+    // End meeting if faculty disconnects mid-session
+    if (socket.user.role === "faculty" && socket.meetingSessionId) {
+      try {
+        const liveClass = await LiveClass.findByIdAndUpdate(
+          socket.meetingSessionId,
+          { isLive: false, endedAt: new Date() },
+          { new: true }
+        );
+        if (liveClass) io.to(socket.meetingSessionId).emit("meetingEnded", { sessionId: socket.meetingSessionId });
+      } catch (err) {
+        console.error("Error ending meeting on disconnect:", err);
+      }
+    }
+  });
+});
+
+// ─── Start Server ─────────────────────────────────────────────────────────────
 
 const PORT = process.env.PORT || 5000;
-
-server.listen(PORT, () => {
-  console.log(`🔥 Server running on port ${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));

@@ -1,14 +1,14 @@
 ﻿const express = require("express");
 const Announcement = require("../models/Announcement");
-const authMiddleware = require("../middleware/authMiddleware");
+const auth = require("../middleware/authMiddleware");
 
 module.exports = (io) => {
   const router = express.Router();
 
+  // POST /api/announcements
   router.post("/", async (req, res) => {
     try {
       const announcement = await Announcement.create(req.body);
-      // Broadcast to all users in announcements room
       io.to("announcements").emit("announcementCreated", announcement);
       res.status(201).json({ success: true, announcement });
     } catch (err) {
@@ -16,16 +16,18 @@ module.exports = (io) => {
     }
   });
 
-  router.get("/", authMiddleware, async (req, res) => {
+  // GET /api/announcements
+  router.get("/", auth, async (req, res) => {
     try {
-      let query = {};
-      if (req.user.role === 'student') {
-        if (!req.user.year || req.user.semester == null) {
-          console.warn(`Student ${req.user.id} has no year/semester in token`);
-          return res.json({ success: true, announcements: [] });
-        }
-        query = { targetYear: req.user.year, targetSemester: req.user.semester };
+      // Students only see announcements for their year and semester
+      const query = req.user.role === "student"
+        ? { targetYear: req.user.year, targetSemester: req.user.semester }
+        : {};
+
+      if (req.user.role === "student" && (!req.user.year || req.user.semester == null)) {
+        return res.json({ success: true, announcements: [] });
       }
+
       const announcements = await Announcement.find(query).sort({ createdAt: -1 });
       res.json({ success: true, announcements });
     } catch {
@@ -33,10 +35,11 @@ module.exports = (io) => {
     }
   });
 
+  // GET /api/announcements/faculty/:name
   router.get("/faculty/:name", async (req, res) => {
     try {
       const announcements = await Announcement.find({
-        faculty: { $regex: new RegExp("^" + req.params.name + "$", "i") }
+        faculty: { $regex: new RegExp(`^${req.params.name}$`, "i") }
       }).sort({ createdAt: -1 });
       res.json({ success: true, announcements });
     } catch {
@@ -44,16 +47,26 @@ module.exports = (io) => {
     }
   });
 
+  // PUT /api/announcements/:id
   router.put("/:id", async (req, res) => {
-    const updated = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    io.to("announcements").emit("announcementUpdated", updated);
-    res.json({ success: true, announcement: updated });
+    try {
+      const updated = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      io.to("announcements").emit("announcementUpdated", updated);
+      res.json({ success: true, announcement: updated });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
   });
 
+  // DELETE /api/announcements/:id
   router.delete("/:id", async (req, res) => {
-    await Announcement.findByIdAndDelete(req.params.id);
-    io.to("announcements").emit("announcementDeleted", { _id: req.params.id });
-    res.json({ success: true });
+    try {
+      await Announcement.findByIdAndDelete(req.params.id);
+      io.to("announcements").emit("announcementDeleted", { _id: req.params.id });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
   });
 
   return router;
