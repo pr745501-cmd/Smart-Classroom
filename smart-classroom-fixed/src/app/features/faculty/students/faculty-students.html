@@ -1,0 +1,103 @@
+﻿<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+      <h1 class="page-title">Students</h1>
+      <span class="enrolled-badge">&#9989; {{ students.length }} Enrolled</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT: Pending Approval -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">
+          <span class="pending-dot"></span>
+          Pending Approval
+        </span>
+        <span class="panel-count">{{ pendingStudents.length }}</span>
+      </div>
+
+      <div class="pending-list">
+        <div *ngFor="let s of pendingStudents" class="pending-card">
+          <div class="pending-top">
+            <div class="avatar">{{ s.name[0] }}</div>
+            <div>
+              <div class="student-name">{{ s.name }}</div>
+              <div class="student-email">{{ s.email }}</div>
+            </div>
+          </div>
+          <div class="course-chip">&#127891; {{ s.course || 'BCA' }}</div>
+          <button class="btn-approve" (click)="approveStudent(s._id)">&#10003; Approve Student</button>
+        </div>
+
+        <div *ngIf="pendingStudents.length === 0" class="empty-state">
+          <div class="empty-icon">&#10003;</div>
+          <p>No pending approvals</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Enrolled Students Table -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Enrolled Students</span>
+        <span class="panel-count">{{ students.length }}</span>
+      </div>
+
+      <div class="filter-row">
+        <select [(ngModel)]="filterYear">
+          <option value="">All Years</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Course</th>
+              <th>Year</th>
+              <th>Semester</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="loading" class="loading-row">
+              <td colspan="5">Loading students...</td>
+            </tr>
+            <tr *ngIf="!loading && filteredStudents.length === 0" class="loading-row">
+              <td colspan="5">No students enrolled yet</td>
+            </tr>
+            <tr *ngFor="let s of filteredStudents">
+              <td>
+                <div class="td-student">
+                  <div class="table-avatar">{{ s.name[0] }}</div>
+                  <div>
+                    <div class="td-name">{{ s.name }}</div>
+                    <div class="td-email">{{ s.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="course-tag">{{ s.course || 'BCA' }}</span></td>
+              <td>{{ s.year || 'N/A' }}</td>
+              <td>{{ s.semester || 'N/A' }}</td>
+              <td>
+                <span class="auth-badge">
+                  <span class="auth-dot"></span>
+                  Authorized
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>

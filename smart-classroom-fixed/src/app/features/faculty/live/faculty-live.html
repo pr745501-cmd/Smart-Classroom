@@ -1,0 +1,43 @@
+<div *ngIf="!inMeeting" class="page-wrapper">
+
+  <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+
+  <div class="center-wrap">
+    <div class="live-card">
+
+      <div class="live-icon">&#127909;</div>
+      <h2 class="live-card-title">Start Live Class</h2>
+      <p class="live-card-sub">Enter a title and start your meeting</p>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMsg" class="error-banner">
+        ⚠️ {{ errorMsg }}
+        <button *ngIf="hasActiveMeeting" class="btn-end" (click)="forceEnd()" [disabled]="loading" style="margin-top:10px;width:100%;">
+          {{ loading ? 'Ending...' : '🔴 End Previous Meeting' }}
+        </button>
+      </div>
+
+      <!-- Form Fields -->
+      <div class="field-group">
+        <label>Class Title</label>
+        <input type="text" [(ngModel)]="title" placeholder="e.g. Introduction to Angular">
+      </div>
+
+      <!-- Start Button -->
+      <button class="btn-start" (click)="start()" [disabled]="loading">
+        {{ loading ? 'Starting...' : '🟢 Start Live Class' }}
+      </button>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Meeting Room -->
+<app-meeting-room
+  *ngIf="inMeeting"
+  [sessionId]="sessionId"
+  [meetingCode]="meetingCode"
+  [meetingTitle]="title"
+  role="faculty">
+</app-meeting-room>

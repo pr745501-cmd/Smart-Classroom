@@ -1,0 +1,314 @@
+<div class="meeting-room zoom-meeting">
+
+  <div *ngIf="sessionExpired" class="banner banner-expired">
+    <span>Your session has expired. You have been disconnected.</span>
+    <button type="button" class="banner-dismiss" (click)="dismissSessionExpired()">Leave</button>
+  </div>
+
+  <div *ngIf="permissionError && !sessionExpired" class="banner banner-error">
+    <span>{{ permissionError }}</span>
+    <button type="button" class="banner-dismiss" (click)="permissionError = null">Dismiss</button>
+  </div>
+
+  <header class="meet-topbar">
+    <div class="meet-topbar-left">
+      <div class="meet-title-block">
+        <h1 class="meet-title">{{ meetingTitle || 'Live meeting' }}</h1>
+        <div class="meet-sub" *ngIf="meetingCode">
+          <span class="meet-id">ID {{ meetingCode }}</span>
+          <span class="meet-dot">·</span>
+          <span class="meet-time">{{ elapsedLabel }}</span>
+        </div>
+      </div>
+      <div class="meet-topbar-actions">
+        <button type="button" class="tb-btn" *ngIf="meetingCode" (click)="copyMeetingCode()">
+          Copy invite
+        </button>
+        <span class="tb-hint" *ngIf="copyHint">{{ copyHint }}</span>
+        <button type="button" class="tb-btn" (click)="toggleLayout()">
+          {{ layoutMode === 'gallery' ? 'Speaker view' : 'Gallery view' }}
+        </button>
+        <button type="button" class="tb-btn" (click)="toggleMainFullscreen()">Fullscreen</button>
+      </div>
+    </div>
+    <div class="meet-topbar-right">
+      <div class="quality-pill" [class]="'q-' + connectionQuality">
+        <span class="q-dot"></span>{{ connectionQuality }}
+      </div>
+    </div>
+  </header>
+
+  <div class="meet-body">
+    <div class="meet-stage-wrap" #mainStage>
+      <!-- Speaker layout -->
+      <ng-container *ngIf="layoutMode === 'speaker'">
+        <div class="speaker-stage" *ngIf="spotlight as sp">
+          <div class="speaker-main-tile">
+            <video
+              [id]="'video-main-' + sp.socketId"
+              autoplay
+              playsinline
+              class="remote-video video-fit-contain"
+              appSetStream
+              [stream]="sp.stream">
+            </video>
+            <div class="tile-avatar tile-avatar-lg" *ngIf="showRemoteAvatar(sp)">
+              <span>{{ (sp.name || 'P').charAt(0).toUpperCase() }}</span>
+            </div>
+            <div class="tile-label tile-label-lg">
+              <span>{{ sp.name }}</span>
+              <span class="role-chip">{{ sp.role }}</span>
+              <span class="hand-chip" *ngIf="sp.handRaised">✋</span>
+            </div>
+            <div class="state-icons">
+              <span class="icon-mute" *ngIf="sp.remoteAudioOn === false" title="Muted">🔇</span>
+              <span class="icon-cam" *ngIf="sp.remoteVideoOn === false" title="Camera off">📷</span>
+            </div>
+          </div>
+          <div class="filmstrip" *ngIf="filmstrip.length">
+            <button
+              type="button"
+              class="strip-tile"
+              *ngFor="let p of filmstrip"
+              (click)="selectSpotlight(p.socketId)">
+              <video
+                [id]="'video-strip-' + p.socketId"
+                autoplay
+                playsinline
+                class="remote-video strip-video"
+                appSetStream
+                [stream]="p.stream">
+              </video>
+              <div class="tile-avatar strip-avatar" *ngIf="showRemoteAvatar(p)">
+                <span>{{ (p.name || 'P').charAt(0).toUpperCase() }}</span>
+              </div>
+              <div class="strip-label">{{ p.name }}</div>
+              <span class="strip-hand" *ngIf="p.handRaised">✋</span>
+            </button>
+          </div>
+        </div>
+        <div class="speaker-empty" *ngIf="!spotlight">
+          <div class="empty-icon">👥</div>
+          <p>Waiting for others to join…</p>
+          <p class="empty-hint">Share the meeting ID so students can connect.</p>
+        </div>
+      </ng-container>
+
+      <!-- Gallery layout -->
+      <div class="video-grid" *ngIf="layoutMode === 'gallery'" [class.empty]="participants.length === 0">
+        <div *ngIf="participants.length === 0" class="waiting-message">
+          <span class="waiting-icon">👥</span>
+          <p>Waiting for participants…</p>
+        </div>
+        <div
+          class="video-tile gallery-tile"
+          *ngFor="let p of participants"
+          [class.cam-off-tile]="p.remoteVideoOn === false"
+          (click)="layoutMode = 'speaker'; selectSpotlight(p.socketId)">
+          <video
+            [id]="'video-g-' + p.socketId"
+            autoplay
+            playsinline
+            class="remote-video"
+            appSetStream
+            [stream]="p.stream">
+          </video>
+          <div class="tile-avatar" *ngIf="showRemoteAvatar(p)">
+            <span>{{ (p.name || 'P').charAt(0).toUpperCase() }}</span>
+          </div>
+          <div class="tile-label">
+            <span>{{ p.name }}</span>
+            <span class="tile-role">{{ p.role }}</span>
+            <span *ngIf="p.handRaised" class="hand-mini">✋</span>
+          </div>
+          <div class="tile-state">
+            <span *ngIf="p.remoteAudioOn === false">🔇</span>
+            <span *ngIf="p.remoteVideoOn === false">📷</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat panel -->
+    <aside class="meet-chat" [class.open]="showChat">
+      <div class="chat-header">
+        <span>In-meeting chat</span>
+        <div class="chat-header-actions">
+          <button
+            type="button"
+            class="chat-notify-btn"
+            *ngIf="canPromptDesktopNotify"
+            (click)="requestDesktopNotifications()"
+            title="Get browser alerts for new messages">
+            🔔 Alerts
+          </button>
+          <span class="chat-notify-on" *ngIf="desktopNotifyEnabled" title="Desktop alerts on">🔔</span>
+          <button type="button" class="chat-close" (click)="closeChatPanel()" aria-label="Close chat">✕</button>
+        </div>
+      </div>
+      <div class="chat-messages" #chatScroll>
+        <div *ngIf="chatMessages.length === 0" class="chat-empty">No messages yet.</div>
+        <div
+          *ngFor="let m of chatMessages"
+          class="chat-row"
+          [class.self]="m.socketId === mySocketId">
+          <div class="chat-meta">
+            <strong>{{ m.name }}</strong>
+            <span class="chat-when">{{ m.at | date:'shortTime' }}</span>
+          </div>
+          <div class="chat-text">{{ m.text }}</div>
+        </div>
+      </div>
+      <div class="chat-compose">
+        <input
+          type="text"
+          [(ngModel)]="chatInput"
+          (keyup.enter)="sendChat()"
+          placeholder="Message everyone…"
+          maxlength="2000"
+          autocomplete="off">
+        <button type="button" class="chat-send" (click)="sendChat()">Send</button>
+      </div>
+    </aside>
+  </div>
+
+  <!-- Participants side panel -->
+  <div class="participants-panel" [class.open]="showParticipants">
+    <div class="panel-header">
+      <span>Participants ({{ participants.length + 1 }})</span>
+      <button type="button" class="panel-close" (click)="showParticipants = false">✕</button>
+    </div>
+    <div class="panel-list">
+      <div class="panel-item self">
+        <span class="participant-avatar">You</span>
+        <div class="panel-meta">
+          <div class="participant-name">You ({{ role }})</div>
+          <div class="panel-badges">
+            <span *ngIf="!audioEnabled" class="badge">Mic off</span>
+            <span *ngIf="!videoEnabled" class="badge">Cam off</span>
+            <span *ngIf="selfHandRaised" class="badge hand">Hand raised</span>
+          </div>
+        </div>
+      </div>
+      <div class="panel-item" *ngFor="let p of participants">
+        <span class="participant-avatar">{{ (p.name || 'P').charAt(0).toUpperCase() }}</span>
+        <div class="panel-meta">
+          <div class="participant-name">{{ p.name }}</div>
+          <div class="participant-role">{{ p.role }}</div>
+          <div class="panel-badges">
+            <span *ngIf="p.remoteAudioOn === false" class="badge">Mic off</span>
+            <span *ngIf="p.remoteVideoOn === false" class="badge">Cam off</span>
+            <span *ngIf="p.handRaised" class="badge hand">✋ Raised</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local picture-in-picture -->
+  <div class="local-pip">
+    <video #localVideo autoplay muted playsinline class="local-video"></video>
+    <div class="local-avatar" *ngIf="!videoEnabled">
+      <span>You</span>
+    </div>
+    <div class="local-label">You</div>
+    <div class="local-badges">
+      <span *ngIf="!audioEnabled" title="Muted">🔇</span>
+      <span *ngIf="!videoEnabled" title="Camera off">📷</span>
+    </div>
+    <div class="scr-indicator" *ngIf="screenSharing">Sharing</div>
+  </div>
+
+  <!-- Real-time chat toast (new message while chat closed or tab in background) -->
+  <div
+    class="chat-toast"
+    *ngIf="chatToast"
+    (click)="openChatFromToast()"
+    role="status"
+    aria-live="polite">
+    <div class="chat-toast-body">
+      <div class="chat-toast-title">{{ chatToast.name }}</div>
+      <div class="chat-toast-text">{{ chatToast.text }}</div>
+      <div class="chat-toast-hint">Click to open chat</div>
+    </div>
+    <button type="button" class="chat-toast-x" (click)="dismissChatToast($event)" aria-label="Dismiss">✕</button>
+  </div>
+
+  <!-- Bottom toolbar (Zoom-style) -->
+  <footer class="meet-toolbar">
+    <button
+      type="button"
+      class="tool tool-round"
+      [class.tool-off]="!audioEnabled"
+      (click)="toggleAudio()"
+      [title]="audioEnabled ? 'Mute' : 'Unmute'">
+      <span class="tool-ico">{{ audioEnabled ? '🎤' : '🔇' }}</span>
+      <span class="tool-cap">{{ audioEnabled ? 'Mute' : 'Unmute' }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tool tool-round"
+      [class.tool-off]="!videoEnabled"
+      (click)="toggleVideo()"
+      [title]="videoEnabled ? 'Stop video' : 'Start video'">
+      <span class="tool-ico">{{ videoEnabled ? '📹' : '📷' }}</span>
+      <span class="tool-cap">{{ videoEnabled ? 'Stop video' : 'Start video' }}</span>
+    </button>
+
+    <button
+      type="button"
+      class="tool tool-round"
+      [class.tool-active]="screenSharing"
+      (click)="toggleScreenShare()"
+      title="Share screen">
+      <span class="tool-ico">🖥️</span>
+      <span class="tool-cap">Share</span>
+    </button>
+
+    <button
+      type="button"
+      class="tool tool-round tool-with-badge"
+      [class.tool-active]="showChat"
+      (click)="toggleChat()"
+      title="Chat">
+      <span class="tool-ico">💬</span>
+      <span class="chat-unread-badge" *ngIf="chatUnreadCount > 0" aria-label="Unread messages">
+        {{ chatUnreadCount > 99 ? '99+' : chatUnreadCount }}
+      </span>
+      <span class="tool-cap">Chat</span>
+    </button>
+
+    <button
+      type="button"
+      class="tool tool-round"
+      [class.tool-active]="selfHandRaised"
+      (click)="toggleRaiseHand()"
+      title="Raise hand">
+      <span class="tool-ico">✋</span>
+      <span class="tool-cap">Raise hand</span>
+    </button>
+
+    <button
+      type="button"
+      class="tool tool-round"
+      [class.tool-active]="showParticipants"
+      (click)="showParticipants = !showParticipants"
+      title="Participants">
+      <span class="tool-ico">👥</span>
+      <span class="tool-cap">People</span>
+    </button>
+
+    <div class="toolbar-spacer"></div>
+
+    <button *ngIf="role === 'faculty'" type="button" class="tool tool-leave" (click)="endMeeting()">
+      <span class="tool-ico">⏹</span>
+      <span class="tool-cap">End</span>
+    </button>
+
+    <button *ngIf="role === 'student'" type="button" class="tool tool-leave student" (click)="leaveMeeting()">
+      <span class="tool-ico">🚪</span>
+      <span class="tool-cap">Leave</span>
+    </button>
+  </footer>
+</div>

@@ -1,0 +1,91 @@
+<div class="pending-shell">
+
+  <!-- Approved overlay -->
+  <div class="approved-overlay" *ngIf="approved">
+    <div class="approved-card">
+      <div class="approved-icon">🎉</div>
+      <h2>You're Approved!</h2>
+      <p>Redirecting you to login...</p>
+      <div class="approved-bar"></div>
+    </div>
+  </div>
+
+  <!-- Background orbs -->
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="card">
+
+    <!-- Brand -->
+    <div class="brand">
+      <span class="brand-icon">🎓</span>
+      <span>SmartClassroom</span>
+    </div>
+
+    <!-- Animated hourglass -->
+    <div class="clock-wrap">
+      <div class="clock-ring"></div>
+      <div class="clock-inner">⏳</div>
+    </div>
+
+    <h1 class="title">Awaiting Approval</h1>
+    <p class="subtitle">
+      Hey <strong>{{ name }}</strong>, your registration is submitted!<br>
+      A faculty member will review and approve your account.
+    </p>
+
+    <!-- Email chip -->
+    <div class="email-chip">
+      <span class="chip-dot"></span>
+      {{ email }}
+    </div>
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step done">
+        <div class="step-icon">✅</div>
+        <div class="step-text">
+          <strong>Registration Submitted</strong>
+          <span>Your account has been created successfully</span>
+        </div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step pending-step">
+        <div class="step-icon pulse-icon">⏳</div>
+        <div class="step-text">
+          <strong>Faculty Review</strong>
+          <span>Typically takes 5–15 minutes during class hours</span>
+        </div>
+      </div>
+      <div class="step-line"></div>
+      <div class="step locked">
+        <div class="step-icon">🔓</div>
+        <div class="step-text">
+          <strong>Access Granted</strong>
+          <span>You'll be redirected to login automatically</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto check bar -->
+    <div class="auto-check-bar">
+      <div class="auto-check-left">
+        <span class="pulse-dot"></span>
+        <span>Auto-checking status</span>
+      </div>
+      <span class="countdown">Next check in <strong>{{ nextCheckIn }}s</strong></span>
+    </div>
+
+    <!-- Check now button -->
+    <button class="check-btn" (click)="checkNow()" [disabled]="loading">
+      <span *ngIf="!loading">🔄 Check Now</span>
+      <span *ngIf="loading" class="btn-spinner"></span>
+    </button>
+
+    <p class="login-hint">
+      Already approved? <button class="link-btn" (click)="goToLogin()">Go to Login</button>
+    </p>
+
+  </div>
+</div>

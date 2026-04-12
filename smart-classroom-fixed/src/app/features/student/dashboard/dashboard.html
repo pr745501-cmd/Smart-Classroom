@@ -1,0 +1,213 @@
+<div class="dashboard-shell" *ngIf="!loading; else loader">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🎓</span>
+      <span class="brand-name">NexusEdu</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" (click)="goToLectures()">
+        <span class="nav-icon">📚</span>
+        <span>Lectures</span>
+      </button>
+      <button class="nav-item" (click)="goToAssignments()">
+        <span class="nav-icon">📝</span>
+        <span>Assignments</span>
+      </button>
+      <button class="nav-item" (click)="goToLive()">
+        <span class="nav-icon">🎥</span>
+        <span>Live Class</span>
+        <span class="live-badge" *ngIf="activeMeeting">LIVE</span>
+      </button>
+      <button class="nav-item" (click)="goToAttendance()">
+        <span class="nav-icon">📊</span>
+        <span>Attendance</span>
+      </button>
+      <button class="nav-item" (click)="goToAnnouncements()">
+        <span class="nav-icon">📢</span>
+        <span>Notices</span>
+      </button>
+      <button class="nav-item" (click)="goToMessages()">
+        <span class="nav-icon">💬</span>
+        <span>Messages</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="logout-btn" (click)="logout()">
+        <span>⏻</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+
+    <!-- TOP BAR -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h1 class="page-title">Student Dashboard</h1>
+        <span class="system-status"><span class="pulse-dot"></span> Systems Nominal</span>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-avatar">
+          <img [src]="user.profilePic || getAvatarUrl(user.name)" alt="avatar" />
+          <div class="topbar-user-info">
+            <span class="topbar-name">{{ user.name }}</span>
+            <span class="topbar-role">{{ user.role | titlecase }}</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MEETING NOTIFICATION BANNER -->
+    <div class="meeting-banner" *ngIf="showMeetingBanner">
+      <div class="meeting-banner-left">
+        <span class="meeting-banner-pulse"></span>
+        <div>
+          <strong>Teacher has started a meeting — join class fast!</strong>
+          <span *ngIf="activeMeeting?.title"> · {{ activeMeeting.title }}</span>
+          <span *ngIf="activeMeeting?.meetingCode" class="meeting-code-chip">Code: {{ activeMeeting.meetingCode }}</span>
+        </div>
+      </div>
+      <div class="meeting-banner-actions">
+        <button class="banner-join-btn" (click)="joinMeeting()">Join Now</button>
+        <button class="banner-dismiss-btn" (click)="dismissBanner()">✕</button>
+      </div>
+    </div>
+
+    <!-- PROFILE HERO -->
+    <section class="profile-hero">
+      <div class="profile-avatar-wrap">
+        <img [src]="user.profilePic || getAvatarUrl(user.name)" alt="Profile" />
+        <span class="online-badge">Online</span>
+      </div>
+      <div class="profile-details">
+        <p class="profile-id">Digital Profile ID: #{{ user.name.length }}82</p>
+        <h2 class="profile-name">{{ user.name }}</h2>
+        <div class="profile-meta">
+          <span class="meta-chip"><b>Role</b> {{ user.role }}</span>
+          <span class="meta-chip"><b>Course</b> {{ user.course }}</span>
+          <span class="meta-chip"><b>Email</b> {{ user.email }}</span>
+          <span class="meta-chip" *ngIf="user.role === 'student'"><b>Year</b> {{ user.year || 'N/A' }}</span>
+          <span class="meta-chip" *ngIf="user.role === 'student'"><b>Semester</b> {{ user.semester ? 'Semester ' + user.semester : 'N/A' }}</span>
+        </div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-box">
+          <span class="stat-value" [class.stat-loading]="statsLoading">
+            {{ statsLoading ? '—' : stats.subjects }}
+          </span>
+          <span class="stat-label">Subjects</span>
+        </div>
+        <div class="stat-box">
+          <span class="stat-value" [class.stat-loading]="statsLoading">
+            {{ statsLoading ? '—' : stats.pending }}
+          </span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="stat-box" [class.stat-warn]="!statsLoading && stats.attendance < 75">
+          <span class="stat-value" [class.stat-loading]="statsLoading">
+            {{ statsLoading ? '—' : stats.attendance + '%' }}
+          </span>
+          <span class="stat-label">Attendance</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- MODULE GRID -->
+    <section class="module-grid">
+
+      <div class="module-card" (click)="goToLectures()">
+        <div class="module-icon lectures-icon">📚</div>
+        <div class="module-body">
+          <h3>Lectures</h3>
+          <p>View subject-wise lectures</p>
+          <ul>
+            <li>Video / PDF / PPT</li>
+            <li>Faculty name</li>
+            <li>Date wise</li>
+          </ul>
+        </div>
+        <div class="module-footer">Explore Resources →</div>
+      </div>
+
+      <div class="module-card featured" (click)="goToAssignments()">
+        <div class="module-icon assignments-icon">📝</div>
+        <div class="module-body">
+          <h3>Assignments</h3>
+          <p>Track & submit tasks</p>
+          <ul>
+            <li>Due date countdown</li>
+            <li>Status tracking</li>
+          </ul>
+        </div>
+        <div class="module-footer">Open Portal →</div>
+      </div>
+
+      <div class="module-card live-card" (click)="goToLive()">
+        <div class="live-tag-card" *ngIf="activeMeeting">● LIVE NOW</div>
+        <div class="module-icon live-icon">🎥</div>
+        <div class="module-body">
+          <h3>Live Class</h3>
+          <p *ngIf="!activeMeeting">Join ongoing sessions</p>
+          <p *ngIf="activeMeeting" class="live-meeting-title">{{ activeMeeting.title }}</p>
+          <ul>
+            <li>Real-time video &amp; audio</li>
+            <li>Enter code to join</li>
+          </ul>
+        </div>
+        <div class="module-footer">Enter Room →</div>
+      </div>
+
+      <div class="module-card" (click)="goToAttendance()">
+        <div class="module-icon attendance-icon">📊</div>
+        <div class="module-body">
+          <h3>Attendance</h3>
+          <p>Overview & alerts</p>
+          <ul>
+            <li>Subject wise %</li>
+            <li>Monthly chart</li>
+          </ul>
+        </div>
+        <div class="module-footer">View Data →</div>
+      </div>
+
+      <div class="module-card" (click)="goToAnnouncements()">
+        <div class="module-icon notices-icon">📢</div>
+        <div class="module-body">
+          <h3>Notices</h3>
+          <p>Important updates</p>
+          <ul>
+            <li>Exam notices</li>
+            <li>Admin alerts</li>
+          </ul>
+        </div>
+        <div class="module-footer">Read All →</div>
+      </div>
+
+      <div class="module-card" (click)="goToMessages()">
+        <div class="module-icon chat-icon">💬</div>
+        <div class="module-body">
+          <h3>Messages</h3>
+          <p>Chat privately with faculty</p>
+          <ul>
+            <li>1-on-1 direct chat</li>
+            <li>Emojis &amp; read receipts</li>
+          </ul>
+        </div>
+        <div class="module-footer">Open Messages →</div>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<ng-template #loader>
+  <div class="loader-screen">
+    <div class="spin-ring"></div>
+    <p>Loading Workspace...</p>
+  </div>
+</ng-template>

@@ -1,0 +1,69 @@
+<div class="page-wrapper">
+
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">← Dashboard</button>
+
+    <div class="header-row">
+      <div class="header-title">
+        <h1>Lectures</h1>
+        <p>{{ filteredLectures.length }} resource{{ filteredLectures.length !== 1 ? 's' : '' }} available</p>
+      </div>
+
+      <div class="header-controls">
+        <div class="search-box">
+          <span>🔍</span>
+          <input
+            type="text"
+            placeholder="Search lectures..."
+            [(ngModel)]="searchText"
+            (input)="applyFilter()"
+          />
+        </div>
+
+        <select class="filter-select" [(ngModel)]="selectedSubject" (change)="applyFilter()">
+          <option value="">All Subjects</option>
+          <option *ngFor="let s of subjects" [value]="s">{{ s }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="skeleton-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card"></div>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && filteredLectures.length === 0" class="state-box">
+    <span class="state-icon">📂</span>
+    <p>No lectures found. Try adjusting your search.</p>
+  </div>
+
+  <!-- GRID -->
+  <div *ngIf="!loading && filteredLectures.length > 0" class="lecture-grid">
+    <div *ngFor="let lec of filteredLectures" class="lecture-card">
+
+      <div class="card-top-row">
+        <span class="type-badge" [ngClass]="lec.type?.toLowerCase()">
+          {{ lec.type?.toUpperCase() }}
+        </span>
+        <span class="subject-tag">{{ lec.subject }}</span>
+      </div>
+
+      <h3 class="card-title">{{ lec.title }}</h3>
+
+      <div class="faculty-row">
+        <div class="avatar-circle">{{ lec.faculty?.charAt(0) }}</div>
+        <span class="faculty-name">{{ lec.faculty }}</span>
+      </div>
+
+      <span class="date-added">{{ lec.createdAt | date:'mediumDate' }}</span>
+
+      <a [href]="lec.fileUrl" target="_blank" class="btn-open">
+        Open Resource →
+      </a>
+
+    </div>
+  </div>
+
+</div>

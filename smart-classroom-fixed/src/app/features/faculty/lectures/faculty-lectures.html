@@ -1,0 +1,122 @@
+﻿<div class="page-wrapper">
+
+  <div class="page-header">
+    <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+    <h1 class="page-title">Lectures</h1>
+    <span class="count-badge">{{ lectures.length }}</span>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT: Form -->
+    <div class="form-card">
+      <h2 class="form-title">{{ editingLectureId ? '✏️ Update Lecture' : '📤 Upload Lecture' }}</h2>
+
+      <div class="field-group">
+        <label>Title</label>
+        <input type="text" [(ngModel)]="title" placeholder="e.g. Introduction to Angular">
+      </div>
+
+      <div class="field-group">
+        <label>Subject</label>
+        <input type="text" [(ngModel)]="subject" placeholder="e.g. Web Development">
+      </div>
+
+      <div class="field-group">
+        <label>Content Type</label>
+        <select [(ngModel)]="type">
+          <option value="PDF">📄 PDF Document</option>
+          <option value="VIDEO">🎥 Video Lesson</option>
+          <option value="PPT">📊 Presentation</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Resource Link (URL)</label>
+        <input type="text" [(ngModel)]="fileUrl" placeholder="https://drive.google.com/...">
+      </div>
+
+      <div class="field-group">
+        <label>Target Year</label>
+        <select [(ngModel)]="targetYear">
+          <option value="">-- Select Year --</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Target Semester</label>
+        <select [(ngModel)]="targetSemester">
+          <option [ngValue]="null">-- Select Semester --</option>
+          <option [ngValue]="1">Semester 1</option>
+          <option [ngValue]="2">Semester 2</option>
+          <option [ngValue]="3">Semester 3</option>
+          <option [ngValue]="4">Semester 4</option>
+          <option [ngValue]="5">Semester 5</option>
+          <option [ngValue]="6">Semester 6</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <ng-container *ngIf="!editingLectureId">
+          <button class="btn-primary" (click)="uploadLecture()">Upload Resource</button>
+        </ng-container>
+        <ng-container *ngIf="editingLectureId">
+          <button class="btn-update" (click)="updateLecture()">💾 Save Changes</button>
+          <button class="btn-cancel" (click)="resetForm()">Cancel</button>
+        </ng-container>
+      </div>
+    </div>
+
+    <!-- RIGHT: Grid -->
+    <div>
+      <div class="grid-header">
+        <h3>Recent Uploads</h3>
+        <div class="filter-row">
+          <select [(ngModel)]="filterYear">
+            <option value="">All Years</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+          </select>
+          <select [(ngModel)]="filterSemester">
+            <option [ngValue]="null">All Semesters</option>
+            <option [ngValue]="1">Sem 1</option>
+            <option [ngValue]="2">Sem 2</option>
+            <option [ngValue]="3">Sem 3</option>
+            <option [ngValue]="4">Sem 4</option>
+            <option [ngValue]="5">Sem 5</option>
+            <option [ngValue]="6">Sem 6</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="lecture-grid">
+        <div *ngFor="let l of filteredLectures" class="lecture-card">
+          <div class="type-badge" [ngClass]="l.type.toLowerCase()">
+            <span *ngIf="l.type.toLowerCase() === 'pdf'">📄 PDF</span>
+            <span *ngIf="l.type.toLowerCase() === 'video'">🎥 Video</span>
+            <span *ngIf="l.type.toLowerCase() === 'ppt'">📊 PPT</span>
+          </div>
+          <div class="subject-tag">{{ l.subject }}</div>
+          <h4 class="lecture-title">{{ l.title }}</h4>
+          <div class="card-footer">
+            <a [href]="l.fileUrl" target="_blank" class="open-link">Open →</a>
+            <div class="card-actions">
+              <button class="btn-edit" (click)="editLecture(l)">✏️</button>
+              <button class="btn-delete" (click)="deleteLecture(l._id)">🗑️</button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="filteredLectures.length === 0" class="empty-state">
+          <div class="empty-icon">📂</div>
+          <p>No lectures yet. Upload your first resource!</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

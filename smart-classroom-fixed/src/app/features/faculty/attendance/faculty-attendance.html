@@ -1,0 +1,116 @@
+﻿<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+      <h1 class="page-title">Mark Attendance</h1>
+    </div>
+    <div class="date-picker-wrap">
+      <label>Attendance Date</label>
+      <input type="date" [(ngModel)]="date">
+    </div>
+  </div>
+
+  <!-- Year and Semester Selectors -->
+  <div class="year-sem-row">
+    <div class="field-group">
+      <label>Year</label>
+      <select [(ngModel)]="selectedYear" (ngModelChange)="loadStudents()">
+        <option value="">-- Select Year --</option>
+        <option value="1st Year">1st Year</option>
+        <option value="2nd Year">2nd Year</option>
+        <option value="3rd Year">3rd Year</option>
+      </select>
+    </div>
+    <div class="field-group">
+      <label>Semester</label>
+      <select [(ngModel)]="selectedSemester" (ngModelChange)="loadStudents()">
+        <option [ngValue]="null">-- Select Semester --</option>
+        <option [ngValue]="1">Semester 1</option>
+        <option [ngValue]="2">Semester 2</option>
+        <option [ngValue]="3">Semester 3</option>
+        <option [ngValue]="4">Semester 4</option>
+        <option [ngValue]="5">Semester 5</option>
+        <option [ngValue]="6">Semester 6</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Prompt when year/semester not selected -->
+  <div *ngIf="!selectedYear || !selectedSemester" class="empty-state">
+    <p>Please select a year and semester to load students.</p>
+  </div>
+
+  <ng-container *ngIf="selectedYear && selectedSemester">
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-icon blue">&#128101;</div>
+      <div>
+        <div class="stat-num">{{ students.length }}</div>
+        <div class="stat-lbl">Total Students</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon green">&#9989;</div>
+      <div>
+        <div class="stat-num">{{ presentCount }}</div>
+        <div class="stat-lbl">Present</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon red">&#10060;</div>
+      <div>
+        <div class="stat-num">{{ absentCount }}</div>
+        <div class="stat-lbl">Absent</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div *ngIf="!loading && students.length > 0" class="quick-actions">
+    <button class="btn-all-present" (click)="selectAll(true)">&#9989; Select All Present</button>
+    <button class="btn-all-absent" (click)="selectAll(false)">&#10060; Select All Absent</button>
+  </div>
+
+  <!-- Loading Skeleton -->
+  <div *ngIf="loading" class="skeleton-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card"></div>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && students.length === 0" class="empty-state">
+    <p>No enrolled students found.</p>
+  </div>
+
+  <!-- Student Grid -->
+  <div *ngIf="!loading && students.length > 0" class="student-grid">
+    <div *ngFor="let s of students" class="student-card" [class.present]="s.present" [class.absent]="!s.present">
+      <div class="card-top">
+        <div class="student-info">
+          <div class="avatar">{{ s.name[0] }}</div>
+          <div class="s-name">{{ s.name }}</div>
+        </div>
+        <label class="toggle-wrap">
+          <input type="checkbox" [(ngModel)]="s.present">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="status-label" [class.present]="s.present" [class.absent]="!s.present">
+        {{ s.present ? '✅ Present' : '❌ Absent' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div *ngIf="!loading && students.length > 0" class="submit-row">
+    <button class="btn-submit" (click)="submitAttendance()" [disabled]="submitting">
+      {{ submitting ? 'Submitting...' : '📋 Submit Attendance' }}
+    </button>
+  </div>
+
+  </ng-container>
+
+</div>

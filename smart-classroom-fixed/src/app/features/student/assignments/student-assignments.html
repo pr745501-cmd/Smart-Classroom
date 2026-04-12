@@ -1,0 +1,64 @@
+<div class="page-wrapper">
+
+  <button class="back-btn" (click)="goBack()">← Dashboard</button>
+
+  <div class="header-row">
+    <div class="header-title">
+      <h1>Assignments</h1>
+      <p>{{ filteredAssignments.length }} assignment{{ filteredAssignments.length !== 1 ? 's' : '' }} in your queue</p>
+    </div>
+
+    <div class="search-box">
+      <span>🔍</span>
+      <input
+        type="text"
+        placeholder="Search assignments..."
+        [(ngModel)]="searchText"
+      />
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div *ngIf="loading" class="assignments-grid">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card"></div>
+  </div>
+
+  <!-- EMPTY -->
+  <div *ngIf="!loading && filteredAssignments.length === 0" class="state-box">
+    <span class="state-icon">📋</span>
+    <p>No assignments found.</p>
+  </div>
+
+  <!-- GRID -->
+  <div *ngIf="!loading && filteredAssignments.length > 0" class="assignments-grid">
+    <div *ngFor="let a of filteredAssignments" class="assignment-card">
+
+      <span class="status-badge" [ngClass]="getStatus(a.dueDate)">
+        <span class="status-dot"></span>
+        <span *ngIf="getStatus(a.dueDate) === 'overdue'">OVERDUE</span>
+        <span *ngIf="getStatus(a.dueDate) === 'due-soon'">DUE SOON</span>
+        <span *ngIf="getStatus(a.dueDate) === 'active'">ACTIVE</span>
+      </span>
+
+      <h3 class="card-title">{{ a.title }}</h3>
+      <p class="card-desc">{{ a.description }}</p>
+
+      <div class="faculty-chip">
+        <div class="faculty-avatar">{{ a.faculty?.charAt(0) }}</div>
+        <span>{{ a.faculty }}</span>
+      </div>
+
+      <div class="card-footer">
+        <div class="due-date" [ngClass]="{ overdue: getStatus(a.dueDate) === 'overdue' }">
+          📅 {{ a.dueDate | date:'dd MMM, yyyy' }}
+        </div>
+
+        <a *ngIf="a.fileUrl" [href]="a.fileUrl" target="_blank" class="download-btn">
+          ⬇ Download
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>

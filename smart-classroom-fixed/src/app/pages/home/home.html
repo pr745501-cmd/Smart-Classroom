@@ -1,0 +1,424 @@
+<!-- ===== NAVBAR ===== -->
+<nav class="navbar" [class.scrolled]="isScrolled">
+  <div class="nav-brand">
+    <div class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+    </div>
+    <span class="nav-brand-name">Smart<span>Classroom</span></span>
+  </div>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#modules" class="nav-link">Modules</a>
+    <a href="#stats" class="nav-link">Stats</a>
+    <a href="#about" class="nav-link">About</a>
+  </div>
+  <div class="nav-actions">
+    <button class="btn-ghost" (click)="goToLogin()">Sign In</button>
+    <button class="btn-nav-cta" (click)="goToSignup()">Get Started</button>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Now with AI-Powered Insights
+    </div>
+
+    <h1 class="hero-title">
+      The Future of<br>
+      <span class="gradient-text">Smart Learning</span><br>
+      Starts Here
+    </h1>
+
+    <p class="hero-desc">
+      A unified platform for students, faculty, and administrators.
+      Manage lectures, assignments, attendance, and analytics — all in one place.
+    </p>
+
+    <div class="hero-actions">
+      <button class="btn-primary-lg" (click)="goToSignup()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Start for Free
+      </button>
+      <button class="btn-outline-lg" (click)="goToLogin()">Sign In</button>
+    </div>
+
+    <div class="hero-stats">
+      <div class="hstat">
+        <span class="hstat-num">3</span>
+        <span class="hstat-label">User Roles</span>
+      </div>
+      <div class="hstat-divider"></div>
+      <div class="hstat">
+        <span class="hstat-num">10+</span>
+        <span class="hstat-label">Modules</span>
+      </div>
+      <div class="hstat-divider"></div>
+      <div class="hstat">
+        <span class="hstat-num">100%</span>
+        <span class="hstat-label">Secure</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="dashboard-mockup">
+      <div class="mockup-bar">
+        <span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span>
+        <span class="mockup-title">Smart Classroom Dashboard</span>
+      </div>
+      <div class="mockup-body">
+        <div class="mockup-sidebar">
+          <div class="sidebar-item active">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+            Dashboard
+          </div>
+          <div class="sidebar-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Lectures
+          </div>
+          <div class="sidebar-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Assignments
+          </div>
+          <div class="sidebar-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            Students
+          </div>
+        </div>
+        <div class="mockup-main">
+          <div class="mockup-cards">
+            <div class="mcard blue">
+              <div class="mcard-label">Students</div>
+              <div class="mcard-val">248</div>
+              <div class="mcard-trend">↑ 12%</div>
+            </div>
+            <div class="mcard green">
+              <div class="mcard-label">Attendance</div>
+              <div class="mcard-val">91%</div>
+              <div class="mcard-trend">↑ 3%</div>
+            </div>
+            <div class="mcard purple">
+              <div class="mcard-label">Assignments</div>
+              <div class="mcard-val">34</div>
+              <div class="mcard-trend">Active</div>
+            </div>
+          </div>
+          <div class="mockup-chart">
+            <div class="chart-label">Weekly Attendance</div>
+            <div class="chart-bars">
+              <div class="bar" style="height:55%"></div>
+              <div class="bar" style="height:70%"></div>
+              <div class="bar" style="height:60%"></div>
+              <div class="bar" style="height:85%"></div>
+              <div class="bar active" style="height:91%"></div>
+              <div class="bar" style="height:78%"></div>
+              <div class="bar" style="height:65%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== WHY SECTION ===== -->
+<section class="why" id="why">
+  <div class="section-label">The Problem We Solve</div>
+  <h2 class="section-title">Traditional vs Smart Classroom</h2>
+  <div class="compare-grid">
+    <div class="compare-col bad">
+      <div class="compare-header">
+        <span class="compare-icon">⚠️</span>
+        <h3>Traditional Way</h3>
+      </div>
+      <ul>
+        <li>Manual attendance on paper</li>
+        <li>Scattered assignment submissions</li>
+        <li>No real-time progress tracking</li>
+        <li>Poor faculty-student communication</li>
+        <li>No centralized data management</li>
+      </ul>
+    </div>
+    <div class="compare-vs">VS</div>
+    <div class="compare-col good">
+      <div class="compare-header">
+        <span class="compare-icon">✅</span>
+        <h3>Smart Classroom</h3>
+      </div>
+      <ul>
+        <li>Digital attendance with analytics</li>
+        <li>Online submission &amp; auto-grading</li>
+        <li>Live dashboards &amp; progress charts</li>
+        <li>Announcements &amp; live class tools</li>
+        <li>Centralized role-based platform</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES ===== -->
+<section class="features" id="features">
+  <div class="section-label">What We Offer</div>
+  <h2 class="section-title">Everything You Need in One Place</h2>
+  <p class="section-sub">Built for modern academic institutions with powerful tools for every role.</p>
+
+  <div class="feature-grid">
+    <div class="feat-card">
+      <div class="feat-icon blue">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <h3>Student Dashboard</h3>
+      <p>Access lectures, submit assignments, track attendance and view announcements from one place.</p>
+      <div class="feat-tag">For Students</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon purple">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <h3>Faculty Panel</h3>
+      <p>Upload lectures, create assignments, mark attendance and monitor student performance.</p>
+      <div class="feat-tag">For Faculty</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon green">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Admin Control</h3>
+      <p>Manage users, approve registrations, assign roles and view system-wide analytics.</p>
+      <div class="feat-tag">For Admins</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon orange">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h3>Secure Auth</h3>
+      <p>JWT-based authentication with role-based access control keeps your data safe.</p>
+      <div class="feat-tag">Security</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon teal">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Live Analytics</h3>
+      <p>Real-time charts and dashboards for attendance, grades and engagement metrics.</p>
+      <div class="feat-tag">Analytics</div>
+    </div>
+
+    <div class="feat-card">
+      <div class="feat-icon pink">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      </div>
+      <h3>Live Classes &amp; Chat</h3>
+      <p>Host live sessions and communicate in real-time with students and faculty.</p>
+      <div class="feat-tag">Communication</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STATS ===== -->
+<section class="stats-section" id="stats">
+  <div class="stats-bg">
+    <div class="stats-orb"></div>
+  </div>
+  <div class="stats-content">
+    <div class="section-label light">Platform Impact</div>
+    <h2 class="section-title light">Built for Real Academic Environments</h2>
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-num">3</div>
+        <div class="stat-label">Distinct User Roles</div>
+        <div class="stat-desc">Student, Faculty &amp; Admin</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">10+</div>
+        <div class="stat-label">Platform Modules</div>
+        <div class="stat-desc">Fully integrated features</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">100%</div>
+        <div class="stat-label">Role-Based Security</div>
+        <div class="stat-desc">JWT protected APIs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">∞</div>
+        <div class="stat-label">Scalability</div>
+        <div class="stat-desc">MEAN stack architecture</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== MODULES ===== -->
+<section class="modules" id="modules">
+  <div class="section-label">Role-Based Access</div>
+  <h2 class="section-title">Three Powerful Modules</h2>
+  <p class="section-sub">Each role gets a tailored experience with the tools they actually need.</p>
+
+  <div class="modules-grid">
+    <div class="module-card student">
+      <div class="module-icon">🎓</div>
+      <h3>Student Module</h3>
+      <p class="module-desc">Everything a student needs to stay on top of their academics.</p>
+      <ul class="module-list">
+        <li><span class="check">✓</span> View &amp; download lectures</li>
+        <li><span class="check">✓</span> Submit assignments online</li>
+        <li><span class="check">✓</span> Track attendance &amp; grades</li>
+        <li><span class="check">✓</span> Join live classes</li>
+        <li><span class="check">✓</span> View announcements</li>
+      </ul>
+      <button class="module-btn" (click)="goToSignup()">Join as Student</button>
+    </div>
+
+    <div class="module-card faculty featured">
+      <div class="module-badge">Most Used</div>
+      <div class="module-icon">👨‍🏫</div>
+      <h3>Faculty Module</h3>
+      <p class="module-desc">Powerful tools to manage your classroom efficiently.</p>
+      <ul class="module-list">
+        <li><span class="check">✓</span> Upload lectures &amp; materials</li>
+        <li><span class="check">✓</span> Create &amp; grade assignments</li>
+        <li><span class="check">✓</span> Mark &amp; track attendance</li>
+        <li><span class="check">✓</span> Host live sessions</li>
+        <li><span class="check">✓</span> Post announcements</li>
+      </ul>
+      <button class="module-btn" (click)="goToSignup()">Join as Faculty</button>
+    </div>
+
+    <div class="module-card admin">
+      <div class="module-icon">🛡️</div>
+      <h3>Admin Module</h3>
+      <p class="module-desc">Full control over the platform and all its users.</p>
+      <ul class="module-list">
+        <li><span class="check">✓</span> Manage all users</li>
+        <li><span class="check">✓</span> Approve registrations</li>
+        <li><span class="check">✓</span> Assign &amp; manage roles</li>
+        <li><span class="check">✓</span> System-wide analytics</li>
+        <li><span class="check">✓</span> Security &amp; access control</li>
+      </ul>
+      <button class="module-btn" (click)="goToSignup()">Admin Access</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== HOW IT WORKS ===== -->
+<section class="how-it-works" id="about">
+  <div class="section-label">Simple Process</div>
+  <h2 class="section-title">Get Started in Minutes</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📝</div>
+      <h3>Create Account</h3>
+      <p>Register with your email and select your role — student, faculty, or admin.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-icon">✅</div>
+      <h3>Get Approved</h3>
+      <p>Admin reviews and approves your account to ensure secure access.</p>
+    </div>
+    <div class="step-arrow">→</div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-icon">🚀</div>
+      <h3>Start Learning</h3>
+      <p>Access your personalized dashboard and all the tools for your role.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ABOUT ===== -->
+<section class="about-section">
+  <div class="about-content">
+    <div class="about-text">
+      <div class="section-label">About the Platform</div>
+      <h2 class="section-title">Built with Modern Tech</h2>
+      <p>
+        Smart Classroom is a full-stack web application built using the MEAN stack —
+        MongoDB, Express.js, Angular, and Node.js. It demonstrates real-world concepts
+        like JWT authentication, role-based authorization, protected REST APIs, and
+        scalable frontend architecture.
+      </p>
+      <div class="tech-stack">
+        <span class="tech-badge">Angular 17</span>
+        <span class="tech-badge">Node.js</span>
+        <span class="tech-badge">Express.js</span>
+        <span class="tech-badge">MongoDB</span>
+        <span class="tech-badge">JWT Auth</span>
+        <span class="tech-badge">Socket.io</span>
+      </div>
+    </div>
+    <div class="about-visual">
+      <div class="about-card">
+        <div class="about-card-icon">🏗️</div>
+        <h4>MEAN Stack</h4>
+        <p>Full-stack JavaScript architecture for seamless development.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">🔒</div>
+        <h4>JWT Security</h4>
+        <p>Token-based auth with role-based access control on every route.</p>
+      </div>
+      <div class="about-card">
+        <div class="about-card-icon">📡</div>
+        <h4>Real-time APIs</h4>
+        <p>Live data sync between frontend and backend for instant updates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section class="cta-section">
+  <div class="cta-bg">
+    <div class="cta-orb"></div>
+  </div>
+  <div class="cta-content">
+    <h2>Ready to Transform Your Classroom?</h2>
+    <p>Join Smart Classroom today and experience the future of academic management.</p>
+    <div class="cta-actions">
+      <button class="btn-primary-lg" (click)="goToSignup()">Create Free Account</button>
+      <button class="btn-outline-lg light" (click)="goToLogin()">Sign In</button>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="nav-logo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <span>Smart<strong>Classroom</strong></span>
+    </div>
+    <p class="footer-copy">© 2026 Smart Classroom · MEAN Stack Project · Built with ❤️</p>
+    <div class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#modules">Modules</a>
+      <a (click)="goToLogin()">Login</a>
+      <a (click)="goToSignup()">Register</a>
+    </div>
+  </div>
+</footer>

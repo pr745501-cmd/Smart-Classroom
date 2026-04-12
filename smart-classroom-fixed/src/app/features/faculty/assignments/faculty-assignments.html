@@ -1,0 +1,122 @@
+﻿<div class="page-wrapper">
+
+  <div class="page-header">
+    <div class="header-left">
+      <button class="back-btn" (click)="goBack()">&#8592; Faculty</button>
+      <h1 class="page-title">Assignments</h1>
+      <span class="count-badge">{{ assignments.length }}</span>
+    </div>
+    <div class="header-right">
+      <input class="search-input" type="text" [(ngModel)]="searchText" placeholder="Search assignments...">
+    </div>
+  </div>
+
+  <div class="two-col">
+
+    <!-- LEFT: Form -->
+    <div class="form-card">
+      <h2 class="form-title">{{ editingAssignmentId ? '✏️ Edit Assignment' : '➕ New Assignment' }}</h2>
+
+      <div class="field-group">
+        <label>Title</label>
+        <input type="text" [(ngModel)]="title" placeholder="e.g. Advanced System Design">
+      </div>
+
+      <div class="field-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="description" rows="4" placeholder="Write the requirements here..."></textarea>
+      </div>
+
+      <div class="field-group">
+        <label>Due Date</label>
+        <input type="date" [(ngModel)]="dueDate">
+      </div>
+
+      <div class="field-group">
+        <label>File URL (optional)</label>
+        <input type="text" [(ngModel)]="fileUrl" placeholder="https://drive.google.com/...">
+      </div>
+
+      <div class="field-group">
+        <label>Target Year</label>
+        <select [(ngModel)]="targetYear">
+          <option value="">-- Select Year --</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label>Target Semester</label>
+        <select [(ngModel)]="targetSemester">
+          <option [ngValue]="null">-- Select Semester --</option>
+          <option [ngValue]="1">Semester 1</option>
+          <option [ngValue]="2">Semester 2</option>
+          <option [ngValue]="3">Semester 3</option>
+          <option [ngValue]="4">Semester 4</option>
+          <option [ngValue]="5">Semester 5</option>
+          <option [ngValue]="6">Semester 6</option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" (click)="editingAssignmentId ? updateAssignment() : addAssignment()">
+          {{ editingAssignmentId ? 'Save Changes' : 'Add Assignment' }}
+        </button>
+        <button *ngIf="editingAssignmentId" class="btn-cancel" (click)="resetForm()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: List -->
+    <div class="list-col">
+      <div class="filter-row">
+        <select [(ngModel)]="filterYear">
+          <option value="">All Years</option>
+          <option value="1st Year">1st Year</option>
+          <option value="2nd Year">2nd Year</option>
+          <option value="3rd Year">3rd Year</option>
+        </select>
+        <select [(ngModel)]="filterSemester">
+          <option [ngValue]="null">All Semesters</option>
+          <option [ngValue]="1">Sem 1</option>
+          <option [ngValue]="2">Sem 2</option>
+          <option [ngValue]="3">Sem 3</option>
+          <option [ngValue]="4">Sem 4</option>
+          <option [ngValue]="5">Sem 5</option>
+          <option [ngValue]="6">Sem 6</option>
+        </select>
+      </div>
+      <div *ngFor="let a of filteredAssignments" class="assignment-card">
+        <div class="asgn-top">
+          <div class="asgn-info">
+            <h3 class="asgn-title">{{ a.title }}</h3>
+            <p class="asgn-desc">{{ a.description }}</p>
+          </div>
+          <span class="status-badge" [ngClass]="getStatus(a.dueDate)">
+            {{ getStatus(a.dueDate) === 'overdue' ? 'Overdue' : getStatus(a.dueDate) === 'due-soon' ? 'Due Soon' : 'Active' }}
+          </span>
+        </div>
+
+        <div class="asgn-meta">
+          <span class="meta-chip">&#128197; {{ a.dueDate | date:'MMM d, y' }}</span>
+          <span class="meta-chip">&#128100; {{ a.faculty }}</span>
+          <span class="meta-chip" *ngIf="a.targetYear">🎓 {{ a.targetYear }}</span>
+          <span class="meta-chip" *ngIf="a.targetSemester">📅 Sem {{ a.targetSemester }}</span>
+          <a *ngIf="a.fileUrl" [href]="a.fileUrl" target="_blank" class="meta-chip link-chip">&#128206; Download</a>
+        </div>
+
+        <div class="asgn-actions">
+          <button class="btn-edit" (click)="editAssignment(a)">✏️ Edit</button>
+          <button class="btn-delete" (click)="deleteAssignment(a._id)">🗑️ Delete</button>
+        </div>
+      </div>
+
+      <div *ngIf="filteredAssignments.length === 0" class="empty-state">
+        <div class="empty-icon">&#128203;</div>
+        <p>No assignments found</p>
+      </div>
+    </div>
+
+  </div>
+</div>

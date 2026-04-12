@@ -1,0 +1,60 @@
+<div *ngIf="!inMeeting" class="page-wrapper">
+
+  <button class="back-btn" (click)="goBack()">← Dashboard</button>
+
+  <div class="center-area">
+
+    <!-- Notification Banner -->
+    <div *ngIf="showBanner" class="notification-banner">
+      <div class="banner-content">
+        <span class="banner-icon">🔔</span>
+        <div class="banner-text">
+          <strong>Teacher has started a meeting — join class fast</strong>
+          <span class="banner-sub">{{ bannerTitle }}</span>
+        </div>
+        <div class="banner-code">{{ bannerCode }}</div>
+      </div>
+      <div class="banner-actions">
+        <button class="btn-use-code" (click)="useBannerCode()">Use this code</button>
+        <button class="btn-dismiss" (click)="dismissBanner()">Dismiss</button>
+      </div>
+    </div>
+
+    <!-- Join Form -->
+    <div class="join-card">
+      <div class="join-icon">📡</div>
+      <h2 class="join-title">Join Live Class</h2>
+      <p class="join-sub">Enter the meeting code shared by your teacher</p>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMsg" class="error-banner">
+        ⚠️ {{ errorMsg }}
+      </div>
+
+      <div class="field-group">
+        <label>Meeting Code</label>
+        <input
+          type="text"
+          [(ngModel)]="meetingCodeInput"
+          placeholder="e.g. AB12CD"
+          (keyup.enter)="joinMeeting()"
+          autocomplete="off"
+          style="text-transform: uppercase;">
+      </div>
+
+      <button class="btn-join" (click)="joinMeeting()" [disabled]="loading">
+        {{ loading ? 'Joining...' : '🚀 Join Class' }}
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Meeting Room -->
+<app-meeting-room
+  *ngIf="inMeeting"
+  [sessionId]="sessionId"
+  [meetingTitle]="meetingTitle"
+  role="student">
+</app-meeting-room>

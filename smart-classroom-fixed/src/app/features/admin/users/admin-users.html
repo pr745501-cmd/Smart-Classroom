@@ -1,0 +1,150 @@
+﻿<div class="admin-layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo">SmartClass Admin</div>
+    <div class="sidebar-admin">
+      <div class="admin-avatar">{{ admin.name?.charAt(0) | uppercase }}</div>
+      <div>
+        <div class="admin-name">{{ admin.name }}</div>
+        <div class="admin-email">{{ admin.email }}</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a [class.active]="isActive('/admin')" (click)="goTo('/admin')">Dashboard</a>
+      <a [class.active]="isActive('/admin/users')" (click)="goTo('/admin/users')">Users</a>
+      <a [class.active]="isActive('/admin/stats')" (click)="goTo('/admin/stats')">Stats</a>
+      <a [class.active]="isActive('/admin/approvals')" (click)="goTo('/admin/approvals')">Pending Approvals</a>
+      <a [class.active]="isActive('/admin/announcements')" (click)="goTo('/admin/announcements')">Announcements</a>
+      <a [class.active]="isActive('/admin/assignments')" (click)="goTo('/admin/assignments')">Assignments</a>
+      <a [class.active]="isActive('/admin/attendance')" (click)="goTo('/admin/attendance')">Attendance</a>
+    </nav>
+    <button class="logout-btn" (click)="logout()">Logout</button>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <div>
+        <h1 class="page-title">Manage Users</h1>
+        <p class="page-subtitle">View, search and manage all platform users</p>
+      </div>
+    </header>
+
+    <div *ngIf="loading" class="loading-grid">
+      <div class="skeleton-card" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-banner">Failed to load users. Please refresh.</div>
+
+    <section *ngIf="!loading && !error" class="stat-cards">
+      <div class="stat-card blue" [class.active-card]="activeTab==='all'" (click)="setTab('all')">
+        <div class="stat-icon">&#128101;</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalUsers }}</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+      </div>
+      <div class="stat-card green" [class.active-card]="activeTab==='students'" (click)="setTab('students')">
+        <div class="stat-icon">&#127891;</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalStudents }}</div>
+          <div class="stat-label">Students</div>
+        </div>
+      </div>
+      <div class="stat-card purple" [class.active-card]="activeTab==='faculty'" (click)="setTab('faculty')">
+        <div class="stat-icon">&#128104;&#8205;&#127979;</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ totalFaculty }}</div>
+          <div class="stat-label">Faculty</div>
+        </div>
+      </div>
+      <div class="stat-card orange" [class.active-card]="activeTab==='pending'" (click)="setTab('pending')">
+        <div class="stat-icon">&#9203;</div>
+        <div class="stat-info">
+          <div class="stat-value">{{ pendingStudents }}</div>
+          <div class="stat-label">Pending</div>
+        </div>
+      </div>
+    </section>
+
+    <div *ngIf="!loading && !error" class="chart-search-row">
+      <div class="chart-card">
+        <h3 class="chart-title">User Distribution</h3>
+        <div class="chart-container">
+          <canvas baseChart [data]="pieChartData" [type]="pieChartType" [options]="pieChartOptions"></canvas>
+        </div>
+      </div>
+      <div class="search-panel">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search by name, email or role..."
+          [(ngModel)]="search"
+          (input)="filterUsers()"
+        />
+        <div class="filter-row">
+          <select [(ngModel)]="filterYear" (ngModelChange)="filterUsers()">
+            <option value="">All Years</option>
+            <option value="1st Year">1st Year</option>
+            <option value="2nd Year">2nd Year</option>
+            <option value="3rd Year">3rd Year</option>
+          </select>
+        </div>
+        <div class="tab-bar">
+          <button class="tab-btn" [class.active]="activeTab==='all'" (click)="setTab('all')">All ({{ totalUsers }})</button>
+          <button class="tab-btn" [class.active]="activeTab==='students'" (click)="setTab('students')">Students</button>
+          <button class="tab-btn" [class.active]="activeTab==='faculty'" (click)="setTab('faculty')">Faculty</button>
+          <button class="tab-btn" [class.active]="activeTab==='pending'" (click)="setTab('pending')">
+            Pending
+            <span class="tab-badge" *ngIf="pendingStudents > 0">{{ pendingStudents }}</span>
+          </button>
+        </div>
+        <p class="result-count">Showing {{ filteredUsers.length }} user(s)</p>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && !error && filteredUsers.length === 0" class="empty-state">
+      No users found.
+    </div>
+
+    <div *ngIf="!loading && !error && filteredUsers.length > 0" class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Course</th>
+            <th>Year</th>
+            <th>Semester</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of filteredUsers">
+            <td class="td-user">
+              <div class="user-avatar-sm">{{ u.name?.charAt(0) | uppercase }}</div>
+              <span class="user-name-text">{{ u.name }}</span>
+            </td>
+            <td class="td-email">{{ u.email }}</td>
+            <td>
+              <span class="role-badge" [ngClass]="getRoleBadgeClass(u.role)">{{ u.role }}</span>
+            </td>
+            <td>{{ u.course || '-' }}</td>
+            <td>{{ u.role === 'student' ? (u.year || 'N/A') : '' }}</td>
+            <td>{{ u.role === 'student' ? (u.semester || 'N/A') : '' }}</td>
+            <td>
+              <span [class.status-active]="u.isApproved !== false" [class.status-pending]="u.isApproved === false">
+                {{ u.isApproved === false ? 'Pending' : 'Active' }}
+              </span>
+            </td>
+            <td class="td-date">{{ u.createdAt | date:'mediumDate' }}</td>
+            <td>
+              <button class="btn-delete" (click)="deleteUser(u._id)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
