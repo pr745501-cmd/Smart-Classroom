@@ -1,42 +1,73 @@
-const express = require("express");
-const router = express.Router();
+﻿const express = require("express");
 const Announcement = require("../models/Announcement");
-const authMiddleware = require("../middleware/authMiddleware");
+const auth = require("../middleware/authMiddleware");
 
-/**
- * CREATE announcement (ONLY teacher/admin)
- */
-router.post("/", authMiddleware, async (req, res) => {
-  try {
-    if (req.user.role !== "teacher" && req.user.role !== "admin") {
-      return res.status(403).json({ message: "Access denied" });
+module.exports = (io) => {
+  const router = express.Router();
+
+  // POST /api/announcements
+  router.post("/", async (req, res) => {
+    try {
+      const announcement = await Announcement.create(req.body);
+      io.to("announcements").emit("announcementCreated", announcement);
+      res.status(201).json({ success: true, announcement });
+    } catch (err) {
+      res.status(400).json({ success: false, message: err.message });
     }
+  });
 
-    const { title, message } = req.body;
+  // GET /api/announcements
+  router.get("/", auth, async (req, res) => {
+    try {
+      // Students only see announcements for their year and semester
+      const query = req.user.role === "student"
+        ? { targetYear: req.user.year, targetSemester: req.user.semester }
+        : {};
 
-    const announcement = await Announcement.create({
-      title,
-      message,
-      postedBy: req.user.id,
-      role: req.user.role
-    });
+      if (req.user.role === "student" && (!req.user.year || req.user.semester == null)) {
+        return res.json({ success: true, announcements: [] });
+      }
 
-    res.status(201).json(announcement);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+      const announcements = await Announcement.find(query).sort({ createdAt: -1 });
+      res.json({ success: true, announcements });
+    } catch {
+      res.status(500).json({ success: false, message: "Failed to fetch announcements" });
+    }
+  });
 
-/**
- * GET announcements (ALL users)
- */
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const announcements = await Announcement.find().sort({ createdAt: -1 });
-    res.json(announcements);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+  // GET /api/announcements/faculty/:name
+  router.get("/faculty/:name", async (req, res) => {
+    try {
+      const announcements = await Announcement.find({
+        faculty: { $regex: new RegExp(`^${req.params.name}$`, "i") }
+      }).sort({ createdAt: -1 });
+      res.json({ success: true, announcements });
+    } catch {
+      res.status(500).json({ success: false, message: "Failed to fetch faculty announcements" });
+    }
+  });
 
-module.exports = router;
+  // PUT /api/announcements/:id
+  router.put("/:id", async (req, res) => {
+    try {
+      const updated = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+      io.to("announcements").emit("announcementUpdated", updated);
+      res.json({ success: true, announcement: updated });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  // DELETE /api/announcements/:id
+  router.delete("/:id", async (req, res) => {
+    try {
+      await Announcement.findByIdAndDelete(req.params.id);
+      io.to("announcements").emit("announcementDeleted", { _id: req.params.id });
+      res.json({ success: true });
+    } catch (err) {
+      res.status(500).json({ success: false, message: err.message });
+    }
+  });
+
+  return router;
+};

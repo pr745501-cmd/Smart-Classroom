@@ -2,19 +2,20 @@ const mongoose = require("mongoose");
 
 const announcementSchema = new mongoose.Schema(
   {
-    title: {
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    faculty: { type: String },
+    targetYear: {
       type: String,
-      required: true,
+      enum: ['1st Year', '2nd Year', '3rd Year'],
+      required: true
     },
-    message: {
-      type: String,
-      required: true,
-    },
-    createdBy: {
-      type: String,
-      enum: ["teacher", "admin"],
-      required: true,
-    },
+    targetSemester: {
+      type: Number,
+      min: 1,
+      max: 6,
+      required: true
+    }
   },
   { timestamps: true }
 );
