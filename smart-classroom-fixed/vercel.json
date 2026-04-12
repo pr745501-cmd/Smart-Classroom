@@ -1,5 +1,6 @@
 {
-  "outputDirectory": "dist/smart-classroom-fixed",
+  "buildCommand": "ng build --configuration production --output-path=dist/browser",
+  "outputDirectory": "dist/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
