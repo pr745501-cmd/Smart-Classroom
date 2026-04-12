@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -26,7 +27,7 @@ export class Login {
 
     const payload = { email: this.email.trim().toLowerCase(), password: this.password };
 
-    this.http.post<any>('http://localhost:5000/api/auth/login', payload).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/auth/login`, payload).subscribe({
       next: (res) => {
         // Save token and user info to localStorage
         localStorage.setItem('token', res.token);

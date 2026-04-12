@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-faculty-attendance',
@@ -43,7 +44,7 @@ export class FacultyAttendance implements OnInit {
   loadStudents() {
     if (!this.selectedYear || !this.selectedSemester) return;
     this.loading = true;
-    this.http.get<any>(`http://localhost:5000/api/students/enrolled?year=${this.selectedYear}&semester=${this.selectedSemester}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/students/enrolled?year=${this.selectedYear}&semester=${this.selectedSemester}`).subscribe({
       next: (res) => {
         this.students = (res.students || []).map((s: any) => ({ ...s, present: true }));
         this.loading = false;
@@ -58,7 +59,7 @@ export class FacultyAttendance implements OnInit {
     this.submitting = true;
     const records = this.students.map(s => ({ studentId: s._id, name: s.name, status: s.present ? 'present' : 'absent' }));
     const payload = { date: this.date, faculty: this.faculty, course: this.course, targetYear: this.selectedYear, targetSemester: this.selectedSemester, records };
-    this.http.post('http://localhost:5000/api/attendance', payload).subscribe({
+    this.http.post(`${environment.apiUrl}/api/attendance`, payload).subscribe({
       next: () => { alert('Attendance marked successfully'); this.submitting = false; this.cdr.detectChanges(); },
       error: err => { alert(err.error?.message || 'Failed'); this.submitting = false; this.cdr.detectChanges(); }
     });

@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class LiveClassService {
-  private API = 'http://localhost:5000/api/live-class';
+  private API = `${environment.apiUrl}/api/live-class`;
 
   constructor(private http: HttpClient) {}
 

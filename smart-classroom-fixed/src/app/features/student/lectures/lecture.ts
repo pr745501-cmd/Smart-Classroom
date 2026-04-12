@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-lectures',
@@ -26,7 +27,7 @@ export class Lectures implements OnInit {
   goBack() { this.router.navigate(['/dashboard']); }
 
   loadLectures() {
-    this.http.get<any>('http://localhost:5000/api/lectures').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/lectures`).subscribe({
       next: (res) => {
         this.lectures = res.lectures ?? [];
         this.filteredLectures = [...this.lectures];

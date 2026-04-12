@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-faculty-lectures',
@@ -45,7 +46,7 @@ export class FacultyLectures implements OnInit {
   goBack() { this.router.navigate(['/faculty']); }
 
   loadLectures() {
-    this.http.get<any>(`http://localhost:5000/api/lectures/faculty/${this.facultyName}`).subscribe(res => {
+    this.http.get<any>(`${environment.apiUrl}/api/lectures/faculty/${this.facultyName}`).subscribe(res => {
       this.lectures = res.lectures || [];
       this.cdr.detectChanges();
     });
@@ -54,7 +55,7 @@ export class FacultyLectures implements OnInit {
   uploadLecture() {
     if (!this.targetYear || !this.targetSemester) { alert('Please select target year and semester'); return; }
     const payload = { title: this.title, subject: this.subject, type: this.type.toLowerCase(), fileUrl: this.fileUrl, faculty: this.facultyName, course: this.course, targetYear: this.targetYear, targetSemester: this.targetSemester };
-    this.http.post('http://localhost:5000/api/lectures', payload).subscribe(() => {
+    this.http.post(`${environment.apiUrl}/api/lectures`, payload).subscribe(() => {
       alert('Lecture uploaded');
       this.resetForm();
       this.loadLectures();
@@ -72,7 +73,7 @@ export class FacultyLectures implements OnInit {
 
   updateLecture() {
     const payload = { title: this.title, subject: this.subject, type: this.type.toLowerCase(), fileUrl: this.fileUrl };
-    this.http.put(`http://localhost:5000/api/lectures/${this.editingLectureId}`, payload).subscribe(() => {
+    this.http.put(`${environment.apiUrl}/api/lectures/${this.editingLectureId}`, payload).subscribe(() => {
       alert('Lecture updated');
       this.resetForm();
       this.loadLectures();
@@ -81,7 +82,7 @@ export class FacultyLectures implements OnInit {
 
   deleteLecture(id: string) {
     if (!confirm('Delete this lecture?')) return;
-    this.http.delete(`http://localhost:5000/api/lectures/${id}`).subscribe(() => this.loadLectures());
+    this.http.delete(`${environment.apiUrl}/api/lectures/${id}`).subscribe(() => this.loadLectures());
   }
 
   resetForm() {

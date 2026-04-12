@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 export interface DirectMessage {
   _id: string;
@@ -42,7 +43,7 @@ export interface DmInboxUpdatePayload {
 
 @Injectable({ providedIn: 'root' })
 export class DmChatService {
-  private apiUrl = 'http://localhost:5000/api/chat';
+  private apiUrl = `${environment.apiUrl}/api/chat`;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -87,7 +88,7 @@ export class DmChatService {
   }
 
   getUserById(userId: string): Observable<{ name: string; isOnline: boolean; lastSeen: string | null } | null> {
-    return this.http.get<any>(`http://localhost:5000/api/auth/user/${userId}`, this.getHeaders()).pipe(
+    return this.http.get<any>(`${environment.apiUrl}/api/auth/user/${userId}`, this.getHeaders()).pipe(
       catchError(() => throwError(() => null))
     );
   }

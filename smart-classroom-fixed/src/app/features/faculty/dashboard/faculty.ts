@@ -6,6 +6,7 @@ import { AssignmentService } from '../../../core/services/assignment.service';
 import { AnnouncementService } from '../../../core/services/announcement.service';
 import { LiveClassService } from '../../../core/services/live-class.service';
 import { SocketService } from '../../../core/services/socket.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-faculty',
@@ -85,7 +86,7 @@ export class Faculty implements OnInit, OnDestroy {
     });
 
     // 3. Lectures
-    this.http.get<any>('http://localhost:5000/api/lectures').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/lectures`).subscribe({
       next: res => {
         const all = res.lectures || [];
         this.totalLectures = all.filter((l: any) => l.faculty === name).length;
@@ -96,7 +97,7 @@ export class Faculty implements OnInit, OnDestroy {
     });
 
     // 4. Students
-    this.http.get<any>('http://localhost:5000/api/students/enrolled').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/students/enrolled`).subscribe({
       next: res => {
         this.totalStudents = (res.students || []).length;
         this.cdr.detectChanges();

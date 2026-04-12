@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-signup',
@@ -37,7 +38,7 @@ export class Signup {
     const body: any = { name: this.name, email: this.email, password: this.password, role: this.role };
     if (this.role === 'student') { body.year = this.year; body.semester = this.semester; }
 
-    this.http.post<any>('http://localhost:5000/api/auth/signup', body).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/api/auth/signup`, body).subscribe({
       next: () => {
         this.loading = false;
         this.cdr.detectChanges();

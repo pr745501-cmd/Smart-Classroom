@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import Chart from 'chart.js/auto';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-student-attendance',
@@ -46,7 +47,7 @@ export class StudentAttendance implements OnInit {
   goBack() { this.router.navigate(['/dashboard']); }
 
   loadMyAttendance() {
-    this.http.get<any>('http://localhost:5000/api/attendance/my').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/attendance/my`).subscribe({
       next: res => {
         this.attendance = res.attendance || [];
         this.computeStats();
@@ -77,7 +78,7 @@ export class StudentAttendance implements OnInit {
   }
 
   loadMonthlyAttendance(year: number, month: number) {
-    this.http.get<any>(`http://localhost:5000/api/attendance/monthly/${year}/${month}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/attendance/monthly/${year}/${month}`).subscribe({
       next: res => {
         const data = res.data || [];
         // Small delay to ensure canvas is rendered before drawing

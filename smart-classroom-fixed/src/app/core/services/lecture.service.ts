@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class LectureService {
-  private API = 'http://localhost:5000/api/lectures';
+  private API = `${environment.apiUrl}/api/lectures`;
 
   constructor(private http: HttpClient) {}
 

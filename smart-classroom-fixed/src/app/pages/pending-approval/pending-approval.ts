@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-pending-approval',
@@ -43,7 +44,7 @@ export class PendingApproval implements OnInit, OnDestroy {
 
   // Called automatically every 30s — no loading spinner
   private silentCheck() {
-    this.http.get<any>(`http://localhost:5000/api/auth/check-status/${this.email}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/auth/check-status/${this.email}`).subscribe({
       next: (res) => { if (res.approved) this.handleApproved(); },
       error: () => {}
     });
@@ -53,7 +54,7 @@ export class PendingApproval implements OnInit, OnDestroy {
   checkNow() {
     this.loading = true;
     this.cdr.detectChanges();
-    this.http.get<any>(`http://localhost:5000/api/auth/check-status/${this.email}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/auth/check-status/${this.email}`).subscribe({
       next: (res) => {
         this.loading = false;
         if (res.approved) this.handleApproved();

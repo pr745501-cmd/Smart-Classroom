@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-faculty-students',
@@ -31,20 +32,20 @@ export class FacultyStudents implements OnInit {
   goBack() { this.router.navigate(['/faculty']); }
 
   loadStudents() {
-    this.http.get<any>('http://localhost:5000/api/students/enrolled').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/students/enrolled`).subscribe({
       next: (res) => { this.students = res.students || []; this.loading = false; this.cdr.detectChanges(); },
       error: () => { this.loading = false; this.cdr.detectChanges(); }
     });
   }
 
   loadPendingStudents() {
-    this.http.get<any>('http://localhost:5000/api/students/pending').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/api/students/pending`).subscribe({
       next: (res) => { this.pendingStudents = res.students || []; this.cdr.detectChanges(); }
     });
   }
 
   approveStudent(id: string) {
-    this.http.put(`http://localhost:5000/api/students/approve/${id}`, {}).subscribe(() => {
+    this.http.put(`${environment.apiUrl}/api/students/approve/${id}`, {}).subscribe(() => {
       this.loadStudents();
       this.loadPendingStudents();
     });
