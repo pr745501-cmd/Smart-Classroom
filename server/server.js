@@ -55,7 +55,6 @@ const announcementRoutes = require("./routes/announcementRoutes")(io);
 app.get("/", (req, res) => res.send("Smart Classroom API Running"));
 
 app.use("/api/auth",        require("./routes/auth"));
-app.use("/api/test",        require("./routes/test"));
 app.use("/api/announcements", announcementRoutes);
 app.use("/api/students",    require("./routes/studentRoutes"));
 app.use("/api/lectures",    require("./routes/lectureRoutes"));
@@ -83,7 +82,6 @@ io.use((socket, next) => {
 // ─── Socket.io Events ────────────────────────────────────────────────────────
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
 
   // Register presence and personal inbox channel
   if (socket.user) {
@@ -227,7 +225,6 @@ io.on("connection", (socket) => {
   // ── Disconnect ────────────────────────────────────────────────────────────
 
   socket.on("disconnect", async () => {
-    console.log("User disconnected:", socket.id);
     if (!socket.user) return;
 
     presenceService.userDisconnected(socket.user.id, socket.id, io);

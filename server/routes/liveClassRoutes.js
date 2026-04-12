@@ -24,8 +24,17 @@ module.exports = (io) => {
   // POST /api/live-class/start — faculty starts a meeting
   router.post("/start", auth, role(["faculty"]), async (req, res) => {
     try {
-      const existing = await LiveClass.findOne({ facultyId: req.user.id, isLive: true });
-      if (existing) return res.status(409).json({ message: "You already have an active meeting" });
+      // End ALL previously active meetings (any faculty) that are stuck
+      // and notify all clients so banners/UI clears everywhere
+      const stuckMeetings = await LiveClass.find({ isLive: true });
+      for (const meeting of stuckMeetings) {
+        const sessionId = meeting._id.toString();
+        // Notify room participants
+        io.to(sessionId).emit("meetingEnded", { sessionId });
+        meeting.isLive = false;
+        meeting.endedAt = new Date();
+        await meeting.save();
+      }
 
       const facultyUser = await User.findById(req.user.id).select("name email").lean();
       const facultyName = facultyUser?.name || facultyUser?.email || "Faculty";
@@ -40,6 +49,7 @@ module.exports = (io) => {
       });
 
       const sessionId = liveClass._id.toString();
+      // Broadcast new meeting to ALL connected clients
       io.emit("meetingStarted", { sessionId, title: liveClass.title, meetingCode, facultyName });
 
       res.json({ meetingCode, title: liveClass.title, sessionId, facultyName });
@@ -86,11 +96,18 @@ module.exports = (io) => {
   // DELETE /api/live-class/force-end — force-end any stuck active meeting
   router.delete("/force-end", auth, role(["faculty"]), async (req, res) => {
     try {
-      const result = await LiveClass.updateMany(
-        { facultyId: req.user.id, isLive: true },
-        { isLive: false, endedAt: new Date() }
-      );
-      res.json({ success: true, ended: result.modifiedCount });
+      const stuckMeetings = await LiveClass.find({ facultyId: req.user.id, isLive: true });
+
+      // Notify all participants in each stuck meeting before ending
+      for (const meeting of stuckMeetings) {
+        const sessionId = meeting._id.toString();
+        io.to(sessionId).emit("meetingEnded", { sessionId });
+        meeting.isLive = false;
+        meeting.endedAt = new Date();
+        await meeting.save();
+      }
+
+      res.json({ success: true, ended: stuckMeetings.length });
     } catch (err) {
       res.status(500).json({ message: err.message });
     }

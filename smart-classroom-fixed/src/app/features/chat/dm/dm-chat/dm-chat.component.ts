@@ -46,6 +46,7 @@ export class DmChatComponent implements OnInit, OnDestroy {
   activeEmojiCategory = 0;
 
   private typingTimeout: any;
+  private stopTypingTimeout: any;
   private typingDebounceTimeout: any;
   private lastTypingEmit = 0;
 
@@ -84,9 +85,15 @@ export class DmChatComponent implements OnInit, OnDestroy {
 
   private readonly handleTyping = (data: { userId: string }) => {
     this.ngZone.run(() => {
-      if (data.userId === this.contactId) {
+      // Only show typing indicator for the other person (not ourselves)
+      if (data.userId !== this.currentUserId && data.userId === this.contactId) {
         this.isTyping = true;
         this.typingName = this.contactName || 'Contact';
+        clearTimeout(this.typingTimeout);
+        this.typingTimeout = setTimeout(() => {
+          this.isTyping = false;
+          this.cd.detectChanges();
+        }, 4000);
         this.cd.detectChanges();
       }
     });
@@ -94,8 +101,9 @@ export class DmChatComponent implements OnInit, OnDestroy {
 
   private readonly handleStopTyping = (data: { userId: string }) => {
     this.ngZone.run(() => {
-      if (data.userId === this.contactId) {
+      if (data.userId !== this.currentUserId && data.userId === this.contactId) {
         this.isTyping = false;
+        clearTimeout(this.typingTimeout);
         this.cd.detectChanges();
       }
     });
@@ -248,7 +256,7 @@ export class DmChatComponent implements OnInit, OnDestroy {
       senderId: this.currentUserId
     });
     clearTimeout(this.typingDebounceTimeout);
-    clearTimeout(this.typingTimeout);
+    clearTimeout(this.stopTypingTimeout);
     this.socketService.emitStopTyping(this.roomId);
   }
 
@@ -265,8 +273,8 @@ export class DmChatComponent implements OnInit, OnDestroy {
       this.socketService.emitTyping(this.roomId);
       this.lastTypingEmit = now;
     }
-    clearTimeout(this.typingTimeout);
-    this.typingTimeout = setTimeout(() => {
+    clearTimeout(this.stopTypingTimeout);
+    this.stopTypingTimeout = setTimeout(() => {
       this.socketService.emitStopTyping(this.roomId);
     }, 3000);
   }
@@ -372,6 +380,7 @@ export class DmChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     clearTimeout(this.typingTimeout);
+    clearTimeout(this.stopTypingTimeout);
     clearTimeout(this.typingDebounceTimeout);
     if (this.roomId) {
       this.socketService.leaveDM(this.roomId);

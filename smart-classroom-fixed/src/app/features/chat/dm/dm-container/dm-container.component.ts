@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FacultyListComponent } from '../faculty-list/faculty-list.component';
 import { FacultyContactsComponent } from '../faculty-contacts/faculty-contacts.component';
@@ -12,10 +12,14 @@ import { FacultyContactsComponent } from '../faculty-contacts/faculty-contacts.c
     <app-faculty-contacts *ngIf="role === 'faculty'"></app-faculty-contacts>
   `
 })
-export class DmContainerComponent {
-  role = JSON.parse(localStorage.getItem('user') || '{}').role || '';
+export class DmContainerComponent implements AfterViewInit {
+  role = '';
 
   constructor(private cdr: ChangeDetectorRef) {
+    this.role = JSON.parse(localStorage.getItem('user') || '{}').role || '';
+  }
+
+  ngAfterViewInit(): void {
     this.cdr.detectChanges();
   }
 }

@@ -33,7 +33,6 @@ export class FacultyLive implements OnInit {
 
   goBack() { this.router.navigate(['/faculty']); }
 
-  // Force-end any stuck active meeting before starting a new one
   forceEnd() {
     this.loading = true;
     this.live.forceEndClass().subscribe({
@@ -53,13 +52,13 @@ export class FacultyLive implements OnInit {
         this.sessionId = res.sessionId;
         this.inMeeting = true;
         this.loading = false;
+        this.hasActiveMeeting = false;
         this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.loading = false;
-        if (err.status === 409)     this.errorMsg = 'You already have an active meeting. Please end it first.', this.hasActiveMeeting = true;
-        else if (err.status === 0)  this.errorMsg = 'Service unavailable. Please try again.';
-        else                        this.errorMsg = err.error?.message || 'Failed to start meeting. Please try again.';
+        if (err.status === 0) this.errorMsg = 'Service unavailable. Please try again.';
+        else this.errorMsg = err.error?.message || 'Failed to start meeting. Please try again.';
         this.cdr.detectChanges();
       }
     });
