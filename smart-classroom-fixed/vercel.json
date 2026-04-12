@@ -1,4 +1,5 @@
 {
+  "outputDirectory": "dist/smart-classroom-fixed/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
