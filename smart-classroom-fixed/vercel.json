@@ -1,5 +1,6 @@
 {
-  "buildCommand": "ng build --configuration production --output-path=dist/browser",
+  "framework": null,
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
